@@ -1,4 +1,4 @@
-package nl.knmi.adagucservices.services.tools;
+package nl.knmi.adaguc.services.tools;
 
 public class WebRequestBadStatusException extends Exception {
     private static final long serialVersionUID = 1L;

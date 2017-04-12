@@ -1,4 +1,4 @@
-package nl.knmi.adagucservices.services;
+package nl.knmi.adaguc.services;
 
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -28,8 +28,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
-import nl.knmi.adagucservices.services.tools.Debug;
-import nl.knmi.adagucservices.services.tools.Tools;
+import nl.knmi.adaguc.services.tools.Debug;
+import nl.knmi.adaguc.services.tools.Tools;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;

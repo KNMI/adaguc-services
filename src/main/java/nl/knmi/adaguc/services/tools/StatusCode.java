@@ -1,4 +1,4 @@
-package nl.knmi.adagucservices.services.tools;
+package nl.knmi.adaguc.services.tools;
 
 import lombok.Getter;
 

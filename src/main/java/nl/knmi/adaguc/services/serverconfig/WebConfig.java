@@ -1,4 +1,4 @@
-package nl.knmi.adagucservices.services.serverconfig;
+package nl.knmi.adaguc.services.serverconfig;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.util.AntPathMatcher;
