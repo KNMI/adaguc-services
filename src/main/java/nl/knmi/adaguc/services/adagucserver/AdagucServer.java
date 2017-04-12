@@ -12,8 +12,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import nl.knmi.adaguc.services.tools.Debug;
-import tools.CGIRunner;
+import nl.knmi.adaguc.tools.CGIRunner;
+import nl.knmi.adaguc.tools.Debug;
 
 
 

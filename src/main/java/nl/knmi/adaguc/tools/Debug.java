@@ -1,4 +1,4 @@
-package nl.knmi.adaguc.services.tools;
+package nl.knmi.adaguc.tools;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;

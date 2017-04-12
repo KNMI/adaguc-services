@@ -1,13 +1,10 @@
-package tools;
+package nl.knmi.adaguc.tools;
 
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Calendar;
 
 import javax.servlet.http.HttpServletResponse;
-
-import nl.knmi.adaguc.services.tools.Debug;
-import nl.knmi.adaguc.services.tools.ProcessRunner;
 
 public class CGIRunner {
   

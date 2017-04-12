@@ -17,12 +17,11 @@ import org.springframework.web.bind.annotation.RestController;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
-import nl.knmi.adaguc.services.tools.Debug;
-import nl.knmi.adaguc.services.tools.HTTPTools;
-import nl.knmi.adaguc.services.tools.JSONResponse;
-import nl.knmi.adaguc.services.tools.MyXMLParser;
-
 import nl.knmi.adaguc.services.adagucserver.AdagucServer;
+import nl.knmi.adaguc.tools.Debug;
+import nl.knmi.adaguc.tools.HTTPTools;
+import nl.knmi.adaguc.tools.JSONResponse;
+import nl.knmi.adaguc.tools.MyXMLParser;
 
 
 @RestController

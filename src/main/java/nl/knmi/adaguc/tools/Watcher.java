@@ -1,4 +1,4 @@
-package nl.knmi.adaguc.services.tools;
+package nl.knmi.adaguc.tools;
 
 /** 
  *  Copyright (c) 2010  Ng Pan Wei
