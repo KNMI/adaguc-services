@@ -12,6 +12,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import nl.knmi.adaguc.services.serverconfig.ConfigurationReader;
 import nl.knmi.adaguc.tools.CGIRunner;
 import nl.knmi.adaguc.tools.Debug;
 
@@ -41,7 +42,8 @@ public class AdagucServer extends HttpServlet{
     List<String> environmentVariables = new ArrayList<String>();
     String userHomeDir="/tmp/";
     String homeURL="http://localhost/";
-    String adagucExecutableLocation = "/usr/bin/adagucserver";
+    String adagucExecutableLocation = ConfigurationReader.ADAGUCServerConfig.getADAGUCExecutable();
+    String[] configEnv = ConfigurationReader.ADAGUCServerConfig.getADAGUCEnvironment();
     
     if(response == null && outputStream == null){
     	throw new Exception("Either response or outputstream needs to be set");
@@ -58,12 +60,15 @@ public class AdagucServer extends HttpServlet{
     if(queryString == null){
     	queryString = request.getQueryString();
     }
+    
+    
  
     environmentVariables.add("HOME="+userHomeDir);
     environmentVariables.add("QUERY_STRING="+queryString);
     environmentVariables.add("ADAGUC_ONLINERESOURCE="+homeURL+"/adagucserver?");
     environmentVariables.add("ADAGUC_TMP="+userHomeDir+"/tmp/");
     
+    for(int j=0;j<configEnv.length;j++)environmentVariables.add(configEnv[j]);    
     String commands[] = {adagucExecutableLocation};
   
     String[] environmentVariablesAsArray = new String[ environmentVariables.size() ];
