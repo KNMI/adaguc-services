@@ -28,8 +28,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
-import nl.knmi.adaguc.services.tools.Debug;
-import nl.knmi.adaguc.services.tools.Tools;
+import nl.knmi.adaguc.tools.Debug;
+import nl.knmi.adaguc.tools.Tools;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
