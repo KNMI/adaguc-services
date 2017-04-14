@@ -65,6 +65,7 @@ public class AdagucServer extends HttpServlet{
     environmentVariables.add("ADAGUC_TMP="+userHomeDir+"/tmp/");
     
     String commands[] = {adagucExecutableLocation};
+  
     String[] environmentVariablesAsArray = new String[ environmentVariables.size() ];
     environmentVariables.toArray( environmentVariablesAsArray );
     CGIRunner.runCGIProgram(commands,environmentVariablesAsArray,userHomeDir,response,outputStream,null);
