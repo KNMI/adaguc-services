@@ -1,6 +1,7 @@
 package nl.knmi.adaguc.services.adagucserver;
 
 
+import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URLDecoder;
@@ -43,6 +44,19 @@ public class AdagucServer extends HttpServlet{
     String userHomeDir="/tmp/";
     String homeURL="http://localhost/";
     String adagucExecutableLocation = ConfigurationReader.ADAGUCServerConfig.getADAGUCExecutable();
+    Debug.println("adagucExecutableLocation: "+adagucExecutableLocation);
+    
+    if(adagucExecutableLocation == null){
+    	Debug.errprintln("Adagucserver executable not configured");
+    	throw new Exception("Adagucserver executable not configured");
+    }
+    
+    File f=new File(adagucExecutableLocation);
+    if(f.exists() == false || f.isFile() == false){
+    	Debug.errprintln("Adagucserver executable not found");
+    	throw new Exception("Adagucserver executable not found");
+    }
+    
     String[] configEnv = ConfigurationReader.ADAGUCServerConfig.getADAGUCEnvironment();
     
     if(response == null && outputStream == null){

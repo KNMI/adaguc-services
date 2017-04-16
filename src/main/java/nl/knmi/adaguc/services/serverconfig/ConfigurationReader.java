@@ -75,7 +75,7 @@ public class ConfigurationReader {
 
 	public static class Main{
 		public static void doConfig(XMLElement configReader) {
-			serverExternalURL = configReader.getNodeValue("external-home-url");
+			serverExternalURL = configReader.getNodeValue("adaguc-services.external-home-url");
 
 		}
 		private static String serverExternalURL="";
@@ -93,8 +93,9 @@ public class ConfigurationReader {
 		};
 
 		public static void doConfig(XMLElement  configReader){
-			ADAGUCExecutable=configReader.getNodeValue("adaguc-server.adagucexecutable");
-			environmentVariables = configReader.getNodeValues("adaguc-server.export");
+			ADAGUCExecutable=configReader.getNodeValue("adaguc-services.adaguc-server.adagucexecutable");
+			Debug.println("ADAGUCExecutable"+ ADAGUCExecutable);
+			environmentVariables = configReader.getNodeValues("adaguc-services.adaguc-server.export");
 		}
 
 		public static String getADAGUCExecutable() {
