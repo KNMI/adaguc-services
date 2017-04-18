@@ -1,4 +1,4 @@
-package nl.knmi.adaguc.services.serverconfig;
+package nl.knmi.adaguc.services.config;
 
 
 import nl.knmi.adaguc.tools.Debug;
@@ -36,7 +36,7 @@ public class ConfigurationReader {
 
 	private static String getConfigFile(){
 		try{
-			String configLocation = System.getenv("ADAGUC-SERVICES_CONFIG");
+			String configLocation = System.getenv("ADAGUC_SERVICES_CONFIG");
 			if(configLocation!=null){
 				if(configLocation.length()>0){
 					return configLocation;

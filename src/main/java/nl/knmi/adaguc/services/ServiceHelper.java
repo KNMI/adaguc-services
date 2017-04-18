@@ -1,5 +1,6 @@
 package nl.knmi.adaguc.services;
 
+import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URL;
 import java.net.URLDecoder;
@@ -36,56 +37,66 @@ public class ServiceHelper {
 	}
 	@ResponseBody
 	@RequestMapping("XML2JSON")
-	public void XML2JSON(@RequestParam(value="request", required=false)String request,@RequestParam(value="callback", required=false)String callback, HttpServletResponse response, HttpServletRequest req){
+	public void XML2JSON(@RequestParam(value="request")String request,@RequestParam(value="callback", required=false)String callback, HttpServletResponse response){
 		/**
 		 * Converts XML file pointed with request to JSON file
 		 * @param requestStr
 		 * @param out1
 		 * @param response
 		 */
-		JSONResponse jsonResponse = new JSONResponse(req);
+		System.err.println("XML2JSON "+request);
 
-		if(request == null){
-			jsonResponse.setErrorMessage("Parameter request is missing", 400);
-			try{
-				jsonResponse.setMessage("bla");
-			} catch(Exception e){
-				jsonResponse.setException("nice error message",e);
-			}
-
-			try {
-				jsonResponse.print(response);
-			} catch (Exception e1) {
-
-			}
-		}
-
-		Debug.println("XML2JSON "+request);
-
-
+		String requestStr;
+		OutputStream out;
 		try {
-			String requestStr=URLDecoder.decode(HTTPTools.getHTTPParam(req, "request"), "UTF-8");
+			out = response.getOutputStream();
+		} catch (IOException e2) {
+			// TODO Auto-generated catch block
+			e2.printStackTrace();
+			return;
+		}
+		try {
+			requestStr=URLDecoder.decode(request,"UTF-8");
 			MyXMLParser.XMLElement rootElement = new MyXMLParser.XMLElement();
 			//Remote XML2JSON request to external WMS service
-			Debug.println("Converting XML to JSON for "+requestStr);
+			System.err.println("Converting XML to JSON for "+requestStr);
 			rootElement.parse(new URL(requestStr));
+			if (callback==null) {
+				response.setContentType("application/json");
+				out.write(rootElement.toJSON(null).getBytes());
+			} else {
+				response.setContentType("application/javascript");
+				out.write(callback.getBytes());
+				out.write("(".getBytes());
+				out.write(rootElement.toJSON(null).getBytes());
+				out.write(");".getBytes());
 
-			jsonResponse.setMessage(new String(rootElement.toJSON(null).getBytes()));
+			}
 		} catch (Exception e) {
+			e.printStackTrace();
+			try {
+				if (callback==null) {
+					response.setContentType("application/json");
+					out.write("{\"error\":\"error\"}".getBytes());
+				} else {
+					response.setContentType("application/javascript");
+					out.write(callback.getBytes());
+					out.write("(".getBytes());
+					out.write("{\"error\":\"error\"}".getBytes());
+					out.write(");".getBytes());
 
-			jsonResponse.setException("XML2JSON request failed",e);
-		}
-		try {
-			jsonResponse.print(response);
-		} catch (Exception e1) {
-
+				}
+			}catch (Exception e1) {
+				response.setStatus(500);
+			}
 		}
 	}
-	
+
+
 	@ResponseBody
 	@RequestMapping("adagucserver")
 	public void ADAGUCSERVER(HttpServletResponse response, HttpServletRequest request){
-		
+
 		try {
 			AdagucServer.runADAGUCWMS(request,response,null,null);
 		} catch (Exception e) {
@@ -97,8 +108,8 @@ public class ServiceHelper {
 
 			}
 		}
-		 
-	 }
-		 
+
+	}
+
 }
 
