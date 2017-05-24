@@ -77,6 +77,71 @@
 		</dependency>
 
 
+		<dependency>
+			<groupId>org.reflections</groupId>
+			<artifactId>reflections</artifactId>
+			<version>0.9.9-RC1</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-lang3</artifactId>
+			<version>3.5</version>
+		</dependency>
+
+
+		<!-- https://mvnrepository.com/artifact/org.bouncycastle/bcprov-jdk15on --><!-- https://mvnrepository.com/artifact/org.bouncycastle/bcpkix-jdk15on -->
+		<dependency>
+			<groupId>org.bouncycastle</groupId>
+			<artifactId>bcprov-jdk15on</artifactId>
+			<version>1.56</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>org.bouncycastle</groupId>
+			<artifactId>bcpkix-jdk15on</artifactId>
+			<version>1.56</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.apache.httpcomponents/httpclient -->
+		<dependency>
+			<groupId>org.apache.httpcomponents</groupId>
+			<artifactId>httpclient</artifactId>
+			<version>4.5.2</version>
+		</dependency>
+<!-- https://mvnrepository.com/artifact/log4j/log4j -->
+<dependency>
+    <groupId>log4j</groupId>
+    <artifactId>log4j</artifactId>
+    <version>1.2.17</version>
+</dependency>
+
+<!-- https://mvnrepository.com/artifact/edu.ucar/cdm -->
+<dependency>
+    <groupId>edu.ucar</groupId>
+    <artifactId>cdm</artifactId>
+    <version>4.5.5</version>
+</dependency>
+<!-- https://mvnrepository.com/artifact/edu.ucar/netcdf -->
+<dependency>
+    <groupId>edu.ucar</groupId>
+    <artifactId>netcdf</artifactId>
+    <version>4.2</version>
+</dependency>
+
+
+<!-- https://mvnrepository.com/artifact/org.jglobus/gss -->
+<!-- <dependency>
+    <groupId>org.jglobus</groupId>
+    <artifactId>gss</artifactId>
+    <version>2.1.0</version>
+</dependency>-->
+
+<!-- https://mvnrepository.com/artifact/org.jglobus/JGlobus-Core -->
+<!-- dependency>
+    <groupId>org.jglobus</groupId>
+    <artifactId>JGlobus-Core</artifactId>
+    <version>2.0.4</version>
+</dependency>-->
 
 
 	</dependencies>

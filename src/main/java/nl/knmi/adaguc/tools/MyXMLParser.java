@@ -11,8 +11,10 @@ import java.io.PrintStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.Vector;
 
@@ -28,7 +30,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-import lombok.Getter;
+import nl.knmi.adaguc.config.ConfigurationItemNotFoundException;
 
 
 public class MyXMLParser {
@@ -540,28 +542,35 @@ public class MyXMLParser {
 			return values[0];
 		}
 		public String[] getNodeValues(String string) {
-			//Debug.println("Get value for ["+string+"]");
 			String[] elements = string.split("\\.");
 			int j=0;
 			XMLElement a = this;
 			try{
 				while(j<elements.length-1){
-					//Debug.println("Getting "+elements[j] );
 					a = a.get(elements[j]);
 					j++;
 				};
-				//Debug.println("Getting "+elements[j] );
 				Vector<XMLElement> b = a.getList(elements[j]);
 				if(b.size()>0){
 					String[] results = new String[b.size()];
 					for(int i=0;i<b.size();i++){
-						results[i] = b.get(i).getValue();
+						String value = b.get(i).getValue();
+						
+						results[i] = value;
 					}
 					return results;
 				}
 			} catch (Exception e) {
+				e.printStackTrace();
 			}
 			return null;
+		}
+		public String getNodeValueMustNotBeUndefined(String string) throws ConfigurationItemNotFoundException {
+			String nodeValue = getNodeValue(string);
+			if(nodeValue == null){
+				throw new ConfigurationItemNotFoundException(string);
+			}
+			return nodeValue;
 		}
 
 	};

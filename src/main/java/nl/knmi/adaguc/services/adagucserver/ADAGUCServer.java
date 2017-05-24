@@ -4,7 +4,6 @@ package nl.knmi.adaguc.services.adagucserver;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,14 +12,17 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import nl.knmi.adaguc.services.config.ConfigurationReader;
 import nl.knmi.adaguc.tools.CGIRunner;
 import nl.knmi.adaguc.tools.Debug;
 
 
 
-
-public class AdagucServer extends HttpServlet{
+/**
+ * 
+ * @author maartenplieger
+ *
+ */
+public class ADAGUCServer extends HttpServlet{
 
   /**
    * 
@@ -43,7 +45,7 @@ public class AdagucServer extends HttpServlet{
     List<String> environmentVariables = new ArrayList<String>();
     String userHomeDir="/tmp/";
     String homeURL="http://localhost/";
-    String adagucExecutableLocation = ConfigurationReader.ADAGUCServerConfig.getADAGUCExecutable();
+    String adagucExecutableLocation = ADAGUCConfigurator.getADAGUCExecutable();
     Debug.println("adagucExecutableLocation: "+adagucExecutableLocation);
     
     if(adagucExecutableLocation == null){
@@ -57,7 +59,7 @@ public class AdagucServer extends HttpServlet{
     	throw new Exception("Adagucserver executable not found");
     }
     
-    String[] configEnv = ConfigurationReader.ADAGUCServerConfig.getADAGUCEnvironment();
+    
     
     if(response == null && outputStream == null){
     	throw new Exception("Either response or outputstream needs to be set");
@@ -82,7 +84,12 @@ public class AdagucServer extends HttpServlet{
     environmentVariables.add("ADAGUC_ONLINERESOURCE="+homeURL+"/adagucserver?");
     environmentVariables.add("ADAGUC_TMP="+userHomeDir+"/tmp/");
     
-    for(int j=0;j<configEnv.length;j++)environmentVariables.add(configEnv[j]);    
+    String[] configEnv = ADAGUCConfigurator.getADAGUCEnvironment();
+    if(configEnv == null){
+    	Debug.println("ADAGUC environment is not configured");
+    }else{
+    	for(int j=0;j<configEnv.length;j++)environmentVariables.add(configEnv[j]);    
+    }
     String commands[] = {adagucExecutableLocation};
   
     String[] environmentVariablesAsArray = new String[ environmentVariables.size() ];
@@ -109,7 +116,7 @@ public class AdagucServer extends HttpServlet{
     }
   
     try {
-      AdagucServer.runADAGUCWMS(request,response,request.getQueryString(),out1);
+      ADAGUCServer.runADAGUCWMS(request,response,request.getQueryString(),out1);
 
     } catch (Exception e) {
       response.setStatus(401);
