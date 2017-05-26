@@ -159,7 +159,7 @@ public class PemX509Tools {
 	 * @param cert The X509Certificate to get the information from
 	 * @return
 	 */
-	public static X509Info getUserIdFromCertificate(X509Certificate cert){
+	public X509Info getUserIdFromCertificate(X509Certificate cert){
 		/*Trying to get user info from X509 cert*/
 		String CertOpenIdIdentifier = null;
 		String uniqueId = null;
@@ -215,6 +215,7 @@ public class PemX509Tools {
 			// process extension request
 			if (attr.getAttrType().equals(PKCSObjectIdentifiers.pkcs_9_at_extensionRequest)) {
 				Extensions extensions = Extensions.getInstance(attr.getAttrValues().getObjectAt(0));
+				@SuppressWarnings("unchecked")
 				Enumeration<ASN1ObjectIdentifier> e = (Enumeration<ASN1ObjectIdentifier>  )extensions.oids();
 				while (e.hasMoreElements()) {
 					ASN1ObjectIdentifier oid =  e.nextElement();

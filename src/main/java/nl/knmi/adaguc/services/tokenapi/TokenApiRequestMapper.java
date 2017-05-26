@@ -1,6 +1,7 @@
-package nl.knmi.adaguc.services.pywpsserver;
+package nl.knmi.adaguc.services.tokenapi;
 
 import java.io.IOException;
+import java.text.ParseException;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -16,11 +17,17 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
 import nl.knmi.adaguc.config.ConfigurationItemNotFoundException;
+import nl.knmi.adaguc.security.AuthenticatorFactory;
+import nl.knmi.adaguc.security.AuthenticatorInterface;
+import nl.knmi.adaguc.security.token.Token;
+import nl.knmi.adaguc.security.token.TokenManager;
+import nl.knmi.adaguc.security.user.UserManager;
 import nl.knmi.adaguc.tools.Debug;
 import nl.knmi.adaguc.tools.JSONResponse;
 
+
 @RestController
-public class PyWPSRequestMapper {
+public class TokenApiRequestMapper {
 	@Bean
 	public MappingJackson2HttpMessageConverter mappingJackson2HttpMessageConverter() {
 		ObjectMapper mapper = new ObjectMapper();
@@ -30,21 +37,35 @@ public class PyWPSRequestMapper {
 		return converter;
 	}
 	@ResponseBody
-	@RequestMapping("wps")
-	public void PyWPSServer(HttpServletResponse response, HttpServletRequest request) throws IOException{
+	@RequestMapping("registertoken")
+	public void registerToken(HttpServletRequest request, HttpServletResponse response) throws IOException{
+		JSONResponse jsonResponse = new JSONResponse(request);
 
+		AuthenticatorInterface authenticator = AuthenticatorFactory.getAuthenticator(request);
 		try {
-			PyWPSServer.runPyWPS(request,response,null,null);
+			Token token = TokenManager.registerToken(UserManager.getUser(authenticator));
+			ObjectMapper om=new ObjectMapper();
+			jsonResponse.setMessage(om.writeValueAsString(token));
 		} catch (AuthenticationException e) {
 			Debug.printStackTrace(e);
-				new JSONResponse(request).setErrorMessage("Authentication error", 401).print(response);
-		} catch (IOException e) {
-			new JSONResponse(request).setException("IOException",e).print(response);
+			jsonResponse.setErrorMessage("Authentication error", 401);
 		} catch (ConfigurationItemNotFoundException e) {
-			new JSONResponse(request).setException("ConfigurationItemNotFoundException",e).print(response);
-		} catch (InterruptedException e) {
-			new JSONResponse(request).setException("InterruptedException",e).print(response);
+			jsonResponse.setException("ConfigurationItemNotFoundException",e);
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		try {
+			jsonResponse.print(response);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 
 	}
+
+
+
 }
+

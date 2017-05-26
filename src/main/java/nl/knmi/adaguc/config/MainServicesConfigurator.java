@@ -13,11 +13,13 @@ public class MainServicesConfigurator implements ConfiguratorInterface {
 	private static String serverExternalURL="";
 	private static String userWorkspace="/tmp";
 	private static String serverPort="443";
+	private static String baseDir="/tmp/";
 
-	public void doConfig(XMLElement configReader) {
-		serverExternalURL = configReader.getNodeValue("adaguc-services.external-home-url");
-		userWorkspace = configReader.getNodeValue("adaguc-services.userworkspace");
-		serverPort = configReader.getNodeValue("adaguc-services.server.port");
+	public void doConfig(XMLElement configReader) throws ConfigurationItemNotFoundException {
+		serverExternalURL = configReader.getNodeValueMustNotBeUndefined("adaguc-services.external-home-url");
+		userWorkspace = configReader.getNodeValueMustNotBeUndefined("adaguc-services.userworkspace");
+		serverPort = configReader.getNodeValueMustNotBeUndefined("adaguc-services.server.port");
+		baseDir = configReader.getNodeValueMustNotBeUndefined("adaguc-services.basedir");
 	}
 
 	public static String getServerExternalURL() throws ConfigurationItemNotFoundException {
@@ -34,5 +36,10 @@ public class MainServicesConfigurator implements ConfiguratorInterface {
 		ConfigurationReader.readConfig();
 		return serverPort;
 		
+	}
+
+	public static String getBaseDir() throws ConfigurationItemNotFoundException {
+		ConfigurationReader.readConfig();
+		return baseDir;
 	}
 }

@@ -1,4 +1,4 @@
-package nl.knmi.adaguc.services;
+package nl.knmi.adaguc.services.xml2json;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -31,7 +31,7 @@ public class ServiceHelperRequestMapper {
 		return converter;
 	}
 	@ResponseBody
-	@RequestMapping("XML2JSON")
+	@RequestMapping("xml2json")
 	public void XML2JSON(@RequestParam(value="request")String request,@RequestParam(value="callback", required=false)String callback, HttpServletResponse response){
 		/**
 		 * Converts XML file pointed with request to JSON file
@@ -39,7 +39,6 @@ public class ServiceHelperRequestMapper {
 		 * @param out1
 		 * @param response
 		 */
-		System.err.println("XML2JSON "+request);
 
 		String requestStr;
 		OutputStream out;

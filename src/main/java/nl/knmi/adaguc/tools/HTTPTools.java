@@ -1,6 +1,10 @@
 package nl.knmi.adaguc.tools;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.net.URLDecoder;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -32,7 +36,7 @@ public class HTTPTools {
 	 * @return returns the same string
 	 * @throws Exception when invalid tokens are encountered
 	 */
-	public static String validateInputTokens(String input) throws Exception {
+	public static String validateInputTokens(String input) throws InvalidHTTPKeyValueTokensException {
 		if(input == null)return null;
 
 		byte[] str = input.getBytes();
@@ -85,4 +89,109 @@ public class HTTPTools {
 		paramValue = validateInputTokens(paramValue);
 		return paramValue;
 	}
+
+	/**
+	   * Get values for a multiple keys with the same name in a URL, 
+	   * e.g. ?variable=psl&variable=tas means: key="variable" value="psl,tas" (as list) 
+	   * @param url The URL containging the KVP encoded data
+	   * @param key The key we want to search for
+	   * @return value, null if not found.
+	 * @throws InvalidHTTPKeyValueTokensException 
+	   * @throws Exception 
+	   */
+	  static public List<String> getKVPList(String url, String key) throws InvalidHTTPKeyValueTokensException {
+
+	    String urlParts[] = url.split("\\?");
+	    String queryString = urlParts[urlParts.length - 1];
+	    List<String> values = new ArrayList<String>();
+	    // System.out.println("*********QU"+queryString);
+	    String[] kvpparts = queryString.split("&");
+	    for (int j = 0; j < kvpparts.length; j++) {
+	      // System.out.println("*********KV"+kvpparts[j]);
+	      int firstEqualsSign = kvpparts[j].indexOf("=");
+	      if(firstEqualsSign>=0){
+	        String foundKey = kvpparts[j].substring(0, firstEqualsSign);
+	        String foundValue = kvpparts[j].substring(firstEqualsSign+1);
+	        if (foundKey.equalsIgnoreCase(key)){
+	          String valueChecked = validateInputTokens(foundValue);
+	          values.add(valueChecked);
+	        }
+	      }
+	    }
+	    return values;
+
+	  }
+
+	  /**
+	   * Finds a KVP from the querystring. Returns null if not found.
+	   * @param queryString
+	   * @param string
+	   * @return
+	 * @throws InvalidHTTPKeyValueTokensException 
+	   * @throws Exception
+	   */
+	  public static String getKVPItem(String queryString, String string) throws InvalidHTTPKeyValueTokensException {
+	    List<String> items = getKVPList(queryString, string);
+	    if (items.size() == 0)
+	      return null;
+	    return items.get(0);
+	  }
+	  
+
+	  static public String makeCleanURL(String url) {
+	    // DebugConsole.println("oldURL="+url);
+	    if (url.length() == 0)
+	      return url;
+	    // Remove double && signs
+	    String newURL = "";
+	    String urlParts[] = url.split("\\?");
+	    if (urlParts.length == 2) {
+	      newURL = urlParts[0] + "?";
+	    }
+	    boolean requireAmp = false;
+	    String queryString = urlParts[urlParts.length - 1];
+	    // System.out.println("*********QU"+queryString);
+	    String[] kvpparts = queryString.split("&");
+	    for (int j = 0; j < kvpparts.length; j++) {
+	      // System.out.println("*********KV"+kvpparts[j]);
+	      String kvp[] = kvpparts[j].split("=");
+
+	      if (kvp.length == 2) {
+	        if (requireAmp)
+	          newURL += "&";
+	        newURL += kvp[0] + "=" + kvp[1];
+	        requireAmp = true;
+	      }
+	      if (kvp.length == 1) {
+	        if (kvp[0].length() != 0) {
+	          newURL += kvp[0];
+	          if (urlParts.length == 1 && j == 0) {
+	            newURL += "?";
+	          }
+	        }
+	      }
+	    }
+	    // return newURL;
+
+	    try {
+	      // DebugConsole.println("+newURL: "+newURL);
+	      String rootCatalog = new URL(newURL).toString();
+	      String path = new URL(rootCatalog).getFile();
+	      String hostPath = rootCatalog.substring(0,
+	          rootCatalog.length() - path.length());
+
+	      // DebugConsole.println("Catalog: "+rootCatalog);
+	      // DebugConsole.println("hostPath: "+hostPath);
+	      path = path.replace("//", "/");
+
+	      newURL = hostPath + path;
+	      // DebugConsole.println("newURL: "+newURL);
+	      // DebugConsole.println("/newURL: "+newURL);
+	      return newURL;
+	    } catch (MalformedURLException e) {
+	      return newURL;
+	    }
+
+	  }
+
 }

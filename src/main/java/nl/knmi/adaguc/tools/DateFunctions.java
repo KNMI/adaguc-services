@@ -24,16 +24,9 @@ public class DateFunctions {
 	public static String dateAddStepInStringFormat(String stringDate,String dateResolutionString) throws Exception{
 	  return dateAddStepInStringFormat(stringDate,dateResolutionString,1);
 	}
-	public static String dateAddStepInStringFormat(String stringDate,String dateResolutionString, int amount) throws Exception{
+	public static String dateAddStepInStringFormat(String stringDate,String dateResolutionString, int amount) throws ParseException {
 		Date dateStartTime = null;
-		try {
-			dateStartTime = getUTCSimpleDate().parse(stringDate);
-		} catch (ParseException e1) {
-			throw new Exception("Unable to parse start date: "+stringDate+" Exception message: "+e1.getMessage());
-		}
-		if(dateResolutionString==null){
-			throw new Exception("dateResolutionString in dateAddStepInStringFormat == null");
-		}
+		dateStartTime = getUTCSimpleDate().parse(stringDate);
 		long time=dateStartTime.getTime();
 		Calendar cal = Calendar.getInstance();
 		Date date = new Date();
@@ -59,7 +52,7 @@ public class DateFunctions {
 		if(dateResolutionString.equalsIgnoreCase("year"))cal.add(Calendar.YEAR, amount);
 		// Check whether we really added something
 		if(cal.getTimeInMillis()==time){
-			throw new Exception("dateResolutionString is invalid in dateAddStepInStringFormat: "+dateResolutionString);
+			throw new ParseException("dateResolutionString is invalid in dateAddStepInStringFormat: "+dateResolutionString, 0);
 		}		//return  date
 		return getUTCSimpleDate().format(cal.getTime());
 	}

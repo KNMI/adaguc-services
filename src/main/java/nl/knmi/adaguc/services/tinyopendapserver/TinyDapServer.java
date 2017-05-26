@@ -1,4 +1,4 @@
-package nl.knmi.adaguc.services.tinydap;
+package nl.knmi.adaguc.services.tinyopendapserver;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
@@ -60,7 +60,7 @@ public class TinyDapServer {
    * @param response
    * @throws IOException
    */
-  public static void handleOpenDapReqeuests(String localNetCDFFileLocation,String baseName,HttpServletRequest request,HttpServletResponse response) throws IOException{
+  public static void handleOpenDapReqeuests(String localNetCDFFileLocation,String baseName, String pathInfo,HttpServletRequest request,HttpServletResponse response) throws IOException{
     long startTime = 0;
 
     if(Debugger.DebugOpendap){
@@ -68,10 +68,11 @@ public class TinyDapServer {
       Debug.println("handleOpenDapReqeuests received.");
       Debug.println("localNetCDFFileLocation:"+localNetCDFFileLocation);
       Debug.println("opendapNameFromPath:    "+baseName);
+      Debug.println("pathInfo:    "+pathInfo);
     }
     String queryString = request.getQueryString();
     if(queryString == null)queryString="";
-    String path = request.getPathInfo();
+    String path = pathInfo;
     if(path==null)return;
     NetcdfFile ncFile = null;
     try {
@@ -79,7 +80,11 @@ public class TinyDapServer {
         response.setContentType("text/plain");
         ncFile = getNetCDFFile(localNetCDFFileLocation);
         response.getOutputStream().write(getDatasetDDSFromNetCDFFile(ncFile,baseName,URLDecoder.decode(queryString,"UTF-8"),false));
-      }else if(path.endsWith(".das")){
+      }else if(path.endsWith(".ddx")){
+          response.setContentType("text/plain");
+          ncFile = getNetCDFFile(localNetCDFFileLocation);
+          response.getOutputStream().write(getDatasetDDXFromNetCDFFile(ncFile,baseName,URLDecoder.decode(queryString,"UTF-8"),false));
+        }else if(path.endsWith(".das")){
         response.setContentType("text/plain");
         ncFile = getNetCDFFile(localNetCDFFileLocation);
         response.getOutputStream().print(getDASFromNetCDFFile(ncFile).toString());
@@ -113,7 +118,13 @@ public class TinyDapServer {
   };
   
   
-  private static synchronized NetcdfFile getNetCDFFile(String localNetCDFFileLocation) throws IOException {
+  private static byte[] getDatasetDDXFromNetCDFFile(NetcdfFile ncFile, String baseName, String decode, boolean b) {
+	Debug.println("DDX needed");
+	return null;
+}
+
+
+private static synchronized NetcdfFile getNetCDFFile(String localNetCDFFileLocation) throws IOException {
         try {
           if(NetcdfFile.iospRegistered(GeoJSONReaderIOSP.class)==false){
             Debug.println("Registering GeoJSONReaderIOSP");

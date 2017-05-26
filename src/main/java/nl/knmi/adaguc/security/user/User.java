@@ -1,4 +1,4 @@
-package nl.knmi.adaguc.usermanagement;
+package nl.knmi.adaguc.security.user;
 
 import java.io.IOException;
 
@@ -30,11 +30,11 @@ public class User {
 	  }
 
 
-	public User(String id) throws IOException, ConfigurationItemNotFoundException {
-		Debug.println("New user ID is made :["+id+"]");
+	public User(String _id) throws IOException, ConfigurationItemNotFoundException {
+		Debug.println("New user ID is made :["+_id+"]");
 		String userWorkspace = MainServicesConfigurator.getUserWorkspace();
-		userId = id;
-		homeDir=userWorkspace+"/"+makePosixUserId(id);
+		userId = makePosixUserId(_id);
+		homeDir=userWorkspace+"/"+userId;
 		dataDir = homeDir+"/data";
 		Tools.mksubdirs(homeDir);
 		Tools.mksubdirs(dataDir);

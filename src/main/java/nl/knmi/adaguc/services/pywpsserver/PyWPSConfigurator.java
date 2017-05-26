@@ -40,7 +40,7 @@ public class PyWPSConfigurator implements ConfiguratorInterface {
 		PyWPSConfigTemplate  = configReader.getNodeValueMustNotBeUndefined ("adaguc-services.pywps-server.pywpsconfigtemplate");
 		PyWPSOutputDir       = configReader.getNodeValueMustNotBeUndefined ("adaguc-services.pywps-server.pywpsoutputdir");
 		PyWPSProcessesDir    = configReader.getNodeValueMustNotBeUndefined ("adaguc-services.pywps-server.pywpsprocessesdir");
-		TempDir              = configReader.getNodeValue ("adaguc-services.pywps-server.tmp");
+		TempDir              = configReader.getNodeValueMustNotBeUndefined ("adaguc-services.pywps-server.tmp");
 		environmentVariables = configReader.getNodeValues("adaguc-services.pywps-server.export");
 	}
 
@@ -72,5 +72,10 @@ public class PyWPSConfigurator implements ConfiguratorInterface {
 	public static String getPyWPSProcessesDir() throws ConfigurationItemNotFoundException {
 		ConfigurationReader.readConfig();
 		return PyWPSProcessesDir;
+	}
+
+	public static String getPyWPSConfig() throws ConfigurationItemNotFoundException {
+		String pyWPSConfigTemplate = PyWPSConfigurator.getPyWPSConfigTemplate();
+		return pyWPSConfigTemplate + "adaguc-services-pywps-config.cfg";
 	}	
 }

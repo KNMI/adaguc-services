@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
-import nl.knmi.adaguc.security.AuthenticatorImpl;
 import nl.knmi.adaguc.security.PemX509Tools;
 import nl.knmi.adaguc.security.PemX509Tools.X509Info;
 import nl.knmi.adaguc.tools.JSONResponse;
@@ -58,7 +57,7 @@ public class AuthRequestMapper {
 			method = RequestMethod.GET, 
 			produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
 	public void makeUserInfoRequest(HttpServletResponse response, HttpServletRequest request) throws JSONException, IOException{
-			String clientId = new AuthenticatorImpl(request).getClientId();
+			//String clientId = new AuthenticatorImpl(request).getClientId();
 			
 	}
 }

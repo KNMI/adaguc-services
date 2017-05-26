@@ -10,17 +10,20 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.tools.Tool;
 
-import org.apache.commons.lang3.StringUtils;
+import org.springframework.security.core.AuthenticationException;
 
+import nl.knmi.adaguc.config.ConfigurationItemNotFoundException;
 import nl.knmi.adaguc.config.MainServicesConfigurator;
 import nl.knmi.adaguc.security.AuthenticatorFactory;
 import nl.knmi.adaguc.security.AuthenticatorInterface;
+import nl.knmi.adaguc.security.user.UserManager;
 import nl.knmi.adaguc.tools.CGIRunner;
 import nl.knmi.adaguc.tools.Debug;
+import nl.knmi.adaguc.tools.HTTPTools;
+import nl.knmi.adaguc.tools.HTTPTools.InvalidHTTPKeyValueTokensException;
+import nl.knmi.adaguc.tools.InvalidTokenException;
 import nl.knmi.adaguc.tools.Tools;
-import nl.knmi.adaguc.usermanagement.UserManager;
 
 /**
  * 
@@ -43,59 +46,39 @@ public class PyWPSServer extends HttpServlet{
 	 * @param queryString The querystring for the CGI script
 	 * @param outputStream A standard byte output stream in which the data of stdout is captured. 
 	 * When null, it will be set to response.getOutputStream().
+	 * @throws ConfigurationItemNotFoundException 
+	 * @throws IOException 
+	 * @throws AuthenticationException 
+	 * @throws InterruptedException 
 	 * @throws Exception
 	 */
-	public static void runPyWPS(HttpServletRequest request,HttpServletResponse response,String queryString,OutputStream outputStream) throws Exception{
+	public static void runPyWPS(HttpServletRequest request,HttpServletResponse response,String queryString,OutputStream outputStream) throws AuthenticationException, IOException, ConfigurationItemNotFoundException, InterruptedException {
 		Debug.println("RunPyWPS");
 		List<String> environmentVariables = new ArrayList<String>();
 		String userHomeDir="/tmp/";
 
 		String homeURL=MainServicesConfigurator.getServerExternalURL();
-		if(homeURL == null){
-			throw new Exception("401");
-		}
-		String pyWPSServerURL = homeURL+"/pywpsserver";
 
 
-		AuthenticatorInterface authenticator = AuthenticatorFactory.getAuthenticator(request);
-		if(authenticator != null){
-			userHomeDir = UserManager.getUser(authenticator).getHomeDir();    			    
-		}
+
 
 		String pywpsExecLoc = PyWPSConfigurator.getPyWPSExecutable();
 		Debug.println("PyWPSExecutableLocation: "+pywpsExecLoc);
-
-		if(pywpsExecLoc == null){
-			throw new Exception("PyWPSServer executable not configured");
-		}
-		String pyWPSConfigTemplate = PyWPSConfigurator.getPyWPSConfigTemplate();
-		if(pyWPSConfigTemplate == null){
-			throw new Exception("adaguc-services.pywps-server.pywpsconfigtemplate not set");
-		}
-		String tempDir = PyWPSConfigurator.getTempDir();
-		if(tempDir == null){
-			throw new Exception("adaguc-services.pywps-server.tmp not set");
-		}
-		String pyWPSOutputDir = PyWPSConfigurator.getPyWPSOutputDir();
-		if(pyWPSOutputDir == null){
-			throw new Exception("adaguc-services.pywps-server.pywpsoutputdir not set");
-		} 
+		String pyWPSConfig = PyWPSConfigurator.getPyWPSConfig();
 		String pyWPSProcessesDir = PyWPSConfigurator.getPyWPSProcessesDir();
-		if(pyWPSProcessesDir == null){
-			throw new Exception("adaguc-services.pywps-server.pywpsprocesses not set");
-		} 
+
 		File f=new File(pywpsExecLoc);
 		if(f.exists() == false || f.isFile() == false){
 			Debug.errprintln("PyWPSServer executable not found");
-			throw new Exception("PyWPSServer executable not found");
+			throw new ConfigurationItemNotFoundException("PyWPSServer executable not found");
 		}
 
 		if(response == null && outputStream == null){
-			throw new Exception("Either response or outputstream needs to be set");
+			throw new IOException("Either response or outputstream needs to be set");
 		}
 
 		if(request == null && queryString == null){
-			throw new Exception("Either request or queryString needs to be set");
+			throw new IOException("Either request or queryString needs to be set");
 		}
 
 		if(outputStream == null){
@@ -106,45 +89,36 @@ public class PyWPSServer extends HttpServlet{
 			queryString = request.getQueryString();
 		}
 
-		String pyWPSConfig = tempDir + "/pywps-config.cfg";
 
-		String configTemplate = Tools.readFile(pyWPSConfigTemplate);
-		if(configTemplate == null){
-			throw new Exception("adaguc-services.pywps-server.pywpsconfigtemplate is invalid ["+pyWPSConfigTemplate+"]");
-		}
-		String[] configLines = configTemplate.split("\n");
+		Debug.println("Using query string "+queryString);
 
-		for( int j=0;j< configLines.length;j++){
-			String line = configLines[j];
-			if(line.startsWith("serveraddress")){
-				configLines[j]="serveraddress=" + pyWPSServerURL;
-			}
-			if(line.startsWith("tempPath")){
-				configLines[j]="tempPath=" + tempDir;
-			}
-			if(line.startsWith("outputUrl")){
-				configLines[j]="outputUrl=" + pyWPSServerURL+"?OUTPUT=";
-			}
-			if(line.startsWith("outputPath")){
-				configLines[j]="outputPath=" + pyWPSOutputDir;
-			}
-			if(line.startsWith("outputPath")){
-				configLines[j]="outputPath=" + pyWPSOutputDir;
-			}
-			if(line.startsWith("processesPath")){
-				configLines[j]="processesPath=" + pyWPSProcessesDir;
-			}
-			if(line.startsWith("maxinputparamlength")){
-				configLines[j]="maxinputparamlength=32768";
-			}
-			if(line.startsWith("maxfilesize")){
-				configLines[j]="maxfilesize=500mb";
-			}
+		try {
+			if(checkStatusLocation(queryString,response ) == true)return;
+		} catch (InvalidTokenException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (InvalidHTTPKeyValueTokensException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 
 
-		String newConfig = StringUtils.join(configLines, "\n");
-		Tools.writeFile(pyWPSConfig, newConfig);
+		AuthenticatorInterface authenticator = AuthenticatorFactory.getAuthenticator(request);
+		if(authenticator != null){
+			userHomeDir = UserManager.getUser(authenticator).getHomeDir();
+		}
+
+
+		String userDataDir = UserManager.getUser(authenticator).getDataDir();
+		Tools.mksubdirs(userDataDir+"/WPS_Scratch/");
+		environmentVariables.add( "POF_OUTPUT_PATH="+userDataDir+"/WPS_Scratch/");
+
+		String pofOutputURL = homeURL+"/opendap/"+UserManager.getUser(authenticator).getUserId()+"/WPS_Scratch/";
+		pofOutputURL = HTTPTools.makeCleanURL(pofOutputURL);
+		pofOutputURL = pofOutputURL.replace("?", "");
+		environmentVariables.add( "POF_OUTPUT_URL="+pofOutputURL);
+
+
 
 		environmentVariables.add("HOME="+userHomeDir);
 		environmentVariables.add("QUERY_STRING="+queryString);
@@ -165,6 +139,34 @@ public class PyWPSServer extends HttpServlet{
 		environmentVariables.toArray( environmentVariablesAsArray );
 
 		CGIRunner.runCGIProgram(commands,environmentVariablesAsArray,userHomeDir,response,outputStream,null);
+
+	}
+
+	private static boolean checkStatusLocation(String queryString, HttpServletResponse response) throws InvalidTokenException, ConfigurationItemNotFoundException, InvalidHTTPKeyValueTokensException, IOException  {
+		//  Check for status location first.
+		Debug.println("Checking ["+queryString+"]");
+		if(queryString!=null){ 
+			String output = HTTPTools.getKVPItem(queryString, "OUTPUT");
+			if(output!=null){
+				String portalOutputPath = PyWPSConfigurator.getPyWPSOutputDir();
+
+				//Remove first "/" token;
+				output = output.substring(1);
+				portalOutputPath = Tools.makeCleanPath(portalOutputPath);
+				String fileName = portalOutputPath+"/"+output;
+				Debug.println("WPS GET status request: "+fileName);
+
+				Tools.checkValidCharsForFile(output);
+				String data = Tools.readFile(fileName);
+				if(response!=null){
+					response.setContentType("text/xml");
+				}
+				response.getOutputStream().write(data.getBytes());          
+				return true;
+			}
+		}
+		Debug.println("No Output found");
+		return false;
 
 	}
 

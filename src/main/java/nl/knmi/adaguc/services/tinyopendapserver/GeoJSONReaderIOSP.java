@@ -1,4 +1,4 @@
-package nl.knmi.adaguc.services.tinydap;
+package nl.knmi.adaguc.services.tinyopendapserver;
 
 import java.io.IOException;
 import java.io.OutputStream;

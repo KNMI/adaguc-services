@@ -357,9 +357,9 @@ public class Tools {
   
 
 
-  public static String checkValidCharsForFile(String input) throws Exception{
+  public static String checkValidCharsForFile(String input) throws InvalidTokenException{
     if(input.indexOf("..")!=-1){
-      throw new Exception("Invalid sequence given: ..");
+      throw new InvalidTokenException("Invalid sequence given: ..");
     }
 
     byte[] validTokens = {
@@ -380,7 +380,7 @@ public class Tools {
       }
       if(found == false){
         Debug.errprintln("Invalid string given: "+input);
-        throw new Exception("Invalid token given: '"+Character.toString((char)str[c])+"', code ("+str[c]+").");
+        throw new InvalidTokenException("Invalid token given: '"+Character.toString((char)str[c])+"', code ("+str[c]+").");
       }
     }
     return input;

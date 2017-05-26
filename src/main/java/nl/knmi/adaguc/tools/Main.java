@@ -56,7 +56,7 @@ public class Main {
 			char [] CLIENT_TRUSTSTORE_PASSWORD = SecurityConfigurator.getTrustStorePassword().toCharArray();
 			String CLIENT_TRUSTSTORE = SecurityConfigurator.getTrustStore();
 			String certLoc = "/home/c3smagic/impactspace/esg-dn1.nsc.liu.se.esgf-idp.openid.maartenplieger/certs/creds.pem";
-			String url = "https://compute-test.c3s-magic.eu:9000/pywpsserver?service=WPS&request=getcapabilities";
+			String url = "https://compute-test.c3s-magic.eu:9000/wps?service=WPS&request=getcapabilities";
 			CloseableHttpClient httpClient = (new PemX509Tools()).getHTTPClientForPEMBasedClientAuth(CLIENT_TRUSTSTORE, CLIENT_TRUSTSTORE_PASSWORD, certLoc);
 			CloseableHttpResponse httpResponse = httpClient.execute(new HttpGet(url));
 			String result = EntityUtils.toString(httpResponse.getEntity());

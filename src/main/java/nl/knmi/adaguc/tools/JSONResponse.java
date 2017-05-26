@@ -99,8 +99,9 @@ public class JSONResponse {
 		}
 	}
 
-	public void setException(String string, Exception e2) {
+	public JSONResponse setException(String string, Exception e2) {
 		setException(string,e2,null);
+		return this;
 	}
 	public void setException(String string, Exception e2, String url) {
 		//    if(e2.getClass() == tools.HTTPTools.WebRequestBadStatusException.class){
@@ -112,7 +113,8 @@ public class JSONResponse {
 			error.put("error", string);
 			error.put("statuscode", this.statusCode);
 			//error.put("exception", e2.getMessage()); Disabled due to XSS issues
-			Debug.errprintln("Exception message: " + e2.getMessage());
+			Debug.printStackTrace(e2);
+			
 			if(redirectURL!=null){error.put("redirect", this.redirectURL);}
 			if(this.userId!=null){error.put("userid", this.userId);}  
 			if(url!=null){
@@ -126,8 +128,9 @@ public class JSONResponse {
 		this.hasError = true;
 	}
 
-	public void setErrorMessage(String errorMessage, int statusCode){
+	public JSONResponse setErrorMessage(String errorMessage, int statusCode){
 		setErrorMessage(errorMessage, statusCode,null,null,null);
+		return this;
 	}
 	public void setErrorMessage(String errorMessage, int statusCode,String redirectURL,String currentPage,String resource){
 		JSONObject error = new JSONObject();
@@ -163,7 +166,7 @@ public class JSONResponse {
 
 	public void print(HttpServletResponse response) throws IOException{
 		response.setContentType(getMimeType());
-		Debug.println("statuscode = " + statusCode);
+//		Debug.println("statuscode = " + statusCode);
 		response.setStatus(statusCode);
 		byte[] msg = getMessage().getBytes();
 		response.setHeader("Content-Length", String.valueOf(msg.length));

@@ -1,46 +1,20 @@
 package nl.knmi.adaguc.authentication;
 
-import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.io.FileInputStream;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.Inet4Address;
-import java.net.UnknownHostException;
-import java.security.KeyManagementException;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
-import java.security.Security;
-import java.security.UnrecoverableKeyException;
-import java.security.cert.CertificateException;
-import java.security.cert.PKIXCertPathBuilderResult;
-import java.security.cert.X509Certificate;
-import java.util.HashSet;
-import java.util.Set;
 import java.util.UUID;
 
 import javax.annotation.Resource;
-import javax.net.ssl.KeyManager;
-import javax.net.ssl.KeyManagerFactory;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.TrustManagerFactory;
 
+import org.apache.http.impl.client.HttpClients;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -48,32 +22,10 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
-import org.apache.http.HttpStatus;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
-import org.apache.http.impl.bootstrap.HttpServer;
-import org.apache.http.impl.bootstrap.ServerBootstrap;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.ssl.SSLContextBuilder;
-import org.apache.http.ssl.SSLContexts;
-import org.apache.http.util.EntityUtils;
-import org.bouncycastle.cert.X509CertificateHolder;
-import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
-import org.bouncycastle.jce.PKCS10CertificationRequest;
-import org.bouncycastle.jce.provider.X509CertificateObject;
-import org.bouncycastle.util.io.pem.PemObject;
-import org.bouncycastle.util.io.pem.PemReader;
 
-import nl.knmi.adaguc.security.AuthenticatorImpl;
-import nl.knmi.adaguc.security.CertificateVerifier;
 import nl.knmi.adaguc.security.PemX509Tools;
 import nl.knmi.adaguc.security.PemX509Tools.X509Info;
 import nl.knmi.adaguc.tools.Debug;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 
 
 @RunWith(SpringRunner.class)
@@ -87,19 +39,11 @@ public class AuthenticatorImplTest {
 	@Resource
 	private WebApplicationContext webApplicationContext;
 
-	/** The {@link ObjectMapper} instance to be used. */
-	@Autowired
-	private ObjectMapper objectMapper;
-
-
-	private CloseableHttpClient httpclient;
-
-
 	@Before
 	public void setUp() {
 		mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext)
 				.build();
-		httpclient = HttpClients.createDefault();
+		HttpClients.createDefault();
 
 	}
 
@@ -139,7 +83,7 @@ public class AuthenticatorImplTest {
 				.andReturn();
 		String responseBody = result.getResponse().getContentAsString();
 		Debug.println(responseBody);
-		ObjectNode jsonResult = (ObjectNode) objectMapper.readTree(responseBody);
+//		ObjectNode jsonResult = (ObjectNode) objectMapper.readTree(responseBody);
 		//        assertThat(jsonResult.has("error"), is(true));
 		//        assertThat(jsonResult.get("error").asText().length(), not(0));
 

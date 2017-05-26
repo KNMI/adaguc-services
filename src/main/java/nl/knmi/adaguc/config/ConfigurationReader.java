@@ -2,17 +2,15 @@ package nl.knmi.adaguc.config;
 
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Set;
 
 import org.reflections.Reflections;
 
 import nl.knmi.adaguc.tools.Debug;
-import nl.knmi.adaguc.tools.Tools;
 import nl.knmi.adaguc.tools.MyXMLParser.XMLElement;
+import nl.knmi.adaguc.tools.Tools;
 
 
 /**

@@ -25,6 +25,23 @@ public class ADAGUCRequestMapper {
 		return converter;
 	}
 	@ResponseBody
+	@RequestMapping("wms")
+	public void ADAGUCSERVERWMS(HttpServletResponse response, HttpServletRequest request){
+
+		try {
+			ADAGUCServer.runADAGUCWMS(request,response,null,null);
+		} catch (Exception e) {
+			JSONResponse jsonResponse = new JSONResponse(request);
+			jsonResponse.setException("ADAGUCServer WMS request failed",e);
+			try {
+				jsonResponse.print(response);
+			} catch (Exception e1) {
+
+			}
+		}
+
+	}
+	@ResponseBody
 	@RequestMapping("adagucserver")
 	public void ADAGUCSERVER(HttpServletResponse response, HttpServletRequest request){
 
@@ -32,7 +49,24 @@ public class ADAGUCRequestMapper {
 			ADAGUCServer.runADAGUCWMS(request,response,null,null);
 		} catch (Exception e) {
 			JSONResponse jsonResponse = new JSONResponse(request);
-			jsonResponse.setException("ADAGUCServer request failed",e);
+			jsonResponse.setException("ADAGUCServer WMS request failed",e);
+			try {
+				jsonResponse.print(response);
+			} catch (Exception e1) {
+
+			}
+		}
+
+	}
+	@ResponseBody
+	@RequestMapping("wcs")
+	public void ADAGUCSERVERWCS(HttpServletResponse response, HttpServletRequest request){
+
+		try {
+			ADAGUCServer.runADAGUCWCS(request,response,null,null);
+		} catch (Exception e) {
+			JSONResponse jsonResponse = new JSONResponse(request);
+			jsonResponse.setException("ADAGUCServer WCS request failed",e);
 			try {
 				jsonResponse.print(response);
 			} catch (Exception e1) {

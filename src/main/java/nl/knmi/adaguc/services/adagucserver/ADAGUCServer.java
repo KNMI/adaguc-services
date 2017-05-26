@@ -12,8 +12,10 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import nl.knmi.adaguc.config.MainServicesConfigurator;
 import nl.knmi.adaguc.tools.CGIRunner;
 import nl.knmi.adaguc.tools.Debug;
+import nl.knmi.adaguc.tools.Tools;
 
 
 
@@ -41,10 +43,31 @@ public class ADAGUCServer extends HttpServlet{
    * @throws Exception
    */
   public static void runADAGUCWMS(HttpServletRequest request,HttpServletResponse response,String queryString,OutputStream outputStream) throws Exception{
+	  runADAGUC(request,response, queryString, outputStream, ADAGUCServiceType.WMS);
+  }
+  /**
+   * Runs the ADAGUC WCS server as executable on the system. 
+   * Emulates the behavior of scripts in a traditional cgi-bin directory of apache http server.
+   * @param request, the HttpServletRequest to obtain querystring parameters from.
+   * @param response Can be null, when given the content-type for the response will be set. 
+   * Results are not sent to this stream, this is done by outputStream parameter
+   * @param queryString The querystring for the CGI script
+   * @param outputStream A standard byte output stream in which the data of stdout is captured. 
+   * When null, it will be set to response.getOutputStream().
+   * @throws Exception
+   */
+  public static void runADAGUCWCS(HttpServletRequest request,HttpServletResponse response,String queryString,OutputStream outputStream) throws Exception{
+	  runADAGUC(request,response, queryString, outputStream, ADAGUCServiceType.WCS);
+  }
+  enum ADAGUCServiceType{
+	  WMS, WCS
+  }
+  public static void runADAGUC(HttpServletRequest request,HttpServletResponse response,String queryString,OutputStream outputStream, ADAGUCServiceType serviceType) throws Exception{
+  
     Debug.println("runADAGUCWMS");
     List<String> environmentVariables = new ArrayList<String>();
     String userHomeDir="/tmp/";
-    String homeURL="http://localhost/";
+    String homeURL=MainServicesConfigurator.getServerExternalURL();
     String adagucExecutableLocation = ADAGUCConfigurator.getADAGUCExecutable();
     Debug.println("adagucExecutableLocation: "+adagucExecutableLocation);
     
@@ -81,8 +104,15 @@ public class ADAGUCServer extends HttpServlet{
  
     environmentVariables.add("HOME="+userHomeDir);
     environmentVariables.add("QUERY_STRING="+queryString);
-    environmentVariables.add("ADAGUC_ONLINERESOURCE="+homeURL+"/adagucserver?");
-    environmentVariables.add("ADAGUC_TMP="+userHomeDir+"/tmp/");
+    if(serviceType == ADAGUCServiceType.WMS){
+    	environmentVariables.add("ADAGUC_ONLINERESOURCE="+homeURL+"/wms?");
+    }
+    if(serviceType == ADAGUCServiceType.WCS){
+    	environmentVariables.add("ADAGUC_ONLINERESOURCE="+homeURL+"/wcs?");
+    }
+    
+    Tools.mksubdirs("ADAGUC_TMP="+userHomeDir+"/adaguctmp/");
+    environmentVariables.add("ADAGUC_TMP="+userHomeDir+"/adaguctmp/");
     
     String[] configEnv = ADAGUCConfigurator.getADAGUCEnvironment();
     if(configEnv == null){

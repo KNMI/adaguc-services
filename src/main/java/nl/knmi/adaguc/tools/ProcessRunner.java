@@ -13,6 +13,7 @@ public class ProcessRunner{
 	public interface StatusPrinterInterface{
 		public void setError(String message);
 		public String getError();
+		public boolean hasData();
 		public void print(byte[] message,int bytesRead);
 	}
 	//This threads runs during the execution of the child program
@@ -58,95 +59,87 @@ public class ProcessRunner{
 		workingDirectory = _workingDirectory;
 	}
 
-	public int runProcess(String[] commands,String dataToPost) throws Exception{
+	public int runProcess(String[] commands,String dataToPost) throws InterruptedException, IOException {
 		InputStream brstdout;
 		InputStream brstderr;
 		// Execute the process
 		if(child != null){
-			throw new Exception("ProcesRunner is already running");
+			throw new RuntimeException("ProcesRunner is already running");
 		}
 
-		try {
-			String cmd = "";
-			for(int j=0;j<commands.length;j++){
-				cmd+=commands[j]+" ";
+
+		String cmd = "";
+		for(int j=0;j<commands.length;j++){
+			cmd+=commands[j]+" ";
+		}
+		Debug.println("Commands: "+cmd);
+		if(dataToPost!=null){
+			if(dataToPost.length()>0){
+				environmentVars = Tools.appendString(environmentVars, "CONTENT_LENGTH="+dataToPost.length());
+				environmentVars = Tools.appendString(environmentVars, "REQUEST_METHOD=POST");
+
+				//environmentVars = Tools.appendString(environmentVars, "QUERY_STRING=SERVICE=WPS&REQUEST=EXECUTE&VERSION=1.0.0&IDENTIFIER=testcdo_dtdp");
+
 			}
-			Debug.println("Commands: "+cmd);
-			if(dataToPost!=null){
-				if(dataToPost.length()>0){
-					environmentVars = Tools.appendString(environmentVars, "CONTENT_LENGTH="+dataToPost.length());
-					environmentVars = Tools.appendString(environmentVars, "REQUEST_METHOD=POST");
+		}
 
-					//environmentVars = Tools.appendString(environmentVars, "QUERY_STRING=SERVICE=WPS&REQUEST=EXECUTE&VERSION=1.0.0&IDENTIFIER=testcdo_dtdp");
-
-				}
-			}
-
-			/*for(int j=0;j<environmentVars.length;j++){
+		/*for(int j=0;j<environmentVars.length;j++){
           Debug.println(environmentVars[j]);
         }
-			 */
-			File workingDir = null;
-			if(workingDirectory != null){
-				workingDir = new File(workingDirectory);
-				if(workingDir.isDirectory() == false || workingDir.exists() == false){
-					workingDir = null;
-				}
+		 */
+		File workingDir = null;
+		if(workingDirectory != null){
+			workingDir = new File(workingDirectory);
+			if(workingDir.isDirectory() == false || workingDir.exists() == false){
+				workingDir = null;
 			}
-
-			if(workingDir!=null){
-				Debug.println("Using working directory "+workingDirectory);
-			}
-
-			child = Runtime.getRuntime().exec(commands,environmentVars,workingDir);
-
-			if(dataToPost!=null){
-				if(dataToPost.length()>0){
-					OutputStreamWriter wr = new OutputStreamWriter(child.getOutputStream());
-					wr.write(dataToPost);
-					wr.flush();
-					wr.close();
-					//DebugConsole.println("Putting postdata\n"+dataToPost);
-					PrintWriter stdin = new PrintWriter(child.getOutputStream());
-					stdin.print(dataToPost);
-
-					stdin.close();
-				}
-			}
-			brstdout = new BufferedInputStream( child.getInputStream() );
-			brstderr = new BufferedInputStream( child.getErrorStream() );
-			stdoutThread= new StatusPrinterThread(stdoutPrinter,brstdout);
-			stderrThread= new StatusPrinterThread(stderrPrinter,brstderr);
-			stdoutThread.start();
-			stderrThread.start();
-
-
-
-
-			//Wait for the process to complete
-			try {
-				child.waitFor();
-			}
-			catch (Exception e) {
-				throw new Exception("Exception in ProcessRunner while waiting on child: "+e.getMessage());
-			}
-
-			//Wait for the output monitoring threads to complete
-			stdoutThread.join();
-			stderrThread.join();
-			if (child != null) {
-				try{child.getOutputStream().close();}catch(Exception e){Debug.errprintln("Output stream was already closed");}
-				child.getInputStream().close();
-				child.getErrorStream().close();
-				child.destroy();
-			}
-
-			exitCode=child.exitValue();
-		} 
-		catch (IOException e) {
-			Debug.printStackTrace(e);
-			throw new Exception("Exception in ProcessRunner while executing child: "+e.getMessage());
 		}
+
+		if(workingDir!=null){
+			Debug.println("Using working directory "+workingDirectory);
+		}
+
+		child = Runtime.getRuntime().exec(commands,environmentVars,workingDir);
+
+		if(dataToPost!=null){
+			if(dataToPost.length()>0){
+				OutputStreamWriter wr = new OutputStreamWriter(child.getOutputStream());
+				wr.write(dataToPost);
+				wr.flush();
+				wr.close();
+				//DebugConsole.println("Putting postdata\n"+dataToPost);
+				PrintWriter stdin = new PrintWriter(child.getOutputStream());
+				stdin.print(dataToPost);
+
+				stdin.close();
+			}
+		}
+		brstdout = new BufferedInputStream( child.getInputStream() );
+		brstderr = new BufferedInputStream( child.getErrorStream() );
+		stdoutThread= new StatusPrinterThread(stdoutPrinter,brstdout);
+		stderrThread= new StatusPrinterThread(stderrPrinter,brstderr);
+		stdoutThread.start();
+		stderrThread.start();
+
+
+
+
+		//Wait for the process to complete
+		child.waitFor();
+
+		//Wait for the output monitoring threads to complete
+		stdoutThread.join();
+		stderrThread.join();
+		if (child != null) {
+			try{child.getOutputStream().close();}catch(Exception e){Debug.errprintln("Output stream was already closed");}
+			child.getInputStream().close();
+			child.getErrorStream().close();
+			child.destroy();
+		}
+
+		exitCode=child.exitValue();
+
+
 		return exitCode;
 	}
 	public int exitValue(){
