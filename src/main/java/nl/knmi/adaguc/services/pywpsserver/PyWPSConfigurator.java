@@ -3,6 +3,7 @@ package nl.knmi.adaguc.services.pywpsserver;
 import nl.knmi.adaguc.config.ConfigurationItemNotFoundException;
 import nl.knmi.adaguc.config.ConfigurationReader;
 import nl.knmi.adaguc.config.ConfiguratorInterface;
+import nl.knmi.adaguc.tools.Debug;
 import nl.knmi.adaguc.tools.MyXMLParser.XMLElement;
 
 /**
@@ -27,15 +28,19 @@ import nl.knmi.adaguc.tools.MyXMLParser.XMLElement;
 
 
 public class PyWPSConfigurator implements ConfiguratorInterface {
-	private static String PyWPSExecutable="/usr/bin/pywps";
-	private static String PyWPSConfigTemplate = "";
-	private static String PyWPSOutputDir = "/tmp/";	
+	private static String PyWPSExecutable=null;
+	private static String PyWPSConfigTemplate = null;
+	private static String PyWPSOutputDir = null;	
 	private static String PyWPSProcessesDir = null;
-	private static String TempDir = "/tmp/";
+	private static String TempDir = null;
 	private static String[] environmentVariables = {
 	};
 
 	public void doConfig(XMLElement  configReader) throws ConfigurationItemNotFoundException {
+		if(configReader.getNodeValue ("adaguc-services.pywps-server")==null){
+			Debug.println("adaguc-services.pywps-server is not configured");
+			return;
+		}
 		PyWPSExecutable      = configReader.getNodeValueMustNotBeUndefined ("adaguc-services.pywps-server.pywpsexecutable");
 		PyWPSConfigTemplate  = configReader.getNodeValueMustNotBeUndefined ("adaguc-services.pywps-server.pywpsconfigtemplate");
 		PyWPSOutputDir       = configReader.getNodeValueMustNotBeUndefined ("adaguc-services.pywps-server.pywpsoutputdir");

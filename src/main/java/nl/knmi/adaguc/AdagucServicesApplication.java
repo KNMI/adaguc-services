@@ -68,13 +68,13 @@ public class AdagucServicesApplication extends SpringBootServletInitializer{
 		}
 		Properties props = new Properties();
 
-		props.put("server.port", MainServicesConfigurator.getServerPort());
-		props.put("server.ssl.key-store", SecurityConfigurator.getKeyStore());
-		props.put("server.ssl.key-store-password", SecurityConfigurator.getKeyStorePassword());
-		props.put("server.ssl.keyStoreType",SecurityConfigurator.getKeyStoreType());
-		props.put("server.ssl.keyAlias", SecurityConfigurator.getKeyAlias());
-		props.put("server.ssl.trust-store", SecurityConfigurator.getTrustStore());
-		props.put("server.ssl.trust-store-password", SecurityConfigurator.getTrustStorePassword());
+		if(MainServicesConfigurator.getServerPort()!=null)props.put("server.port", MainServicesConfigurator.getServerPort());
+		if(SecurityConfigurator.getKeyStore()!=null)props.put("server.ssl.key-store", SecurityConfigurator.getKeyStore());
+		if( SecurityConfigurator.getKeyStorePassword()!=null)props.put("server.ssl.key-store-password", SecurityConfigurator.getKeyStorePassword());
+		if(SecurityConfigurator.getKeyStoreType()!=null)props.put("server.ssl.keyStoreType",SecurityConfigurator.getKeyStoreType());
+		if(SecurityConfigurator.getKeyAlias()!=null)props.put("server.ssl.keyAlias", SecurityConfigurator.getKeyAlias());
+		if(SecurityConfigurator.getTrustStore()!=null)props.put("server.ssl.trust-store", SecurityConfigurator.getTrustStore());
+		if(SecurityConfigurator.getTrustStorePassword()!=null)props.put("server.ssl.trust-store-password", SecurityConfigurator.getTrustStorePassword());
 		props.put("server.ssl.client-auth", "want");
 
 //		props.put("log4j.logger.httpclient.wire.header","WARN");
@@ -95,6 +95,9 @@ public class AdagucServicesApplication extends SpringBootServletInitializer{
 	
 	static void ConfigurePyWPS () throws ConfigurationItemNotFoundException, IOException{
 		String pyWPSConfigTemplate = PyWPSConfigurator.getPyWPSConfigTemplate();
+		if(pyWPSConfigTemplate == null){
+			return;
+		}
 		String tempDir = PyWPSConfigurator.getTempDir();
 		String pyWPSOutputDir = PyWPSConfigurator.getPyWPSOutputDir();
 		String homeURL=MainServicesConfigurator.getServerExternalURL();

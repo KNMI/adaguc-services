@@ -18,7 +18,7 @@ public class MainServicesConfigurator implements ConfiguratorInterface {
 	public void doConfig(XMLElement configReader) throws ConfigurationItemNotFoundException {
 		serverExternalURL = configReader.getNodeValueMustNotBeUndefined("adaguc-services.external-home-url");
 		userWorkspace = configReader.getNodeValueMustNotBeUndefined("adaguc-services.userworkspace");
-		serverPort = configReader.getNodeValueMustNotBeUndefined("adaguc-services.server.port");
+		serverPort = configReader.getNodeValue("adaguc-services.server.port");
 		baseDir = configReader.getNodeValueMustNotBeUndefined("adaguc-services.basedir");
 	}
 

@@ -2,6 +2,7 @@ package nl.knmi.adaguc.security;
 
 import nl.knmi.adaguc.config.ConfigurationItemNotFoundException;
 import nl.knmi.adaguc.config.ConfigurationReader;
+import nl.knmi.adaguc.tools.Debug;
 import nl.knmi.adaguc.tools.MyXMLParser.XMLElement;
 
 /**
@@ -28,6 +29,10 @@ public class SecurityConfigurator implements nl.knmi.adaguc.config.ConfiguratorI
 	private static String keyStoreType="JKS";
 	private static String keyAlias="tomcat";
 	public void doConfig(XMLElement  configReader){
+		if(configReader.getNodeValue ("adaguc-services.security")==null){
+			Debug.println("adaguc-services.security is not configured");
+			return;
+		}
 		trustStorePassword=configReader.getNodeValue("adaguc-services.security.truststorepassword");
 		trustStore=configReader.getNodeValue("adaguc-services.security.truststore");
 		trustRootsCADirectory=configReader.getNodeValue("adaguc-services.security.trustrootscadirectory");
