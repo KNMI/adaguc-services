@@ -113,7 +113,7 @@ public class JSONResponse {
 			error.put("error", string);
 			error.put("statuscode", this.statusCode);
 			//error.put("exception", e2.getMessage()); Disabled due to XSS issues
-			Debug.printStackTrace(e2);
+			// Debug.printStackTrace(e2);
 			
 			if(redirectURL!=null){error.put("redirect", this.redirectURL);}
 			if(this.userId!=null){error.put("userid", this.userId);}  

@@ -87,7 +87,7 @@ import nl.knmi.adaguc.tools.Tools;
 
 
 public class PemX509Tools {
-	
+
 	/**
 	 * 
 	 * @author maartenplieger
@@ -373,7 +373,7 @@ public class PemX509Tools {
 	 * Sets up a closable http client for two way SSL or client authentication
 	 * @param trustStoreLocation Location of the truststore file (.ts file)
 	 * @param trustStorePassword Password of the truststore
-	 * @param clientCertificate The client certificate in PEM format
+	 * @param clientCertificate The client certificate in PEM format, can be null
 	 * @return Closable httpclient to be used in get or post requests
 	 * @throws KeyManagementException
 	 * @throws UnrecoverableKeyException
@@ -392,7 +392,7 @@ public class PemX509Tools {
 			String clientCertificate
 			) throws KeyManagementException, UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException, CertificateException, IOException, InvalidKeyException, NoSuchProviderException, SignatureException, GSSException{
 		KeyStore trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
-		
+
 		/* Load the server JKS truststore */
 		FileInputStream trustStoreStream = new FileInputStream(new File(trustStoreLocation));
 		try {
@@ -405,13 +405,14 @@ public class PemX509Tools {
 		}
 		trustStoreStream.close();
 
-		/* Read the client auth certificates */
-		KeyPair clientPrivateCred = readPrivateKeyFromPEM(clientCertificate);
-		X509Certificate clientCert = readCertificateFromPEM(clientCertificate);
-		
-		trustStore.setKeyEntry("privateKeyAlias", clientPrivateCred.getPrivate(),
-				trustStorePassword, new Certificate[] { clientCert});
-		
+		if(clientCertificate!=null){
+			/* Read the client auth certificates */
+			KeyPair clientPrivateCred = readPrivateKeyFromPEM(clientCertificate);
+			X509Certificate clientCert = readCertificateFromPEM(clientCertificate);
+
+			trustStore.setKeyEntry("privateKeyAlias", clientPrivateCred.getPrivate(),
+					trustStorePassword, new Certificate[] { clientCert});
+		}
 		SSLContext sslContext =
 				new SSLContextBuilder()
 				.loadTrustMaterial(trustStore, new TrustSelfSignedStrategy())
