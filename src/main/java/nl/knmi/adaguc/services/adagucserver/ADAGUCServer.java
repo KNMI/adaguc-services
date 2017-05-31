@@ -13,6 +13,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import nl.knmi.adaguc.config.MainServicesConfigurator;
+import nl.knmi.adaguc.security.AuthenticatorFactory;
+import nl.knmi.adaguc.security.AuthenticatorInterface;
+import nl.knmi.adaguc.security.user.UserManager;
 import nl.knmi.adaguc.tools.CGIRunner;
 import nl.knmi.adaguc.tools.Debug;
 import nl.knmi.adaguc.tools.Tools;
@@ -67,6 +70,12 @@ public class ADAGUCServer extends HttpServlet{
     Debug.println("runADAGUCWMS");
     List<String> environmentVariables = new ArrayList<String>();
     String userHomeDir="/tmp/";
+    
+//    AuthenticatorInterface authenticator = AuthenticatorFactory.getAuthenticator(request);
+//	if(authenticator != null){
+//		userHomeDir = UserManager.getUser(authenticator).getHomeDir();
+//	}
+	
     String homeURL=MainServicesConfigurator.getServerExternalURL();
     String adagucExecutableLocation = ADAGUCConfigurator.getADAGUCExecutable();
     Debug.println("adagucExecutableLocation: "+adagucExecutableLocation);
@@ -111,7 +120,7 @@ public class ADAGUCServer extends HttpServlet{
     	environmentVariables.add("ADAGUC_ONLINERESOURCE="+homeURL+"/wcs?");
     }
     
-    Tools.mksubdirs("ADAGUC_TMP="+userHomeDir+"/adaguctmp/");
+    Tools.mksubdirs(userHomeDir+"/adaguctmp/");
     environmentVariables.add("ADAGUC_TMP="+userHomeDir+"/adaguctmp/");
     
     String[] configEnv = ADAGUCConfigurator.getADAGUCEnvironment();
