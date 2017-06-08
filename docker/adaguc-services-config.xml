@@ -2,6 +2,10 @@
 <adaguc-services>
   <userworkspace>{ENV.HOME}/adaguc-services-space</userworkspace>
 
+  <external-home-url>https://compute-test.c3s-magic.eu:9000</external-home-url>
+
+  <basedir>{ENV.HOME}/adaguc-services-base</basedir>
+
   <server>
     <port>9000</port>
   </server>
