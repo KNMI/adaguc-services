@@ -55,7 +55,7 @@ RUN tar xvf pywps-3.2.5.tar.gz
 # Install adaguc-services
 WORKDIR /src
 RUN mkdir adaguc-services
-COPY . /src/adaguc-services
+COPY . /src/adaguc-services/
 
 WORKDIR /src/adaguc-services
 RUN mvn package 
@@ -73,6 +73,18 @@ RUN mkdir /data/adaguc-autowms
 RUN mkdir /data/adaguc-datasets
 
 EXPOSE 8080
+
+
+# Install certificates
+RUN  mkdir -p /config/
+WORKDIR /config/
+# RUN curl -L https://raw.githubusercontent.com/ESGF/esgf-dist/master/installer/certs/esg_trusted_certificates.tar > esg_trusted_certificates.tar
+RUN curl -L https://raw.githubusercontent.com/ESGF/esgf-dist/master/installer/certs/esg-truststore.ts > esg-truststore.ts
+
+
+#RUN tar -xvf esg_trusted_certificates.tar
+#RUN mv esg_trusted_certificates certificates
+
 
 # Configure adaguc-services
 COPY ./docker/adaguc-services-config.xml /root/adaguc-services-config.xml 
@@ -95,11 +107,6 @@ CMD echo "Starting POSTGRESQL DB" && \
 
 # Build with docker build -t adagucservices:alpha .
 # docker run -it -p9000:8080 adagucservices:alpha bash
-
-
-# This docker container needs to be runned with custom configuration settings:  
-# docker network create --subnet=172.18.0.0/16 adagucnet
-# docker run -i -t --net adagucnet --ip 172.18.0.2 -v $HOME/data:/data openearth/adaguc-server
 
 # You can copy NetCDF's / GeoJSONS to your hosts ~/data directory. This will be served through adaguc-server, via the source=<filename> key value pair. testdata.nc is copied there by default. See example URL above.
 

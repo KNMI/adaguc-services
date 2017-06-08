@@ -12,7 +12,7 @@
 
   <security>
     <truststorepassword>changeit</truststorepassword>
-    <truststore>{ENV.HOME}/config/esg-truststore.ts</truststore>
+    <truststore>/config/esg-truststore.ts</truststore>
     <trustrootscadirectory>{ENV.HOME}/.globus/certificates/</trustrootscadirectory>
     <keystore>/keystore/c4i_keystore.jks</keystore>
     <keystorepassword>password</keystorepassword>
