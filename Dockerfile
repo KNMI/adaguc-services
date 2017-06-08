@@ -47,6 +47,10 @@ RUN tar xvf adaguc-server.tar.gz
 WORKDIR /src/adaguc-server-master
 RUN bash compile.sh
 
+# install pywps
+WORKDIR /src
+RUN curl -L -O https://github.com/geopython/pywps/archive/pywps-3.2.5.tar.gz
+RUN tar xvf pywps-3.2.5.tar.gz
 
 # Install adaguc-services
 WORKDIR /src
@@ -56,16 +60,8 @@ COPY . /src/adaguc-services
 WORKDIR /src/adaguc-services
 RUN mvn package 
 
-# Configure adaguc-services
-COPY ./docker/adaguc-services-config.xml /root/adaguc-services-config.xml 
-ENV ADAGUC_SERVICES_CONFIG=/root/adaguc-services-config.xml 
-
-RUN keytool -genkey -noprompt -keypass password -alias tomcat -keyalg RSA -storepass password -keystore /tmp/c4i_keystore.jks  -dname CN=compute-test.c3s-magic.eu/C=NL/O=C3SMAGIC/OU=KNMI 
-
-# install pywps
-WORKDIR /src
-RUN curl -L -O https://github.com/geopython/pywps/archive/pywps-3.2.5.tar.gz
-RUN tar xvf pywps-3.2.5.tar.gz
+RUN mkdir /keystore/
+RUN keytool -genkey -noprompt -keypass password -alias tomcat -keyalg RSA -storepass password -keystore /keystore/c4i_keystore.jks  -dname CN=compute-test.c3s-magic.eu/C=NL/O=C3SMAGIC/OU=KNMI 
 
 # Set up data dir, this is also configured in adaguc.docker.xml
 RUN mkdir /data/
@@ -78,6 +74,11 @@ RUN mkdir /data/adaguc-datasets
 
 EXPOSE 8080
 
+# Configure adaguc-services
+COPY ./docker/adaguc-services-config.xml /root/adaguc-services-config.xml 
+ENV ADAGUC_SERVICES_CONFIG=/root/adaguc-services-config.xml 
+
+WORKDIR /src/adaguc-services
 CMD echo "Starting POSTGRESQL DB" && \
     runuser -l postgres -c "pg_ctl -D /postgresql -l /var/log/postgresql.log start" && \
     sleep 1 && \ 
@@ -99,8 +100,6 @@ CMD echo "Starting POSTGRESQL DB" && \
 # This docker container needs to be runned with custom configuration settings:  
 # docker network create --subnet=172.18.0.0/16 adagucnet
 # docker run -i -t --net adagucnet --ip 172.18.0.2 -v $HOME/data:/data openearth/adaguc-server
-
-
 
 # You can copy NetCDF's / GeoJSONS to your hosts ~/data directory. This will be served through adaguc-server, via the source=<filename> key value pair. testdata.nc is copied there by default. See example URL above.
 
