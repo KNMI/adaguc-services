@@ -1,0 +1,9 @@
+
+postgres:
+  image: postgres
+  
+
+adaguc-services:
+  restart: always
+  build: .
+
