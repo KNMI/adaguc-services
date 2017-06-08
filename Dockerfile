@@ -69,16 +69,17 @@ WORKDIR /src
 
 RUN mkdir adaguc-services
 COPY . /src/adaguc-services
-#RUN tar xvf adaguc-services.tar.gz
+
+RUN tar xvf adaguc-services.tar.gz
 WORKDIR /src/adaguc-services-master
-RUN mvn jar
+RUN mvn package
 RUN cp ./target/adaguc-services-1.0.0-SNAPSHOT.war /usr/share/tomcat/webapps/adaguc-services.war
 
 RUN keytool -genkey -noprompt -keypass password -alias tomcat -keyalg RSA -storepass password -keystore /tmp/c4i_keystore.jks  -dname CN=compute-test.c3s-magic.eu/C=NL/O=C3SMAGIC/OU=KNMI 
 
 # Configure adaguc-services
 #RUN ... >  adaguc-services-config.xml
-COPY docker/adaguc-services-config.xml /root/adaguc-services-config.xml 
+COPY adaguc-services-config.xml /root/adaguc-services-config.xml 
 
 ENV ADAGUC_SERVICES_CONFIG=/root/adaguc-services-config.xml 
 
