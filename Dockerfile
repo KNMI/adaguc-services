@@ -54,15 +54,15 @@ COPY . /src/adaguc-services
 WORKDIR /src/adaguc-services
 RUN mvn package 
 
-# package as jar in the future.
-RUN java -jar ./target/adaguc-services-1.0.0-SNAPSHOT.war
-
-RUN keytool -genkey -noprompt -keypass password -alias tomcat -keyalg RSA -storepass password -keystore /tmp/c4i_keystore.jks  -dname CN=compute-test.c3s-magic.eu/C=NL/O=C3SMAGIC/OU=KNMI 
-
 # Configure adaguc-services
 COPY ./docker/adaguc-services-config.xml /root/adaguc-services-config.xml 
 
 ENV ADAGUC_SERVICES_CONFIG=/root/adaguc-services-config.xml 
+
+RUN keytool -genkey -noprompt -keypass password -alias tomcat -keyalg RSA -storepass password -keystore /tmp/c4i_keystore.jks  -dname CN=compute-test.c3s-magic.eu/C=NL/O=C3SMAGIC/OU=KNMI 
+
+# package as jar in the future.
+RUN java -jar ./target/adaguc-services-1.0.0-SNAPSHOT.war
 
 # Set up data dir, this is also configured in adaguc.docker.xml
 RUN mkdir /data/
