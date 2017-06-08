@@ -1,0 +1,46 @@
+
+  <userworkspace>{ENV.HOME}/adaguc-services-space</userworkspace>
+
+  <server>
+    <port>9000</port>
+  </server>
+
+  <security>
+    <truststorepassword>changeit</truststorepassword>
+    <truststore>{ENV.HOME}/config/esg-truststore.ts</truststore>
+    <trustrootscadirectory>{ENV.HOME}/.globus/certificates/</trustrootscadirectory>
+    <keystore>{ENV.HOME}/impactportal/c4i_keystore.jks</keystore>
+    <keystorepassword>password</keystorepassword>
+    <keystoretype>JKS</keystoretype>
+    <keyalias>tomcat</keyalias>
+  </security>
+
+  <adaguc-server>
+    <adagucexecutable>{ENV.HOME}/src/adaguc-server/bin/adagucserver</adagucexecutable>
+    <export>ADAGUC_PATH={ENV.HOME}/src/adaguc-server/</export>
+    <export>ADAGUC_CONFIG={ENV.HOME}/src/adaguc-server/data/config/adaguc.docker.xml</export>
+    <export>ADAGUC_DATARESTRICTION=FALSE</export>
+    <export>ADAGUC_LOGFILE={ENV.HOME}/adaguc-services-tmp/adaguc.autoresource.log</export>
+    <export>ADAGUC_FONT={ENV.HOME}/src/adaguc-server/data/fonts/FreeSans.ttf</export>
+  </adaguc-server>
+
+  <pywps-server>
+    <pywpsexecutable>{ENV.HOME}/src/pywps-pywps-3.2.5/wps.py</pywpsexecutable>
+    <pywpsconfigtemplate>{ENV.HOME}/impactportal/pywps.cfg</pywpsconfigtemplate>
+    <pywpsoutputdir>{ENV.HOME}/wpsoutputs</pywpsoutputdir>
+    <pywpsprocessesdir>{ENV.HOME}/wpsprocesses/impactwps</pywpsprocessesdir>
+    <tmp>{ENV.HOME}/adaguc-services-tmp</tmp>
+    <export>ADAGUC_CONFIG={ENV.HOME}/impactportal/adagucserver.xml</export>
+    <export>ADAGUC_PATH={ENV.HOME}/src/adagucserver/</export>
+    <export>ADAGUC_TMP={ENV.HOME}/adaguc-services-tmp/</export>
+    <export>ADAGUC_LOGFILE={ENV.HOME}/adaguc-services-tmp/adagucserver-wps.log</export>
+    <export>ADAGUC_DATARESTRICTION=FALSE</export>
+    <!--<export>PATH={ENV.HOME}/src/adagucserver/bin/:{ENV.HOME}/conda/bin/:{ENV.HOME}/conda/bin/:{ENV.HOME}/conda/bin/:{ENV.HOME}/bin:{ENV.HOME}/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin</export>-->
+    <!--<export>PATH=/home/c3smagic/code/KNMI/wps_prov/climexp:/home/c3smagic/code/KNMI/adagucserver/bin/:/home/c3smagic/conda/bin/:/home/c3smagic/conda/bin/:/home/c3smagic/conda/bin/:/home/c3smagic/bin:/home/c3smagic/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin</export>-->
+    <export>PATH=/home/c3smagic/code/maartenplieger/adaguc-server/bin/:{ENV.HOME}/conda/bin/:{ENV.HOME}/conda/bin/:{ENV.HOME}/conda/bin/:{ENV.HOME}/bin:{ENV.HOME}/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin</export>
+    <export>PYWPS_TEMPLATES={ENV.HOME}/src/pywps-pywps-3.2.5/pywps/Templates</export>
+    <export>PORTAL_OUTPUT_PATH={ENV.HOME}/wpsoutputs/</export>
+    <export>USE_FONTCONFIG=False</export>
+  </pywps-server>
+
+</adaguc-services>
