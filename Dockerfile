@@ -72,7 +72,7 @@ RUN mkdir /data/adaguc-autowms
 #Setup directory for visualization of ADAGUC datasets
 RUN mkdir /data/adaguc-datasets
 
-EXPOSE 8080
+EXPOSE 9000
 
 
 # Install certificates
