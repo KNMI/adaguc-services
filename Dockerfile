@@ -45,41 +45,22 @@ RUN tar xvf adaguc-server.tar.gz
 WORKDIR /src/adaguc-server-master
 RUN bash compile.sh
 
-# removeing...
-# Install adaguc-viewer
-# WORKDIR /usr/share/tomcat/webapps
-# RUN curl -L  https://github.com/KNMI/adaguc-viewer/archive/master.tar.gz > adaguc-viewer.tar.gz
-# RUN tar xvf adaguc-viewer.tar.gz
-# RUN mv adaguc-viewer-master adaguc-viewer
-
-# Configure adaguc-viewer
-#RUN printf "\n\
-#xml2jsonrequestURL = '/adaguc-services/xml2json?';\n\
-#autowmsURL = '/adaguc-services/autowms?';\n\
-#getFeatureInfoApplications.push({name:'AutoWMS',iconCls:'button_getfeatureinfo'});\n\
-#baseLayerConfiguration = [\n\
-#  {service:'http://172.18.0.2:8080/adaguc-services/adagucserver?',name:'baselayer',title:'Baselayer',enabled: true,format:'image/png'},\n\
-#  {service:'http://172.18.0.2:8080/adaguc-services/adagucserver?',name:'overlay',title:'Overlay',enabled: true,keepontop:true,format:'image/png'}\n\
-#];\n\
-#" >> adaguc-viewer/config.js
 
 # Install adaguc-services
 WORKDIR /src
-#RUN curl -L https://github.com/KNMI/adaguc-services/archive/master.tar.gz > adaguc-services.tar.gz
-
 RUN mkdir adaguc-services
 COPY . /src/adaguc-services
 
-RUN tar xvf adaguc-services.tar.gz
-WORKDIR /src/adaguc-services-master
-RUN mvn package
-RUN cp ./target/adaguc-services-1.0.0-SNAPSHOT.war /usr/share/tomcat/webapps/adaguc-services.war
+WORKDIR /src/adaguc-services
+RUN mvn package 
+
+# package as jar in the future.
+RUN java -jar ./target/adaguc-services-1.0.0-SNAPSHOT.war
 
 RUN keytool -genkey -noprompt -keypass password -alias tomcat -keyalg RSA -storepass password -keystore /tmp/c4i_keystore.jks  -dname CN=compute-test.c3s-magic.eu/C=NL/O=C3SMAGIC/OU=KNMI 
 
 # Configure adaguc-services
-#RUN ... >  adaguc-services-config.xml
-COPY adaguc-services-config.xml /root/adaguc-services-config.xml 
+COPY ./docker/adaguc-services-config.xml /root/adaguc-services-config.xml 
 
 ENV ADAGUC_SERVICES_CONFIG=/root/adaguc-services-config.xml 
 
