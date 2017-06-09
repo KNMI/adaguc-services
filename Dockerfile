@@ -61,7 +61,7 @@ WORKDIR /src/adaguc-services
 RUN mvn package 
 
 RUN mkdir /keystore/
-RUN keytool -genkey -noprompt -keypass password -alias tomcat -keyalg RSA -storepass password -keystore /keystore/c4i_keystore.jks  -dname CN=andrews-air-3.knmi.nl
+RUN keytool -genkey -noprompt -keypass password -alias tomcat -keyalg RSA -storepass password -keystore /keystore/c4i_keystore.jks  -dname CN=compute-test.c3s-magic.eu
 
 # Set up data dir, this is also configured in adaguc.docker.xml
 RUN mkdir /data/
