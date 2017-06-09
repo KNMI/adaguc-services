@@ -61,7 +61,7 @@ WORKDIR /src/adaguc-services
 RUN mvn package 
 
 RUN mkdir /keystore/
-RUN keytool -genkey -noprompt -keypass password -alias tomcat -keyalg RSA -storepass password -keystore /keystore/c4i_keystore.jks  -dname CN=compute-test.c3s-magic.eu/C=NL/O=C3SMAGIC/OU=KNMI 
+RUN keytool -genkey -noprompt -keypass password -alias tomcat -keyalg RSA -storepass password -keystore /keystore/c4i_keystore.jks  -dname CN=andrews-air-3.knmi.nl
 
 # Set up data dir, this is also configured in adaguc.docker.xml
 RUN mkdir /data/
@@ -71,6 +71,10 @@ RUN mkdir /data/adaguc-autowms
 
 #Setup directory for visualization of ADAGUC datasets
 RUN mkdir /data/adaguc-datasets
+
+RUN mkdir /data/adaguc-datasets-spaces/
+
+RUN mkdir /src/wpsoutputs
 
 EXPOSE 9000
 
