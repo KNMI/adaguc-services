@@ -75,6 +75,7 @@ RUN mkdir /data/adaguc-datasets
 RUN mkdir /data/adaguc-datasets-spaces/
 
 RUN mkdir /src/wpsoutputs
+RUN mkdir /src/adaguc-services-tmp/
 
 EXPOSE 9000
 
