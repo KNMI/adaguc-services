@@ -64,7 +64,8 @@ public class TokenManager {
 
 	public static synchronized void saveTokensToStore() throws IOException, ConfigurationItemNotFoundException{
 		if(tokenStoreIsLoaded == false){
-			throw new IOException("Trying to save a store which was not yet loaded");
+//			throw new IOException("Trying to save a store which was not yet loaded");
+			loadTokensFromStore();
 		}
 		ObjectMapper om=new ObjectMapper();
 		String tokenStoreStr = om.writeValueAsString(accesstokens);
