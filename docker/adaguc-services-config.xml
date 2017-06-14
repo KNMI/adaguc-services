@@ -2,7 +2,7 @@
 <adaguc-services>
   <userworkspace>/data/adaguc-services-space</userworkspace>
 
-  <external-home-url>https://andrews-air-3.knmi.nl:9000</external-home-url>
+  <external-home-url>https://compute-test.c3s-magic.eu:9000</external-home-url>
 
   <basedir>/src/adaguc-services-base</basedir>
 
