@@ -64,40 +64,8 @@ COPY pom.xml /src/adaguc-services/pom.xml
 WORKDIR /src/adaguc-services
 RUN mvn package
 
-
-RUN mkdir /keystore/
-RUN keytool -genkey -noprompt -keypass password -alias tomcat -keyalg RSA -storepass password -keystore /keystore/c4i_keystore.jks  -dname CN=compute-test.c3s-magic.eu
-
-# Set up data dir, this is also configured in adaguc.docker.xml
-RUN mkdir /data/
-
-#Setup directory for automatic visualization of NetCDF's
-RUN mkdir /data/adaguc-autowms
-
-#Setup directory for visualization of ADAGUC datasets
-RUN mkdir /data/adaguc-datasets
-
-RUN mkdir /data/adaguc-datasets-spaces/
-
-RUN mkdir /src/wpsoutputs
-RUN mkdir /src/adaguc-services-tmp/
-
-
-
-# Install certificates
-RUN  mkdir -p /config/
-WORKDIR /config/
-# RUN curl -L https://raw.githubusercontent.com/ESGF/esgf-dist/master/installer/certs/esg_trusted_certificates.tar > esg_trusted_certificates.tar
-RUN curl -L https://raw.githubusercontent.com/ESGF/esgf-dist/master/installer/certs/esg-truststore.ts > esg-truststore.ts
-
-
-#RUN tar -xvf esg_trusted_certificates.tar
-#RUN mv esg_trusted_certificates certificates
-
-
 # Configure adaguc-services
-COPY ./docker/adaguc-services-config.xml /root/adaguc-services-config.xml
-ENV ADAGUC_SERVICES_CONFIG=/root/adaguc-services-config.xml
+ENV ADAGUC_SERVICES_CONFIG=/config/adaguc-services-config.xml
 
 WORKDIR /src/adaguc-services
 CMD echo "Starting POSTGRESQL DB" && \
@@ -105,6 +73,9 @@ CMD echo "Starting POSTGRESQL DB" && \
     sleep 1 && \
     mkdir -p /data/adaguc-autowms/ && \
     mkdir -p /data/adaguc-datasets/ && \
+    mkdir -p /data/adaguc-datasets-spaces/ && \
+    mkdir -p /data/wpsoutputs/ && \
+    mkdir -p /data/adaguc-services-tmp/ && \
     cp /src/adaguc-server/data/datasets/testdata.nc /data/adaguc-autowms/ && \
     cp /src/adaguc-server/data/config/datasets/dataset_a.xml /data/adaguc-datasets/ && \
     echo "Configuring POSTGRESQL DB" && \
@@ -114,8 +85,7 @@ CMD echo "Starting POSTGRESQL DB" && \
     echo "Starting TOMCAT Server" && \
     java -jar ./target/adaguc-services-1.0.0-SNAPSHOT.war
 
-# Build with docker build -t adagucservices:alpha .
-# docker run -it -p9000:8080 adagucservices:alpha bash
+
 
 # You can copy NetCDF's / GeoJSONS to your hosts ~/data directory. This will be served through adaguc-server, via the source=<filename> key value pair. testdata.nc is copied there by default. See example URL above.
 

@@ -12,8 +12,8 @@ Following commands should be executed inside `config` directory which will be mo
 A certificate is needed for the secure (https) connectivity. This needs to then be put into a so-called keystore so tomcat can read the certificate. Simplest option is to generate a keystore with a self-signed certificate:
 
 ```sh
-    #host.name.com = machine you will be using to host the service. Should be a valid dns entry.
-    keytool -genkey -noprompt -keypass password -alias tomcat -keyalg RSA -storepass password -keystore keystore.jks -dname CN=host.domain.com
+    # example.com = machine you will be using to host the service. Should be a valid dns entry.
+    keytool -genkey -noprompt -keypass password -alias tomcat -keyalg RSA -storepass password -keystore keystore.jks -dname CN=example.com
 ```
 
 Alternatively, you can put an existing certificate in a keystore:
@@ -52,4 +52,13 @@ keytool -delete -alias adagucservicescert  -keystore esg-truststore.ts -storepas
 
 ### Server Config File
 
-ADAGUC-services has a single main config file. See docker/adaguc-services-config.xml for an example suitable for usage in a docker container. The `<external-home-url>` at the top of the file always needs to be changed to the machine running the service (and be equal to the hostname in the certificate, in the example above that would be `host.domain.com`).
+ADAGUC-services has a single main config file. See docker/adaguc-services-config.xml for an example suitable for usage in a docker container. The `<external-home-url>` at the top of the file always needs to be changed to the machine running the service (and be equal to the hostname in the certificate, in the example above that would be `example.com`).
+
+## Building and Running Docker container
+```sh
+docker build -t adagucservices .
+docker run -p9000:9000 -v $PWD/config:/config -v $PWD/data:/data adagucservices
+```
+
+You should be able to go with the web browser to `https://localhost:9000/wps`. You may get an authentication error.
+If you're using docker-machine check what ip address it runs on `docker machine ip <default>` and replace `localhost` with it.

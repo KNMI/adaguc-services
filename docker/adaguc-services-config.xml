@@ -2,7 +2,7 @@
 <adaguc-services>
   <userworkspace>/data/adaguc-services-space</userworkspace>
 
-  <external-home-url>https://compute-test.c3s-magic.eu:9000</external-home-url>
+  <external-home-url>https://example.com:9000</external-home-url>
 
   <basedir>/src/adaguc-services-base</basedir>
 
@@ -40,7 +40,7 @@
     <export>ADAGUC_TMP=/src/adaguc-services-tmp/</export>
     <export>ADAGUC_LOGFILE=/src/adaguc-services-tmp/adagucserver-wps.log</export>
     <export>ADAGUC_DATARESTRICTION=FALSE</export>
-		<export>PATH=/src/adaguc-server/bin/:{ENV.PATH}</export>
+        <export>PATH=/src/adaguc-server/bin/:{ENV.PATH}</export>
     <export>PYWPS_TEMPLATES=/src/pywps-pywps-3.2.5/pywps/Templates</export>
     <export>PORTAL_OUTPUT_PATH=/data/wpsoutputs/</export>
     <export>USE_FONTCONFIG=False</export>
