@@ -48,4 +48,9 @@
     <export>PORTAL_OUTPUT_PATH={ENV.ADAGUCSERVICES_DIR}/src/wpsoutputs/</export>
     <export>USE_FONTCONFIG=False</export>
   </pywps-server>
+
+  <basket>
+    <enabled>true</enabled>
+  </basket>
+  
 </adaguc-services>
