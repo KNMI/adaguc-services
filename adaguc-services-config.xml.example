@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<adaguc-services>
+  <!-- Set the environment variable ADAGUCSERVICES_DIR to the top of the folder structure (adagucservices_dir)
+  <userworkspace>{ENV.ADAGUCSERVICES_DIR}/data/adaguc-services-space</userworkspace>
+
+  <external-home-url>https://bhw451.knmi.nl:8090</external-home-url>
+
+  <basedir>{ENV.ADAGUCSERVICES_DIR}/data/adaguc-services-base</basedir>
+
+  <server>
+    <port>8090</port>
+  </server>
+
+  <security>
+    <truststorepassword>changeit</truststorepassword>
+    <truststore>{ENV.ADAGUCSERVICES_DIR}/config/ds-truststore.ts</truststore>
+    <trustrootscadirectory>{ENV.ADAGUCSERVICES_DIR}/src/.globus/certificates/</trustrootscadirectory>
+    <keystore>{ENV.ADAGUCSERVICES_DIR}/keystore/c4i_keystore.jks</keystore>
+    <keystorepassword>password</keystorepassword>
+    <keystoretype>JKS</keystoretype>
+    <keyalias>tomcat</keyalias>
+  </security>
+
+  <adaguc-server>
+    <adagucexecutable>{ENV.ADAGUCSERVICES_DIR}/src/adaguc-server/bin/adagucserver</adagucexecutable>
+    <export>ADAGUC_PATH={ENV.ADAGUCSERVICES_DIR}/src/adaguc-server/</export>
+    <export>ADAGUC_CONFIG={ENV.ADAGUCSERVICES_DIR}/src/adaguc-server/data/config/adaguc.docker.xml</export>
+    <export>ADAGUC_DATARESTRICTION=FALSE</export>
+    <export>ADAGUC_LOGFILE={ENV.ADAGUCSERVICES_DIR}/adaguc-services-tmp/adaguc.autoresource.log</export>
+    <export>ADAGUC_FONT={ENV.ADAGUCSERVICES_DIR}/src/adaguc-server/data/fonts/FreeSans.ttf</export>
+  </adaguc-server>
+
+  <pywps-server>
+    <pywpsexecutable>{ENV.ADAGUCSERVICES_DIR}/src/pywps-pywps-3.2.5/wps.py</pywpsexecutable>
+    <pywpsconfigtemplate>{ENV.ADAGUCSERVICES_DIR}/src/pywps-pywps-3.2.5/pywps/default.cfg</pywpsconfigtemplate>
+    <pywpsoutputdir>{ENV.ADAGUCSERVICES_DIR}/src/wpsoutputs</pywpsoutputdir>
+    <pywpsprocessesdir>{ENV.ADAGUCSERVICES_DIR}/src/pywps-pywps-3.2.5/pywps/processes/</pywpsprocessesdir>
+    <tmp>{ENV.ADAGUCSERVICES_DIR}/src/adaguc-services-tmp</tmp>
+    <export>ADAGUC_CONFIG={ENV.ADAGUCSERVICES_DIR}/src/adaguc-server/adagucserver.xml</export>
+    <export>ADAGUC_PATH={ENV.ADAGUCSERVICES_DIR}/src/adagucserver/</export>
+    <export>ADAGUC_TMP={ENV.ADAGUCSERVICES_DIR}/src/adaguc-services-tmp/</export>
+    <export>ADAGUC_LOGFILE={ENV.ADAGUCSERVICES_DIR}/src/adaguc-services-tmp/adagucserver-wps.log</export>
+    <export>ADAGUC_DATARESTRICTION=FALSE</export>
+    <!--<export>PATH=/src/src/adagucserver/bin/:/src/conda/bin/:/src/conda/bin/:/src/conda/bin/:/src/bin:/src/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin</export>-->
+    <!--<export>PATH=/home/c3smagic/code/KNMI/wps_prov/climexp:/home/c3smagic/code/KNMI/adagucserver/bin/:/home/c3smagic/conda/bin/:/home/c3smagic/conda/bin/:/home/c3smagic/conda/bin/:/home/c3smagic/bin:/home/c3smagic/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin</export>-->
+    <export>PATH={ENV.ADAGUCSERVICES_DIR}/src/adaguc-server/bin/:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin</export>
+    <export>PYWPS_TEMPLATES={ENV.ADAGUCSERVICES_DIR}/src/pywps-pywps-3.2.5/pywps/Templates</export>
+    <export>PORTAL_OUTPUT_PATH={ENV.ADAGUCSERVICES_DIR}/src/wpsoutputs/</export>
+    <export>USE_FONTCONFIG=False</export>
+  </pywps-server>
+</adaguc-services>

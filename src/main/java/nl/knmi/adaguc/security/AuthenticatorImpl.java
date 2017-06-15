@@ -11,6 +11,7 @@ import nl.knmi.adaguc.security.PemX509Tools.X509Info;
 import nl.knmi.adaguc.security.token.Token;
 import nl.knmi.adaguc.security.token.TokenManager;
 import nl.knmi.adaguc.tools.Debug;
+import nl.knmi.adaguc.tools.HTTPTools;
 
 public class AuthenticatorImpl implements AuthenticatorInterface{
 
@@ -34,6 +35,16 @@ public class AuthenticatorImpl implements AuthenticatorInterface{
 			String path = request.getServletPath();
 			
 		    String tokenStr = new TokenManager().getTokenFromPath(path);
+		    
+		    if(tokenStr == null){
+			    try {
+					tokenStr = HTTPTools.getHTTPParam(request, "key");
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+		    }
+		    
 		    if(tokenStr!=null){
 			    Token token = null;
 				try {
@@ -52,6 +63,7 @@ public class AuthenticatorImpl implements AuthenticatorInterface{
 				Debug.println("not found");
 			}
 			
+
 			
 		}
 
