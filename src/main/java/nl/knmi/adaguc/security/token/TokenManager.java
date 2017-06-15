@@ -10,6 +10,8 @@ import java.util.regex.Pattern;
 
 import org.springframework.security.core.AuthenticationException;
 
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.MapType;
 import com.fasterxml.jackson.databind.type.TypeFactory;
@@ -74,16 +76,36 @@ public class TokenManager {
 		Tools.writeFile(tokenStoreDir+"/tokenstore.json", tokenStoreStr);
 	}
 	
-	public static synchronized void loadTokensFromStore()  throws IOException, ConfigurationItemNotFoundException{
+	public static synchronized void loadTokensFromStore()  throws  ConfigurationItemNotFoundException{
 		if(LazyCaller.getInstance().isCallable("tokenstore", 1000) == false){
 			return;
 		};
 		tokenStoreIsLoaded = true;
-		String tokenStoreStr = Tools.readFile(MainServicesConfigurator.getBaseDir()+"/tokenstore/tokenstore.json");
+		
+		String tokenStoreStr = null;
+		try {
+			Tools.mksubdirs(MainServicesConfigurator.getBaseDir()+"/tokenstore/");
+			tokenStoreStr = Tools.readFile(MainServicesConfigurator.getBaseDir()+"/tokenstore/tokenstore.json");
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return;
+		}
 		ObjectMapper om=new ObjectMapper();
 		TypeFactory factory = TypeFactory.defaultInstance();
 		MapType type    = factory.constructMapType(ConcurrentHashMap.class, String.class, Token.class);
-		accesstokens = om.readValue(tokenStoreStr, type );
+		try {
+			accesstokens = om.readValue(tokenStoreStr, type );
+		} catch (JsonParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (JsonMappingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		Debug.println("Loaded tokenstore: there are " + accesstokens.size() +" tokens.");		
 	}
 	
