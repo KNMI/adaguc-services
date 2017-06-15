@@ -14,9 +14,11 @@ public class Basket {
 	private String userDir;
 	private String name;
 	private BasketNode rootNode;
+	private String token;
 
-	public Basket(String dir, String name) {
+	public Basket(String dir, String name, String token) {
 		this.userDir=dir;
+		this.token=token;
 		if (!this.userDir.endsWith("/")){
 			this.userDir+="/";
 		}
@@ -45,8 +47,12 @@ public class Basket {
 				String cleanPath=fullPath.replace(this.userDir,  "");
 				File f=new File(fullPath);
 				String id=this.name+"/"+cleanPath;
-				String dapUrl=externalURL+"/opendap/"+this.name+"/"+cleanPath;
-				String httpUrl=externalURL+"/opendap/"+this.name+"/"+cleanPath;
+				String tokenPart="";
+				if (token!=null) {
+					tokenPart=token+"/";
+				}
+				String dapUrl=externalURL+"/opendap/"+tokenPart+this.name+"/"+cleanPath;
+				String httpUrl=externalURL+"/opendap/"+tokenPart+this.name+"/"+cleanPath;
 				if (f.isFile()) {
 					BasketNode newBasketNode=new BasketNode(fn,  "leaf", id, dapUrl, httpUrl);
 					newBasketNode.setSize(f.length());
@@ -64,7 +70,7 @@ public class Basket {
 
 
 	public static void main(String[]argv) {
-		Basket b=new Basket("/nobackup/users/vreedede/testimpactspace", "testBasket");
+		Basket b=new Basket("/nobackup/users/vreedede/testimpactspace", "testBasket", null);
 		try {
 			System.err.println(b.listFiles());
 		} catch (ConfigurationItemNotFoundException e) {

@@ -23,6 +23,7 @@ import com.fasterxml.jackson.datatype.jsr310.JSR310Module;
 import nl.knmi.adaguc.security.AuthenticatorFactory;
 import nl.knmi.adaguc.security.AuthenticatorInterface;
 import nl.knmi.adaguc.security.user.UserManager;
+import nl.knmi.adaguc.tools.HTTPTools;
 import nl.knmi.adaguc.tools.JSONResponse;
 
 @RestController
@@ -50,12 +51,20 @@ public class BasketRequestMapper {
 				jsonResponse.setMessage(new JSONObject().put("error","ADAGUC basket is not enabled"));
 			}else{
 				System.err.println("getoverview");
+				String tokenStr=null;
+				try {
+					tokenStr = HTTPTools.getHTTPParam(request, "key");
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				
 				AuthenticatorInterface authenticator = AuthenticatorFactory.getAuthenticator(request);
 
 				String userDataDir = UserManager.getUser(authenticator).getDataDir();
 				String user=UserManager.getUser(authenticator).getUserId();
 				//					Basket basket=new Basket("/nobackup/users/vreedede/testimpactspace/data", "ernst");
-				Basket basket=new Basket(userDataDir, user);
+				Basket basket=new Basket(userDataDir, user, tokenStr);
 				jsonResponse.setMessage(om.writeValueAsString(basket.getRootNode()));
 			}
 		} catch (Exception e) {
@@ -168,7 +177,7 @@ public class BasketRequestMapper {
 		}
 		return sb.toString();
 	}
-	
+
 	@ResponseBody
 	@RequestMapping("/remove")
 	public void removeFromBasket(HttpServletResponse response, HttpServletRequest request, @RequestParam("path") String path) throws IOException{
@@ -195,7 +204,7 @@ public class BasketRequestMapper {
 						jsonResponse.setErrorMessage("path not found", 200);
 					}
 				} else {
-				  jsonResponse.setErrorMessage("path parameter missing", 200);
+					jsonResponse.setErrorMessage("path parameter missing", 200);
 				}
 			}
 		} catch (Exception e) {
