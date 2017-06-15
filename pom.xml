@@ -16,7 +16,7 @@
 		<artifactId>spring-boot-starter-parent</artifactId>
 		<version>1.5.2.BUILD-SNAPSHOT</version>
 		<relativePath /> <!-- lookup parent from repository -->
-		
+
 	</parent>
 
 	<properties>
@@ -28,28 +28,28 @@
 	</properties>
 
 	<dependencies>
-	<dependency>
-  <groupId>org.springframework.boot</groupId>
-  <artifactId>spring-boot-starter</artifactId>
-  <exclusions>
-    <exclusion>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-logging</artifactId>
-    </exclusion>
-  </exclusions>
-</dependency>
-	
-	<dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>org.springframework.boot</groupId>
+					<artifactId>spring-boot-starter-logging</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+
+		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
 			<exclusions>
-    			<exclusion>
-      				<groupId>org.springframework.boot</groupId>
-      				<artifactId>spring-boot-starter-logging</artifactId>
-    			</exclusion>
-  			</exclusions>
-			
-	</dependency>
+				<exclusion>
+					<groupId>org.springframework.boot</groupId>
+					<artifactId>spring-boot-starter-logging</artifactId>
+				</exclusion>
+			</exclusions>
+
+		</dependency>
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
@@ -59,11 +59,11 @@
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
 			<exclusions>
-    <exclusion>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-logging</artifactId>
-    </exclusion>
-  </exclusions>
+				<exclusion>
+					<groupId>org.springframework.boot</groupId>
+					<artifactId>spring-boot-starter-logging</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -73,6 +73,11 @@
 		<dependency>
 			<groupId>org.json</groupId>
 			<artifactId>json</artifactId>
+		</dependency>
+		<dependency>
+	    	<groupId>com.fasterxml.jackson.datatype</groupId>
+ 	    	<artifactId>jackson-datatype-jsr310</artifactId>
+	    	<version>2.4.0</version>
 		</dependency>
 		<dependency>
 			<groupId>de.grundid.opendatalab</groupId>
@@ -95,11 +100,11 @@
 			<artifactId>spring-boot-starter-tomcat</artifactId>
 			<scope>provided</scope>
 			<exclusions>
-    <exclusion>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-logging</artifactId>
-    </exclusion>
-  </exclusions>
+				<exclusion>
+					<groupId>org.springframework.boot</groupId>
+					<artifactId>spring-boot-starter-logging</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 
 
@@ -128,12 +133,12 @@
 			<version>1.56</version>
 		</dependency>
 
-<!-- https://mvnrepository.com/artifact/org.apache.httpcomponents/httpclient -->
-<dependency>
-    <groupId>org.apache.httpcomponents</groupId>
-    <artifactId>httpclient</artifactId>
-    <version>4.5.2</version>
-</dependency>
+		<!-- https://mvnrepository.com/artifact/org.apache.httpcomponents/httpclient -->
+		<dependency>
+			<groupId>org.apache.httpcomponents</groupId>
+			<artifactId>httpclient</artifactId>
+			<version>4.5.2</version>
+		</dependency>
 
 		<!-- https://mvnrepository.com/artifact/log4j/log4j -->
 		<!-- <dependency> <groupId>log4j</groupId> <artifactId>log4j</artifactId> 
@@ -146,25 +151,10 @@
 			<version>4.5.5</version>
 		</dependency>
 		<!-- https://mvnrepository.com/artifact/edu.ucar/netcdf -->
-		<!--  <dependency>
-			<groupId>edu.ucar</groupId>
-			<artifactId>netcdf</artifactId>
-			<version>4.2</version>
-			
-			<exclusions>
- <exclusion> 
-        <groupId>log4j</groupId>
-        <artifactId>log4j</artifactId>
-      </exclusion>
-				<exclusion>
-					<groupId>org.slf4j</groupId>
-					<artifactId>slf4j-jdk14</artifactId>
-				</exclusion>
-
-			</exclusions>
-		</dependency>
-
--->
+		<!-- <dependency> <groupId>edu.ucar</groupId> <artifactId>netcdf</artifactId> 
+			<version>4.2</version> <exclusions> <exclusion> <groupId>log4j</groupId> 
+			<artifactId>log4j</artifactId> </exclusion> <exclusion> <groupId>org.slf4j</groupId> 
+			<artifactId>slf4j-jdk14</artifactId> </exclusion> </exclusions> </dependency> -->
 		<!-- https://mvnrepository.com/artifact/org.jglobus/gss -->
 		<!-- <dependency> <groupId>org.jglobus</groupId> <artifactId>gss</artifactId> 
 			<version>2.1.0</version> </dependency> -->

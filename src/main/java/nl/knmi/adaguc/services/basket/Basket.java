@@ -1,6 +1,9 @@
 package nl.knmi.adaguc.services.basket;
 
 import java.io.File;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 
 import lombok.Getter;
 import nl.knmi.adaguc.config.ConfigurationItemNotFoundException;
@@ -47,9 +50,11 @@ public class Basket {
 				if (f.isFile()) {
 					BasketNode newBasketNode=new BasketNode(fn,  "leaf", id, dapUrl, httpUrl);
 					newBasketNode.setSize(f.length());
+					newBasketNode.setDate(LocalDateTime.ofInstant(Instant.ofEpochMilli(f.lastModified()), ZoneId.of("UTC")));
 					bn.addChild(newBasketNode);
 				} else if (f.isDirectory()) {
 					BasketNode dirNode=new BasketNode(fn, "node", id, null, null);
+					dirNode.setDate(LocalDateTime.ofInstant(Instant.ofEpochMilli(f.lastModified()), ZoneId.of("UTC")));
 					bn.addChild(listFiles(dirNode, dir+fn+"/"));
 				}
 			}

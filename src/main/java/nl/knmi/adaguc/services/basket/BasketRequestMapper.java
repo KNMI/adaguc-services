@@ -18,6 +18,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JSR310Module;
 
 import nl.knmi.adaguc.security.AuthenticatorFactory;
 import nl.knmi.adaguc.security.AuthenticatorInterface;
@@ -41,6 +42,8 @@ public class BasketRequestMapper {
 	public void listBasket(HttpServletResponse response, HttpServletRequest request) throws IOException{
 		JSONResponse jsonResponse = new JSONResponse(request);
 		ObjectMapper om=new ObjectMapper();
+		om.registerModule(new JSR310Module());
+		om.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 		try {
 			boolean enabled = BasketConfigurator.getEnabled();
 			if(!enabled){
