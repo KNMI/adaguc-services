@@ -55,8 +55,6 @@ public class BasketRequestMapper {
 				try {
 					tokenStr = HTTPTools.getHTTPParam(request, "key");
 				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
 				}
 				
 				AuthenticatorInterface authenticator = AuthenticatorFactory.getAuthenticator(request);
