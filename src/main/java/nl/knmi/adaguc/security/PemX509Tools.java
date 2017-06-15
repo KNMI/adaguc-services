@@ -150,6 +150,7 @@ public class PemX509Tools {
 		if (null != certs && certs.length > 0) {
 			return getUserIdFromCertificate(certs[0]);
 		}
+		Debug.println("No user cert found");
 		return null;
 	}
 
