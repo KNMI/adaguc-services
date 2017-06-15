@@ -89,7 +89,30 @@ public class HTTPTools {
 		paramValue = validateInputTokens(paramValue);
 		return paramValue;
 	}
+	/**
+	 * Returns a list of values of a key, but does checking on valid tokens for XSS attacks and decodes the URL.
+	 * @param request The HTTPServlet containing the KVP's
+	 * @param name Name of the key
+	 * @return The values of the key in a String array
+	 * @throws Exception (UnsupportedEncoding and InvalidHTTPKeyValueTokensException)
+	 */
+	public static String[] getHTTPParamList(HttpServletRequest request, String name)
+			throws Exception {
 
+		StringBuffer url=request.getRequestURL();
+		String queryString = request.getQueryString();
+		if (queryString!=null) {
+			url.append('?').append(queryString);
+		}
+		List <String>values=getKVPList(url.toString(), name);
+		
+		if (values.size()==0){
+			throw new Exception("UnableFindParam " + name);
+		}
+
+		return values.toArray(new String[0]);
+	}
+	
 	/**
 	   * Get values for a multiple keys with the same name in a URL, 
 	   * e.g. ?variable=psl&variable=tas means: key="variable" value="psl,tas" (as list) 
