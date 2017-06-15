@@ -62,10 +62,44 @@ public class BasketRequestMapper {
 	}
 
 	@ResponseBody
+	@RequestMapping(value="/mkdir")
+	public void uploadBasket(HttpServletResponse response, HttpServletRequest request, @RequestParam("path")String path) throws IOException{
+		JSONResponse jsonResponse = new JSONResponse(request);
+		try {
+			boolean enabled = BasketConfigurator.getEnabled();
+			if(!enabled){
+				jsonResponse.setMessage(new JSONObject().put("error","ADAGUC basket is not enabled"));
+			}else{
+				System.err.println("uploadToBasket");
+				if (path!=null) {
+					String cleanPath=cleanPathName(path);
+					AuthenticatorInterface authenticator = AuthenticatorFactory.getAuthenticator(request);
+					String userDataDir = UserManager.getUser(authenticator).getDataDir();
+					String destPath=userDataDir;
+					destPath+="/"+cleanPath;
+					File testDir=new File(destPath);
+					if (!testDir.isDirectory()) {
+						if (!testDir.mkdirs()) {
+							System.err.println("mkdirs("+testDir+") failed");
+							jsonResponse.setMessage(new JSONObject().put("error", "mkdir failed"));
+
+						}
+						jsonResponse.setMessage(new JSONObject().put("status", "OK"));
+					} else {
+						jsonResponse.setMessage(new JSONObject().put("error", "directory already exists"));
+					}
+				}
+			}
+		} catch (Exception e) {
+			jsonResponse.setException("error: "+e.getMessage(), e);
+		}
+		jsonResponse.print(response);
+	}
+
+	@ResponseBody
 	@RequestMapping(value="/upload", method=RequestMethod.POST)
 	public void uploadBasket(HttpServletResponse response, HttpServletRequest request, @RequestParam(value="files")MultipartFile[] uploadFiles, @RequestParam(value="path", required=false)String path) throws IOException{
 		JSONResponse jsonResponse = new JSONResponse(request);
-		ObjectMapper om=new ObjectMapper();
 		try {
 			boolean enabled = BasketConfigurator.getEnabled();
 			if(!enabled){
@@ -74,14 +108,14 @@ public class BasketRequestMapper {
 				System.err.println("uploadToBasket");
 				AuthenticatorInterface authenticator = AuthenticatorFactory.getAuthenticator(request);
 				String userDataDir = UserManager.getUser(authenticator).getDataDir();
-				int fileCnt=0;
+				String cleanPath=cleanPathName(path);
 				for (MultipartFile mpf: uploadFiles) {
 					String fn=mpf.getOriginalFilename();
-//					fn=mpf.getName();
+					//					fn=mpf.getName();
 					if ((fn!=null)&&(fn.length()>0)){
 						System.err.println("uploading:"+fn);
 						String destPath=userDataDir;
-						if (path!=null) {
+						if (cleanPath!=null) {
 							destPath+="/"+path;
 							File testDir=new File(destPath);
 							if (!testDir.isDirectory()) {
@@ -102,22 +136,68 @@ public class BasketRequestMapper {
 		jsonResponse.print(response);
 	}
 
+	private void deleteDir(File file) {
+		File[] contents = file.listFiles();
+		if (contents != null) {
+			for (File f : contents) {
+				deleteDir(f);
+			}
+		}
+		file.delete();
+	}
+
+	// cleanPathName: cleans pathname from . and .. and leading /
+	private String cleanPathName(String fn) {
+		if (fn==null) {
+			return null;
+		}
+		String[]terms=fn.split("/");
+		StringBuilder sb=new StringBuilder();
+		for (String t: terms) {
+			if (t.equals(".")||t.equals("..")||(t.trim().length()==0)) {
+				//skip
+			} else {
+				if (sb.length()>0){
+					sb.append("/");
+				}
+				sb.append(t);
+			}
+		}
+		return sb.toString();
+	}
+	
 	@ResponseBody
 	@RequestMapping("/remove")
-	public void removeFromBasket(HttpServletResponse response, HttpServletRequest request) throws IOException{
+	public void removeFromBasket(HttpServletResponse response, HttpServletRequest request, @RequestParam("path") String path) throws IOException{
 		JSONResponse jsonResponse = new JSONResponse(request);
-		ObjectMapper om=new ObjectMapper();
 		try {
 			boolean enabled = BasketConfigurator.getEnabled();
 			if(!enabled){
 				jsonResponse.setMessage(new JSONObject().put("error","ADAGUC basket is not enabled"));
 			}else{
 				System.err.println("removeFromBasket()");
+				if (path!=null) {
+					AuthenticatorInterface authenticator = AuthenticatorFactory.getAuthenticator(request);
+					String userDataDir = UserManager.getUser(authenticator).getDataDir();
+					String cleanPath=cleanPathName(path);
+					File f=new File(userDataDir+"/"+cleanPath);
+					System.err.println("removing:"+ f.getPath());
+					if (f.isDirectory()){
+						deleteDir(f);
+						jsonResponse.setMessage(new JSONObject().put("message", "dir deleted"));
+					}else if (f.isFile()) {
+						jsonResponse.setMessage(new JSONObject().put("message", "file deleted"));
+						f.delete();
+					}else {
+						jsonResponse.setErrorMessage("path not found", 200);
+					}
+				} else {
+				  jsonResponse.setErrorMessage("path parameter missing", 200);
+				}
 			}
 		} catch (Exception e) {
 			jsonResponse.setException("error: "+e.getMessage(), e);
 		}
 		jsonResponse.print(response);
 	}
-
 }
