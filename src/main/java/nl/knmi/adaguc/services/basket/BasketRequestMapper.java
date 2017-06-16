@@ -80,7 +80,7 @@ public class BasketRequestMapper {
 			if(!enabled){
 				jsonResponse.setMessage(new JSONObject().put("error","ADAGUC basket is not enabled"));
 			}else{
-				System.err.println("uploadToBasket");
+				System.err.println("mkdir");
 				if (path!=null) {
 					String cleanPath=cleanPathName(path);
 					AuthenticatorInterface authenticator = AuthenticatorFactory.getAuthenticator(request);
@@ -110,6 +110,7 @@ public class BasketRequestMapper {
 	@RequestMapping(value="/upload", method=RequestMethod.POST)
 	public void uploadBasket(HttpServletResponse response, HttpServletRequest request, @RequestParam(value="files")MultipartFile[] uploadFiles, @RequestParam(value="path", required=false)String path) throws IOException{
 		JSONResponse jsonResponse = new JSONResponse(request);
+		int fileCnt=0;
 		try {
 			boolean enabled = BasketConfigurator.getEnabled();
 			if(!enabled){
@@ -137,8 +138,10 @@ public class BasketRequestMapper {
 						destPath+="/"+fn;
 						File dest=new File(destPath);
 						mpf.transferTo(dest);
+						fileCnt++;
 					}
 				}
+				jsonResponse.setMessage(new JSONObject().put("status", fileCnt+" files uploaded"));
 			}
 		} catch (Exception e) {
 			jsonResponse.setException("error: "+e.getMessage(), e);
