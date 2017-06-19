@@ -9,6 +9,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.json.JSONObject;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -23,11 +24,13 @@ import com.fasterxml.jackson.datatype.jsr310.JSR310Module;
 import nl.knmi.adaguc.security.AuthenticatorFactory;
 import nl.knmi.adaguc.security.AuthenticatorInterface;
 import nl.knmi.adaguc.security.user.UserManager;
+import nl.knmi.adaguc.tools.Debug;
 import nl.knmi.adaguc.tools.HTTPTools;
 import nl.knmi.adaguc.tools.JSONResponse;
 
 @RestController
 @RequestMapping("basket")
+@CrossOrigin
 public class BasketRequestMapper {
 	@Bean
 	public MappingJackson2HttpMessageConverter mappingJackson2HttpMessageConverter() {
@@ -50,7 +53,7 @@ public class BasketRequestMapper {
 			if(!enabled){
 				jsonResponse.setMessage(new JSONObject().put("error","ADAGUC basket is not enabled"));
 			}else{
-				System.err.println("getoverview");
+				Debug.println("getoverview");
 				String tokenStr=null;
 				try {
 					tokenStr = HTTPTools.getHTTPParam(request, "key");
@@ -80,7 +83,7 @@ public class BasketRequestMapper {
 			if(!enabled){
 				jsonResponse.setMessage(new JSONObject().put("error","ADAGUC basket is not enabled"));
 			}else{
-				System.err.println("mkdir");
+				Debug.println("mkdir");
 				if (path!=null) {
 					String cleanPath=cleanPathName(path);
 					AuthenticatorInterface authenticator = AuthenticatorFactory.getAuthenticator(request);
@@ -90,7 +93,7 @@ public class BasketRequestMapper {
 					File testDir=new File(destPath);
 					if (!testDir.isDirectory()) {
 						if (!testDir.mkdirs()) {
-							System.err.println("mkdirs("+testDir+") failed");
+							Debug.println("mkdirs("+testDir+") failed");
 							jsonResponse.setMessage(new JSONObject().put("error", "mkdir failed"));
 
 						}
@@ -116,7 +119,7 @@ public class BasketRequestMapper {
 			if(!enabled){
 				jsonResponse.setMessage(new JSONObject().put("error","ADAGUC basket is not enabled"));
 			}else{
-				System.err.println("uploadToBasket");
+				Debug.println("uploadToBasket");
 				AuthenticatorInterface authenticator = AuthenticatorFactory.getAuthenticator(request);
 				String userDataDir = UserManager.getUser(authenticator).getDataDir();
 				String cleanPath=cleanPathName(path);
@@ -124,14 +127,14 @@ public class BasketRequestMapper {
 					String fn=mpf.getOriginalFilename();
 					//					fn=mpf.getName();
 					if ((fn!=null)&&(fn.length()>0)){
-						System.err.println("uploading:"+fn);
+						Debug.println("uploading:"+fn);
 						String destPath=userDataDir;
 						if (cleanPath!=null) {
 							destPath+="/"+path;
 							File testDir=new File(destPath);
 							if (!testDir.isDirectory()) {
 								if (!testDir.mkdirs()) {
-									System.err.println("mkdirs("+testDir+") failed");
+									Debug.println("mkdirs("+testDir+") failed");
 								}
 							}
 						}
@@ -188,13 +191,13 @@ public class BasketRequestMapper {
 			if(!enabled){
 				jsonResponse.setMessage(new JSONObject().put("error","ADAGUC basket is not enabled"));
 			}else{
-				System.err.println("removeFromBasket()");
+				Debug.println("removeFromBasket()");
 				if (path!=null) {
 					AuthenticatorInterface authenticator = AuthenticatorFactory.getAuthenticator(request);
 					String userDataDir = UserManager.getUser(authenticator).getDataDir();
 					String cleanPath=cleanPathName(path);
 					File f=new File(userDataDir+"/"+cleanPath);
-					System.err.println("removing:"+ f.getPath());
+					Debug.println("removing:"+ f.getPath());
 					if (f.isDirectory()){
 						deleteDir(f);
 						jsonResponse.setMessage(new JSONObject().put("message", "dir deleted"));

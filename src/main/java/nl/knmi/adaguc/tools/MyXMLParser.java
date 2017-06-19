@@ -58,6 +58,11 @@ public class MyXMLParser {
 			attributes = new Vector<XMLAttribute>();
 			xmlElements = new Vector<XMLElement>();
 		}
+		public XMLElement(String name) {
+			this();
+			this.name=name;
+		}
+		
 		public String getValue(){
 			return value;
 		}
@@ -97,6 +102,21 @@ public class MyXMLParser {
 			throw new Exception("XML Attribute \""+name+"\" not found in element "+this.name);
 		}
 
+		public void add(XMLElement el) {
+			this.xmlElements.add(el);
+		}
+		
+		public void setAttr(String attr, String value) {
+			XMLAttribute at=new XMLAttribute();
+			at.name=attr;
+			at.value=value;
+			this.attributes.add(at);
+		}
+		
+		public void setValue(String value) {
+			this.value=value;
+		}
+		
 		/**
 		 * Parses document
 		 * @param document
