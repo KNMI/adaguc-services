@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -146,7 +147,7 @@ public class PyWPSServer extends HttpServlet{
 		String[] environmentVariablesAsArray = new String[ environmentVariables.size() ];
 		environmentVariables.toArray( environmentVariablesAsArray );
 
-		
+
 		try {
 			String wpsRequest=HTTPTools.getHTTPParam(request, "request");
 			if (wpsRequest.equalsIgnoreCase("execute")) {
@@ -166,81 +167,126 @@ public class PyWPSServer extends HttpServlet{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
+
 
 	}
 
-	private static void getUserJobInfo(String queryString, String userDataDir, String wpsResponse) throws Exception {
+	public static JSONObject xmlStatusToJSONStatus(String queryString, String wpsResponse) throws Exception {
 		MyXMLParser.XMLElement rootElement = new MyXMLParser.XMLElement();
 		rootElement.parseString(wpsResponse);
 		Debug.println(rootElement.toJSON(Options.NONE));
 		String statusLocation=null;
 		String creationTime=null;
 		JSONObject data=new JSONObject();
-		
 		try {
-		  Debug.println(wpsResponse);
-		  statusLocation = rootElement.get("wps:ExecuteResponse").getAttrValue("statusLocation");
-		  Debug.println("statusLocation:"+statusLocation);
-		  String status = rootElement.get("wps:ExecuteResponse").get("wps:Status").get("wps:ProcessAccepted").getValue();
-		  creationTime = rootElement.get("wps:ExecuteResponse").get("wps:Status").getAttrValue("creationTime");
-		  String procId = rootElement.get("wps:ExecuteResponse").get("wps:Process").get("ows:Identifier").getValue();
-          Debug.println(creationTime+", "+procId);
-          data.put("statuslocation", statusLocation);
-          data.put("status", status);
-          data.put("creationtime", creationTime);
-          data.put("id",  procId);
-          if (queryString!=null) {
- 
-            String dataInputs=HTTPTools.getKVPItem(queryString, "DataInputs");
-            String responseForm=HTTPTools.getKVPItem(queryString, "ResponseForm");
-            if (dataInputs!=null) {
-              dataInputs=dataInputs.substring(1,dataInputs.length()-1);
-            }
-            if (responseForm!=null) {
-              responseForm=responseForm.substring(1,responseForm.length()-1);
-            }
-            Debug.println("DataInputs: "+dataInputs+" , ResponseForm:"+responseForm);
-            XMLElement wpsElement=new XMLElement();
-            XMLElement execElement=new XMLElement("Execute");
-            XMLElement dataInputsEl=new XMLElement("DataInputs");
-            for (String dt: dataInputs.split(";")) {
-            	String terms[]=dt.split("=");
-            	Debug.println(dt+" "+terms[0]+","+terms[1]);
-            	if (terms.length==2) {
-            		XMLElement inputEl=new XMLElement("Input");
-            		XMLElement dataEl=new XMLElement("Data");
-            		XMLElement literalDataEl=new XMLElement("LiteralData");
-            		dataEl.add(literalDataEl);
-            		literalDataEl.setValue(terms[1]);
-            		inputEl.add(dataEl);
-            		XMLElement identifierEl=new XMLElement("Identifier");
-            		identifierEl.setValue(terms[0]);
+			Debug.println(wpsResponse);
+			statusLocation = rootElement.get("wps:ExecuteResponse").getAttrValue("statusLocation");
+			Debug.println("statusLocation:"+statusLocation);
+			String status = null; // = rootElement.get("wps:ExecuteResponse").get("wps:Status").get("wps:ProcessAccepted").getValue();
+			WPSStatus wpsStatus=null;
+			try {
+				status=rootElement.get("wps:ExecuteResponse").get("wps:Status").get("wps:ProcessAccepted").getValue();
+				wpsStatus=WPSStatus.PROCESSACCEPTED;
+			} catch (Exception e) {Debug.println("Not ACCEPTED");};
+			if (wpsStatus==null) {
+				try {
+					status=rootElement.get("wps:ExecuteResponse").get("wps:Status").get("wps:ProcessStarted").getValue();
+					wpsStatus=WPSStatus.PROCESSSTARTED;
+				} catch (Exception e) {Debug.println("Not STARTED");} 
+			}
+			if (wpsStatus==null) {
+				try {
+					status=rootElement.get("wps:ExecuteResponse").get("wps:Status").get("wps:ProcessFailed").getValue();
+					wpsStatus=WPSStatus.PROCESSFAILED;
+				} catch (Exception e) {Debug.println("Not FAILED");} 
+			}
+			if (wpsStatus==null) {
+				try {
+					status=rootElement.get("wps:ExecuteResponse").get("wps:Status").get("wps:ProcessPaused").getValue();
+					wpsStatus=WPSStatus.PROCESSPAUSED;
+				} catch (Exception e) {Debug.println("Not PAUSED");} 
+			}
+			if (wpsStatus==null) {
+				try {
+					status=rootElement.get("wps:ExecuteResponse").get("wps:Status").get("wps:ProcessSucceeded").getValue();
+					wpsStatus=WPSStatus.PROCESSSUCCEEDED;
 
-            		inputEl.add(identifierEl);
-            		dataInputsEl.add(inputEl);
-            	}
-            }
-            execElement.add(dataInputsEl);
-            wpsElement.add(execElement);
-            
-            data.put("wpspostdata", wpsElement.toJSON(Options.NONE));           
-          }
-          String uniqueID=statusLocation.substring(statusLocation.lastIndexOf("/")+1);
-          data.put("uniqueid", uniqueID);
-          
-//  		  Tools.mksubdirs(userDataDir+"/WPS_Settings/");
-  		  String baseName = statusLocation.substring(statusLocation.lastIndexOf("/")).replace(".xml", ".wpssettings");
-  	      String wpsSettingsFile = userDataDir+"/WPS_Settings/";
-  	      Tools.mksubdirs(wpsSettingsFile);
-  	      wpsSettingsFile+=baseName;
-  	      Tools.writeFile(wpsSettingsFile, data.toString());
-  		  
-		} catch(Exception e) {
-		  Debug.println("Synchronous execution");
+				} catch (Exception e) {Debug.println("Not SUCCEEDED");} 
+			}
+
+			creationTime = rootElement.get("wps:ExecuteResponse").get("wps:Status").getAttrValue("creationTime");
+			String procId = rootElement.get("wps:ExecuteResponse").get("wps:Process").get("ows:Identifier").getValue();
+			Debug.println(creationTime+", "+procId);
+			data.put("statuslocation", statusLocation);
+			data.put("status", status);
+			data.put("wpsstatus", wpsStatus.toString());
+			data.put("creationtime", creationTime);
+			data.put("id",  procId);
+			if (queryString!=null) {
+
+				String dataInputs=HTTPTools.getKVPItem(queryString, "DataInputs");
+				String responseForm=HTTPTools.getKVPItem(queryString, "ResponseForm");
+				if (dataInputs!=null) {
+					dataInputs=dataInputs.substring(1,dataInputs.length()-1);
+				}
+				if (responseForm!=null) {
+					responseForm=responseForm.substring(1,responseForm.length()-1);
+				}
+				Debug.println("DataInputs: "+dataInputs+" , ResponseForm:"+responseForm);
+				XMLElement wpsElement=new XMLElement();
+				XMLElement execElement=new XMLElement("Execute");
+				XMLElement dataInputsEl=new XMLElement("DataInputs");
+				for (String dt: dataInputs.split(";")) {
+					String terms[]=dt.split("=");
+					Debug.println(dt+" "+terms[0]+","+terms[1]);
+					if (terms.length==2) {
+						XMLElement inputEl=new XMLElement("Input");
+						XMLElement dataEl=new XMLElement("Data");
+						XMLElement literalDataEl=new XMLElement("LiteralData");
+						dataEl.add(literalDataEl);
+						literalDataEl.setValue(terms[1]);
+						inputEl.add(dataEl);
+						XMLElement identifierEl=new XMLElement("Identifier");
+						identifierEl.setValue(terms[0]);
+
+						inputEl.add(identifierEl);
+						dataInputsEl.add(inputEl);
+					}
+				}
+				execElement.add(dataInputsEl);
+				wpsElement.add(execElement);
+
+				data.put("wpspostdata", wpsElement.toJSONObject(Options.NONE));      
+				data.put("querystring",  URLEncoder.encode(queryString, "utf-8"));
+			}
+			String uniqueID=statusLocation.substring(statusLocation.lastIndexOf("/")+1);
+			data.put("uniqueid", uniqueID);
+
+		} catch(Exception e){
+
+		}
+		return data;
+
+	}
+
+	private static enum WPSStatus {PROCESSACCEPTED, PROCESSSTARTED, PROCESSPAUSED, PROCESSFAILED, PROCESSSUCCEEDED};
+
+	private static void getUserJobInfo(String queryString, String userDataDir, String wpsResponse) throws Exception {
+		JSONObject data=xmlStatusToJSONStatus(queryString, wpsResponse);
+		if (data!=null) {
+
+			//  		  Tools.mksubdirs(userDataDir+"/WPS_Settings/");
+			String statusLocation=data.getString("statuslocation");
+			String baseName = statusLocation.substring(statusLocation.lastIndexOf("/")).replace(".xml", ".wpssettings");
+			String wpsSettingsFile = userDataDir+"/WPS_Settings/";
+			Tools.mksubdirs(wpsSettingsFile);
+			wpsSettingsFile+=baseName;
+			Tools.writeFile(wpsSettingsFile, data.toString());
+		} else {
+			Debug.println("Synchronous execution");
 		}
 	}
-	
+
 	private static boolean checkStatusLocation(String queryString, HttpServletResponse response) throws InvalidTokenException, ConfigurationItemNotFoundException, InvalidHTTPKeyValueTokensException, IOException  {
 		//  Check for status location first.
 		Debug.println("Checking ["+queryString+"]");
