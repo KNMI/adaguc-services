@@ -25,5 +25,4 @@ public class BasketConfigurator implements nl.knmi.adaguc.config.ConfiguratorInt
 		return enabled;
 	}
 	
-
 }

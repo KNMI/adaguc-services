@@ -1,8 +1,11 @@
 package nl.knmi.adaguc.services.basket;
 
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 import lombok.Getter;
@@ -21,7 +24,10 @@ public class BasketNode {
 	private String httpurl;
 	private List<BasketNode> children;
 	private Long size;
+	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy hh:mm:ss")
+	private LocalDateTime date;
 
+	
 	public BasketNode(String name, String type, String id, String dapUrl, String httpUrl) {
 		this.name=name;
 		this.size=null;
