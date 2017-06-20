@@ -9,11 +9,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.json.JSONObject;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -62,6 +58,7 @@ public class BasketRequestMapper {
 	}
 
 	@ResponseBody
+	@CrossOrigin
 	@RequestMapping(value="/upload", method=RequestMethod.POST)
 	public void uploadBasket(HttpServletResponse response, HttpServletRequest request, @RequestParam(value="files")MultipartFile[] uploadFiles, @RequestParam(value="path", required=false)String path) throws IOException{
 		JSONResponse jsonResponse = new JSONResponse(request);
