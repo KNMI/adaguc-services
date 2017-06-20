@@ -59,7 +59,7 @@ public class BasketRequestMapper {
 					tokenStr = HTTPTools.getHTTPParam(request, "key");
 				} catch (Exception e) {
 				}
-				
+
 				AuthenticatorInterface authenticator = AuthenticatorFactory.getAuthenticator(request);
 
 				String userDataDir = UserManager.getUser(authenticator).getDataDir();
@@ -110,6 +110,7 @@ public class BasketRequestMapper {
 	}
 
 	@ResponseBody
+	@CrossOrigin
 	@RequestMapping(value="/upload", method=RequestMethod.POST)
 	public void uploadBasket(HttpServletResponse response, HttpServletRequest request, @RequestParam(value="files")MultipartFile[] uploadFiles, @RequestParam(value="path", required=false)String path) throws IOException{
 		JSONResponse jsonResponse = new JSONResponse(request);
