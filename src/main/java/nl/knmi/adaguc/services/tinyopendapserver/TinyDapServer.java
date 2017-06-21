@@ -686,7 +686,8 @@ public class TinyDapServer {
 			JSONResponse jsonResponse = new JSONResponse(request);
 			try{
 				String csvSeparator=",";
-				int headerLines=0;
+				int rowWithFieldNames=0;
+				int firstDataRow=1;
 				String lineSeparator="\n";
 
 				File input = new File(filename);
@@ -701,28 +702,40 @@ public class TinyDapServer {
 						if(filename.toLowerCase().endsWith(".csv")){
 							File descr = new File(filename.replace(".csv", "_descr.json"));
 							if (descr.isFile()) {
+								Debug.println("Reading description file "+descr.getName());
 								String description = Tools.readFile(descr.getAbsolutePath());
 								JSONObject descrJson=new JSONObject(description);
 								try {
-									csvSeparator=descrJson.getString("csvSeparator");
+									csvSeparator=descrJson.getString("columnSeparator");
 								} catch (JSONException e){}
 								try {
-									lineSeparator=descrJson.getString("lineSeparator");
+									lineSeparator=descrJson.getString("fieldSeparator");
 								} catch (JSONException e){}
 								try {
-									headerLines=Integer.parseInt(descrJson.getString("headerLines"));
+									rowWithFieldNames=descrJson.getInt("rowWithFieldNames");
+								} catch (JSONException e){}
+								try {
+									firstDataRow=descrJson.getInt("firstDataRow");
 								} catch (JSONException e){}
 							}
-							JSONArray CSV = new JSONArray();
+							JSONArray CSVHeaders = new JSONArray();
+							JSONArray CSVData = new JSONArray();
 							String [] lines = contents.split(lineSeparator);
-							String [] headers;
-							headers=lines[0].split(csvSeparator);
-							if (headerLines==0) {
+                            //Allocate field name array for last but one line
+							String [] headers=lines[lines.length-2].split(csvSeparator);
+							
+							if (rowWithFieldNames==(-1)) {
 								for (int i=0; i<headers.length; i++) {
 									headers[i]=String.format("field%03d",  i);
 								}
+							}else {
+								headers=lines[rowWithFieldNames].split(csvSeparator);
 							}
-							for(int j=headerLines;j<Math.min(lines.length, maxLines)+headerLines;j++){
+							for (int i=0; i<headers.length; i++) {
+								headers[i]=headers[i].trim();
+								CSVHeaders.put(headers[i]);
+							}
+							for(int j=firstDataRow;j<Math.min(lines.length, maxLines)+rowWithFieldNames;j++){
 								String [] cols = lines[j].split(csvSeparator);
 								JSONObject line = new JSONObject();
 								for(int c=0;c<cols.length;c++){
@@ -730,8 +743,12 @@ public class TinyDapServer {
 										line.put(headers[c], cols[c]);
 									}
 								}
-								CSV.put(line);
+								CSVData.put(line);
 							}
+
+							JSONObject CSV=new JSONObject();
+							CSV.put("columns", CSVHeaders);
+							CSV.put("rows", CSVData);
 
 							jsonResponse.setMessage(CSV);
 						}else{
