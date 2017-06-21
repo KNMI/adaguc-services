@@ -98,10 +98,13 @@ public class JobListRequestMapper {
 					String userDataDir = UserManager.getUser(authenticator).getDataDir();
 					String cleanPath=Tools.makeCleanPath(job);
 					String wpsSettingsName=cleanPath.replace(".xml", ".wpssettings");
-					File f=new File(userDataDir+"/WPSSettings/"+wpsSettingsName);
+					File f=new File(userDataDir+"/WPS_Settings/"+wpsSettingsName);
 					Debug.println("removing:"+ f.getPath());
-					f.delete();
-					jsonResponse.setMessage(new JSONObject().put("message", "jobfile deleted"));
+					if (f.delete()) {
+						jsonResponse.setMessage(new JSONObject().put("message", "jobfile deleted"));
+					} else {
+						jsonResponse.setErrorMessage("delete file failed for "+f.getName(), 200);
+					}
 				} else {
 					jsonResponse.setErrorMessage("job parameter missing", 200);
 				}
@@ -143,7 +146,7 @@ public class JobListRequestMapper {
 					//					Debug.println("fn:"+fn+" "+f.isFile()+" ; "+fn.endsWith("settings"));
 					if (f.isFile()&&fn.endsWith("settings")){
 						String fileString=new String(Files.readAllBytes(Paths.get(f.getAbsolutePath())));
-						Debug.println("found: "+fn+" "+fileString.length());
+//						Debug.println("found: "+fn+" "+fileString.length());
 						JSONObject job=new JSONObject(fileString);
 						//if status==Accepted
 
@@ -173,11 +176,11 @@ public class JobListRequestMapper {
 								}								
 
 							} else {
-								Debug.println(fn+": finished");
+//								Debug.println(fn+": finished");
 							}
 
 						}
-						Debug.println(job.toString());
+//						Debug.println(job.toString());
 						jobArray.put(job);
 					}
 				}

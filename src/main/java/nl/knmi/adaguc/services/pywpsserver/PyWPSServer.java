@@ -174,7 +174,7 @@ public class PyWPSServer extends HttpServlet{
 	public static JSONObject xmlStatusToJSONStatus(String queryString, String wpsResponse) throws Exception {
 		MyXMLParser.XMLElement rootElement = new MyXMLParser.XMLElement();
 		rootElement.parseString(wpsResponse);
-		Debug.println(rootElement.toJSON(Options.NONE));
+//		Debug.println(rootElement.toJSON(Options.NONE));
 		String statusLocation=null;
 		String creationTime=null;
 		JSONObject data=new JSONObject();
@@ -221,7 +221,18 @@ public class PyWPSServer extends HttpServlet{
 			data.put("status", status);
 			data.put("wpsstatus", wpsStatus.toString());
 			data.put("creationtime", creationTime);
-			data.put("id",  procId);
+			data.put("processid",  procId);
+			if (wpsStatus==WPSStatus.PROCESSSUCCEEDED){
+				data.put("percentage", "100");
+			} else if (wpsStatus==WPSStatus.PROCESSSTARTED){
+				String perc="-";
+				try {
+					perc=rootElement.get("wps:ExecuteResponse").get("wps:Status").get("wps:ProcessStarted").getAttrValue("percentCompleted");
+				}catch (Exception e){}
+				data.put("percentage", perc);
+			} else {
+				data.put("percentage",  "0");
+			}
 			if (queryString!=null) {
 
 				String dataInputs=HTTPTools.getKVPItem(queryString, "DataInputs");
@@ -260,7 +271,7 @@ public class PyWPSServer extends HttpServlet{
 				data.put("querystring",  URLEncoder.encode(queryString, "utf-8"));
 			}
 			String uniqueID=statusLocation.substring(statusLocation.lastIndexOf("/")+1);
-			data.put("uniqueid", uniqueID);
+			data.put("id", uniqueID);
 
 		} catch(Exception e){
 
