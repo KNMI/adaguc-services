@@ -709,7 +709,7 @@ public class TinyDapServer {
 									csvSeparator=descrJson.getString("columnSeparator");
 								} catch (JSONException e){}
 								try {
-									lineSeparator=descrJson.getString("fieldSeparator");
+									lineSeparator=descrJson.getString("rowSeparator");
 								} catch (JSONException e){}
 								try {
 									rowWithFieldNames=descrJson.getInt("rowWithFieldNames");
