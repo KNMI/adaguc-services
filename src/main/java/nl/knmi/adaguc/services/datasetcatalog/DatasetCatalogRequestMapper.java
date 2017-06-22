@@ -48,6 +48,7 @@ public class DatasetCatalogRequestMapper {
 		om.registerModule(new JSR310Module());
 		om.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 		//om.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
+		Debug.println("Using catalog path " +DatasetCatalogConfigurator.getCatalogPath());
 		DatasetCatalog catalog=new DatasetCatalog(DatasetCatalogConfigurator.getCatalogPath());
 		String json=om.writeValueAsString(catalog);
 		Debug.println("CAT:"+catalog.getCatalog().size());

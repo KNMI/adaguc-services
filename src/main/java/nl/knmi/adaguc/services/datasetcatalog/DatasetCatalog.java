@@ -22,7 +22,9 @@ public class DatasetCatalog {
 
 	private void initCatalog() {
 		this.catalog=new ArrayList<DatasetDescription>();
+		Debug.println("initCatalog" + this.path);
 		File d=new File(this.path);
+		
 		Debug.println("d:"+d);
 		if (d.isDirectory()) {
 			String[] filesIndir=d.list();
