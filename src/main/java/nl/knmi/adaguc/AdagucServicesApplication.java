@@ -136,6 +136,12 @@ public class AdagucServicesApplication extends SpringBootServletInitializer{
 			if(line.startsWith("maxfilesize")){
 				configLines[j]="maxfilesize=500mb";
 			}
+			if(line.startsWith("logFile")){
+				configLines[j]="logFile="+tempDir+"/pywps.log";
+			}
+			if(line.startsWith("logLevel")){
+				configLines[j]="logLevel=DEBUG";
+			}
 		}
 
 
