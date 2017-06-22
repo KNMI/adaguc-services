@@ -160,7 +160,11 @@ public class JobListRequestMapper {
 									status.equalsIgnoreCase("PROCESSPAUSED")){
 								Debug.println(fn+": with status "+status+" let's look again");
 								String statusLocation=job.getString("statuslocation");
-								JSONObject newJobStatus=NewStatusLocation(URLDecoder.decode(job.getString("querystring"), "utf-8"), statusLocation);
+								String queryString=null;
+								try {
+									URLDecoder.decode(job.getString("querystring"), "utf-8");
+								} catch (Exception e){}
+								JSONObject newJobStatus=NewStatusLocation(queryString, statusLocation);
 								Debug.println("newJobStatus: "+newJobStatus.getString("percentage"));
 								Debug.println("st:"+newJobStatus.getString("wpsstatus")+ "<==="+status);
 								if (status.equalsIgnoreCase("PROCESSSTARTED")||((newJobStatus!=null)&&!status.equals(newJobStatus.getString("wpsstatus")))) {
