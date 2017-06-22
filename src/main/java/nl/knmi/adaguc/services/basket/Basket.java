@@ -4,6 +4,7 @@ import java.io.File;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.Arrays;
 
 import lombok.Getter;
 import nl.knmi.adaguc.config.ConfigurationItemNotFoundException;
@@ -42,6 +43,7 @@ public class Basket {
 		File d=new File(dir);
 		if (d.isDirectory()) {
 			String[] filesIndir=d.list();
+			Arrays.sort(filesIndir);
 			for (String fn: filesIndir) {
 				String fullPath=dir+fn;
 				String cleanPath=fullPath.replace(this.userDir,  "");
