@@ -27,7 +27,7 @@ public class AuthenticatorImpl implements AuthenticatorInterface{
 	
 	@Override
 	public void init(HttpServletRequest request) {
-		Debug.println("Init");
+//		Debug.println("Init");
 		// TODO Auto-generated method stub
 		x509 = new PemX509Tools().getUserIdFromCertificate(request);
 		
@@ -49,9 +49,9 @@ public class AuthenticatorImpl implements AuthenticatorInterface{
 			    Token token = null;
 				try {
 					token = TokenManager.getToken(tokenStr);
-					Debug.println("Found token "+token);
+//					Debug.println("Found token "+token);
 					x509 = new PemX509Tools().new X509Info(token.getUserId(), token.getToken());
-					Debug.println("Found user "+x509.getCN());
+//					Debug.println("Found user "+x509.getCN());
 				} catch (AuthenticationException | IOException | ConfigurationItemNotFoundException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
