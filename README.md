@@ -19,6 +19,7 @@ For setting up your adaguc and wps server:
     - data
         - adaguc-services-base
             - tokenstore
+            - catalog
         - adaguc-services-space
     - config
     - src

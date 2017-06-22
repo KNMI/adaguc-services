@@ -161,10 +161,9 @@ public class JobListRequestMapper {
 								Debug.println(fn+": with status "+status+" let's look again");
 								String statusLocation=job.getString("statuslocation");
 								JSONObject newJobStatus=NewStatusLocation(URLDecoder.decode(job.getString("querystring"), "utf-8"), statusLocation);
-								Debug.println("newJobStatus: "+newJobStatus.toString());
+								Debug.println("newJobStatus: "+newJobStatus.getString("percentage"));
 								Debug.println("st:"+newJobStatus.getString("wpsstatus")+ "<==="+status);
-								if ((newJobStatus!=null)&&!status.equals(newJobStatus.getString("wpsstatus"))) {
-
+								if (status.equalsIgnoreCase("PROCESSSTARTED")||((newJobStatus!=null)&&!status.equals(newJobStatus.getString("wpsstatus")))) {
 									//  		  Tools.mksubdirs(userDataDir+"/WPS_Settings/");
 									String baseName = statusLocation.substring(statusLocation.lastIndexOf("/")).replace(".xml", ".wpssettings");
 									String wpsSettingsFile = userDataDir+"/WPS_Settings/";

@@ -56,4 +56,11 @@
   <joblist>
     <enabled>true</enabled>
   </joblist>
+  
+  <datasetcatalog>
+    <enabled>true</enabled>
+    <catalogpath>{ENV.ADAGUCSERVICES}/data/adaguc-services-base/catalog</catalogpath>
+  </datasetcatalog>
+  
+  
 </adaguc-services>
