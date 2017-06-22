@@ -53,4 +53,7 @@
     <enabled>true</enabled>
   </basket>
   
+  <joblist>
+    <enabled>true</enabled>
+  </joblist>
 </adaguc-services>

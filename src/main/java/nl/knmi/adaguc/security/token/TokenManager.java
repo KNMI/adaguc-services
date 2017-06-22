@@ -37,8 +37,8 @@ public class TokenManager {
 		loadTokensFromStore();
 		Token token = accesstokens.get(id);
 		if(token == null){
-			Debug.println("token not found");
-			throw new AuthenticationExceptionImpl("Token not found");
+			Debug.println("token not found "+id);
+			throw new AuthenticationExceptionImpl("Token not found "+id);
 		}
 		return token;
 	}
