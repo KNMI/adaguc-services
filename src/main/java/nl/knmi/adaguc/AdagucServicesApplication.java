@@ -76,6 +76,8 @@ public class AdagucServicesApplication extends SpringBootServletInitializer{
 		if(SecurityConfigurator.getTrustStore()!=null)props.put("server.ssl.trust-store", SecurityConfigurator.getTrustStore());
 		if(SecurityConfigurator.getTrustStorePassword()!=null)props.put("server.ssl.trust-store-password", SecurityConfigurator.getTrustStorePassword());
 		props.put("server.ssl.client-auth", "want");
+		props.put("spring.http.multipart.max-file-size","100MB");
+		props.put("spring.http.multipart.max-request-size","100MB");
 
 //		props.put("log4j.logger.httpclient.wire.header","WARN");
 //		props.put("log4j.logger.httpclient.wire.content","WARN");
