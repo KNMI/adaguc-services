@@ -7,7 +7,7 @@ import java.time.ZoneId;
 import java.util.Arrays;
 
 import lombok.Getter;
-import nl.knmi.adaguc.config.ConfigurationItemNotFoundException;
+import nl.knmi.adaguc.tools.ElementNotFoundException;
 import nl.knmi.adaguc.config.MainServicesConfigurator;
 
 @Getter
@@ -27,18 +27,18 @@ public class Basket {
 		this.rootNode=null;
 		try {
 			this.rootNode=listFiles();
-		} catch (ConfigurationItemNotFoundException e) {
+		} catch (ElementNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
 
-	public BasketNode listFiles() throws ConfigurationItemNotFoundException{
+	public BasketNode listFiles() throws ElementNotFoundException{
 		BasketNode rootBn=new BasketNode(this.name, "root", null, null, null);
 		return this.listFiles(rootBn, userDir);	
 	}
 	
-	public BasketNode listFiles(BasketNode bn, String dir) throws ConfigurationItemNotFoundException {
+	public BasketNode listFiles(BasketNode bn, String dir) throws ElementNotFoundException {
 		String externalURL=MainServicesConfigurator.getServerExternalURL();
 		File d=new File(dir);
 		if (d.isDirectory()) {
@@ -75,7 +75,7 @@ public class Basket {
 		Basket b=new Basket("/nobackup/users/vreedede/testimpactspace", "testBasket", null);
 		try {
 			System.err.println(b.listFiles());
-		} catch (ConfigurationItemNotFoundException e) {
+		} catch (ElementNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}

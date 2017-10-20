@@ -18,7 +18,7 @@ import org.apache.tomcat.util.http.fileupload.ByteArrayOutputStream;
 import org.json.JSONObject;
 import org.springframework.security.core.AuthenticationException;
 
-import nl.knmi.adaguc.config.ConfigurationItemNotFoundException;
+import nl.knmi.adaguc.tools.ElementNotFoundException;
 import nl.knmi.adaguc.config.MainServicesConfigurator;
 import nl.knmi.adaguc.security.AuthenticatorFactory;
 import nl.knmi.adaguc.security.AuthenticatorInterface;
@@ -54,13 +54,13 @@ public class PyWPSServer extends HttpServlet{
 	 * @param queryString The querystring for the CGI script
 	 * @param outputStream A standard byte output stream in which the data of stdout is captured. 
 	 * When null, it will be set to response.getOutputStream().
-	 * @throws ConfigurationItemNotFoundException 
+	 * @throws ElementNotFoundException 
 	 * @throws IOException 
 	 * @throws AuthenticationException 
 	 * @throws InterruptedException 
 	 * @throws Exception
 	 */
-	public static void runPyWPS(HttpServletRequest request,HttpServletResponse response,String queryString,OutputStream outputStream) throws AuthenticationException, IOException, ConfigurationItemNotFoundException, InterruptedException {
+	public static void runPyWPS(HttpServletRequest request,HttpServletResponse response,String queryString,OutputStream outputStream) throws AuthenticationException, IOException, ElementNotFoundException, InterruptedException {
 		Debug.println("RunPyWPS");
 		List<String> environmentVariables = new ArrayList<String>();
 		String userHomeDir="/tmp/";
@@ -78,7 +78,7 @@ public class PyWPSServer extends HttpServlet{
 		File f=new File(pywpsExecLoc);
 		if(f.exists() == false || f.isFile() == false){
 			Debug.errprintln("PyWPSServer executable not found");
-			throw new ConfigurationItemNotFoundException("PyWPSServer executable not found");
+			throw new ElementNotFoundException("PyWPSServer executable not found");
 		}
 
 		if(response == null && outputStream == null){
@@ -298,7 +298,7 @@ public class PyWPSServer extends HttpServlet{
 		}
 	}
 
-	private static boolean checkStatusLocation(String queryString, HttpServletResponse response) throws InvalidTokenException, ConfigurationItemNotFoundException, InvalidHTTPKeyValueTokensException, IOException  {
+	private static boolean checkStatusLocation(String queryString, HttpServletResponse response) throws InvalidTokenException, ElementNotFoundException, InvalidHTTPKeyValueTokensException, IOException  {
 		//  Check for status location first.
 		Debug.println("Checking ["+queryString+"]");
 		if(queryString!=null){ 
