@@ -2,7 +2,7 @@ package nl.knmi.adaguc.services.oauth2;
 
 import java.util.Vector;
 
-import nl.knmi.adaguc.config.ConfigurationItemNotFoundException;
+import nl.knmi.adaguc.tools.ElementNotFoundException;
 import nl.knmi.adaguc.config.ConfigurationReader;
 import nl.knmi.adaguc.tools.Debug;
 import nl.knmi.adaguc.tools.MyXMLParser.XMLElement;
@@ -10,6 +10,7 @@ import nl.knmi.adaguc.tools.MyXMLParser.XMLElement;
 
 
 public class OAuthConfigurator implements nl.knmi.adaguc.config.ConfiguratorInterface {
+	static ConfigurationReader configurationReader = new ConfigurationReader ();
     public static class Oauth2Settings{
     //  For building the web page:
       public String description = null;
@@ -94,13 +95,13 @@ public class OAuthConfigurator implements nl.knmi.adaguc.config.ConfiguratorInte
       }
     }
     
-    public static Oauth2Settings getOAuthSettings(String id) throws ConfigurationItemNotFoundException {
-    	ConfigurationReader.readConfig();
+    public static Oauth2Settings getOAuthSettings(String id) throws ElementNotFoundException {
+    	configurationReader.readConfig();
       return _getOauthSetting(id);
     }
     
-    public static Vector<String> getProviders() throws ConfigurationItemNotFoundException {
-    	ConfigurationReader.readConfig();
+    public static Vector<String> getProviders() throws ElementNotFoundException {
+    	configurationReader.readConfig();
       
       return _getProviders();
     }

@@ -91,7 +91,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 
-import nl.knmi.adaguc.config.ConfigurationItemNotFoundException;
 import nl.knmi.adaguc.config.MainServicesConfigurator;
 import nl.knmi.adaguc.security.CertificateVerificationException;
 import nl.knmi.adaguc.security.PemX509Tools;
@@ -100,10 +99,12 @@ import nl.knmi.adaguc.security.SecurityConfigurator;
 import nl.knmi.adaguc.services.oauth2.OAuthConfigurator.Oauth2Settings;
 import nl.knmi.adaguc.tools.DateFunctions;
 import nl.knmi.adaguc.tools.Debug;
+import nl.knmi.adaguc.tools.ElementNotFoundException;
 import nl.knmi.adaguc.tools.HTTPTools;
-import nl.knmi.adaguc.tools.HTTPTools.WebRequestBadStatusException;
+
 import nl.knmi.adaguc.tools.JSONResponse;
 import nl.knmi.adaguc.tools.KVPKey;
+import nl.knmi.adaguc.tools.WebRequestBadStatusException;
 
 /**
  * Class which helps handling OAuth requests. Uses APACHE oltu, bouncycastle and
@@ -206,10 +207,10 @@ keytool -import -v -trustcacerts -alias slcs.ceda.ac.uk -file  slcs.ceda.ac.uk -
    * 
    * @param request
    * @param response
- * @throws ConfigurationItemNotFoundException 
+ * @throws ElementNotFoundException 
    */
   public static void doGet(HttpServletRequest request,
-      HttpServletResponse response) throws ConfigurationItemNotFoundException {
+      HttpServletResponse response) throws ElementNotFoundException {
     
     // Check if we are dealing with getting JSON request for building up the
     // login form
@@ -258,10 +259,10 @@ keytool -import -v -trustcacerts -alias slcs.ceda.ac.uk -file  slcs.ceda.ac.uk -
    * @return
    * @throws OAuthSystemException
    * @throws IOException
- * @throws ConfigurationItemNotFoundException 
+ * @throws ElementNotFoundException 
    */
   static void getCode(HttpServletRequest httpRequest,
-      HttpServletResponse response) throws OAuthSystemException, IOException, ConfigurationItemNotFoundException {
+      HttpServletResponse response) throws OAuthSystemException, IOException, ElementNotFoundException {
    
     
     Debug.println("getQueryString:"+httpRequest.getQueryString());
@@ -541,7 +542,7 @@ keytool -import -v -trustcacerts -alias slcs.ceda.ac.uk -file  slcs.ceda.ac.uk -
 	} 
   };
   
-  private static JSONObject makeUserCertificate(String clientId) throws CertificateException, IOException, InvalidKeyException, NoSuchAlgorithmException, OperatorCreationException, KeyManagementException, UnrecoverableKeyException, KeyStoreException, NoSuchProviderException, SignatureException, GSSException, ConfigurationItemNotFoundException, CertificateVerificationException, JSONException {
+  private static JSONObject makeUserCertificate(String clientId) throws CertificateException, IOException, InvalidKeyException, NoSuchAlgorithmException, OperatorCreationException, KeyManagementException, UnrecoverableKeyException, KeyStoreException, NoSuchProviderException, SignatureException, GSSException, ElementNotFoundException, CertificateVerificationException, JSONException {
 
 	Debug.println("Making user cert for "+clientId);
     X509Certificate caCertificate = PemX509Tools.readCertificateFromPEM("/usr/people/tjalma/hackaton_config/config/knmi_ds_ca.pem");
@@ -784,9 +785,9 @@ wget --no-check-certificate --private-key /tmp/test.key --certificate /tmp/test.
    * @param request
    * @param JWT
    * @return
- * @throws ConfigurationItemNotFoundException 
+ * @throws ElementNotFoundException 
    */
-  private static UserInfo getIdentifierFromJWTPayload(String JWT) throws ConfigurationItemNotFoundException {
+  private static UserInfo getIdentifierFromJWTPayload(String JWT) throws ElementNotFoundException {
     JSONObject id_token_json = null;
     try {
       id_token_json = (JSONObject) new JSONTokener(JWT).nextValue();
@@ -860,10 +861,10 @@ wget --no-check-certificate --private-key /tmp/test.key --certificate /tmp/test.
    * 
    * @param request
    * @param response
- * @throws ConfigurationItemNotFoundException 
+ * @throws ElementNotFoundException 
    */
   private static void makeForm(HttpServletRequest request,
-      HttpServletResponse response) throws ConfigurationItemNotFoundException {
+      HttpServletResponse response) throws ElementNotFoundException {
     JSONResponse jsonResponse = new JSONResponse(request);
 
     JSONObject form = new JSONObject();
@@ -911,7 +912,7 @@ wget --no-check-certificate --private-key /tmp/test.key --certificate /tmp/test.
      * @throws IOException
      */
    public static UserInfo verifyAndReturnUserIdentifier(HttpServletRequest request)
-     throws JSONException, WebRequestBadStatusException, IOException, ConfigurationItemNotFoundException {
+     throws JSONException, WebRequestBadStatusException, IOException, ElementNotFoundException {
     
      //1) Find the Authorization header containing the access_token
      String access_token = request.getHeader("Authorization");
