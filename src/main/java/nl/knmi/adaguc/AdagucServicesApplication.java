@@ -2,6 +2,7 @@ package nl.knmi.adaguc;
 
 import java.io.IOException;
 import java.security.Security;
+import java.util.Enumeration;
 import java.util.Properties;
 
 import org.apache.commons.lang3.StringUtils;
@@ -10,12 +11,13 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.support.SpringBootServletInitializer;
 
-import nl.knmi.adaguc.config.ConfigurationItemNotFoundException;
+
 import nl.knmi.adaguc.config.ConfigurationReader;
 import nl.knmi.adaguc.config.MainServicesConfigurator;
 import nl.knmi.adaguc.security.SecurityConfigurator;
 import nl.knmi.adaguc.services.pywpsserver.PyWPSConfigurator;
 import nl.knmi.adaguc.tools.Debug;
+import nl.knmi.adaguc.tools.ElementNotFoundException;
 import nl.knmi.adaguc.tools.Tools;
 
 @SpringBootApplication
@@ -25,7 +27,7 @@ public class AdagucServicesApplication extends SpringBootServletInitializer{
 	protected SpringApplicationBuilder configure(SpringApplicationBuilder application)  {
 		try {
 			return application.sources(AdagucServicesApplication.class).properties(getProperties());
-		} catch (ConfigurationItemNotFoundException e) {
+		} catch (ElementNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
@@ -35,15 +37,15 @@ public class AdagucServicesApplication extends SpringBootServletInitializer{
 
 
 	public static void main(String[] args) {
-		try{
-			ConfigurationReader.readConfig();
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+//		try{
+//			ConfigurationReader.readConfig(false);
+//		} catch (Exception e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
 		try {
 			configureApplication(new SpringApplicationBuilder()).properties(getProperties()).run(args);
-		} catch (ConfigurationItemNotFoundException e) {
+		} catch (ElementNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
@@ -52,19 +54,19 @@ public class AdagucServicesApplication extends SpringBootServletInitializer{
 	private static SpringApplicationBuilder configureApplication(SpringApplicationBuilder builder){
 		try {
 			return builder.sources(AdagucServicesApplication.class).properties(getProperties()).bannerMode(Banner.Mode.OFF);
-		} catch (ConfigurationItemNotFoundException e) {
+		} catch (ElementNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return null;
 	}
 
-	static Properties getProperties() throws ConfigurationItemNotFoundException {
+	static Properties getProperties() throws ElementNotFoundException {
 		Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
 		try {
 			ConfigurePyWPS();
 		} catch (IOException e) {
-			throw new ConfigurationItemNotFoundException("Unable to create config file for PyWPS");
+			throw new ElementNotFoundException("Unable to create config file for PyWPS");
 		}
 		Properties props = new Properties();
 
@@ -90,12 +92,19 @@ public class AdagucServicesApplication extends SpringBootServletInitializer{
 //		props.put("log4j.logger.org.apache.http","ERROR");
 //		props.put("log4j.logger.org.apache.http.wire","ERROR");
 //		props.put("log4j.logger.org.apache","ERROR");
-
+		
+//		Debug.errprintln("SecurityConfigurator.getTrustStore()" + SecurityConfigurator.getTrustStore());
+//		
+//		Enumeration e = props.propertyNames();
+//	    while (e.hasMoreElements()) {
+//	      String key = (String) e.nextElement();
+//	      System.out.println(key + " -- " + props.getProperty(key));
+//	    }
 		return props;
 	}
 
 	
-	static void ConfigurePyWPS () throws ConfigurationItemNotFoundException, IOException{
+	static void ConfigurePyWPS () throws ElementNotFoundException, IOException{
 		String pyWPSConfigTemplate = PyWPSConfigurator.getPyWPSConfigTemplate();
 		if(pyWPSConfigTemplate == null){
 			return;
@@ -108,7 +117,7 @@ public class AdagucServicesApplication extends SpringBootServletInitializer{
 		String pyWPSConfig = PyWPSConfigurator.getPyWPSConfig();
 		String pyWPSProcessesDir = PyWPSConfigurator.getPyWPSProcessesDir();
 		if(configTemplate == null){
-			throw new ConfigurationItemNotFoundException("adaguc-services.pywps-server.pywpsconfigtemplate is invalid ["+pyWPSConfigTemplate+"]");
+			throw new ElementNotFoundException("adaguc-services.pywps-server.pywpsconfigtemplate is invalid ["+pyWPSConfigTemplate+"]");
 		}
 		String[] configLines = configTemplate.split("\n");
 

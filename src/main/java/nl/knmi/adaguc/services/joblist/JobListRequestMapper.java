@@ -25,7 +25,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JSR310Module;
 
-import nl.knmi.adaguc.config.ConfigurationItemNotFoundException;
+import nl.knmi.adaguc.tools.ElementNotFoundException;
 import nl.knmi.adaguc.security.AuthenticatorFactory;
 import nl.knmi.adaguc.security.AuthenticatorInterface;
 import nl.knmi.adaguc.security.user.UserManager;
@@ -54,7 +54,7 @@ public class JobListRequestMapper {
 		return converter;
 	}
 
-	private static JSONObject NewStatusLocation(String queryString, String statusLocation) throws InvalidTokenException, ConfigurationItemNotFoundException, InvalidHTTPKeyValueTokensException, IOException  {
+	private static JSONObject NewStatusLocation(String queryString, String statusLocation) throws InvalidTokenException, ElementNotFoundException, InvalidHTTPKeyValueTokensException, IOException  {
 		//  Check for status location first.
 		Debug.println("Checking ["+statusLocation+"]");
 		if (statusLocation!=null){ 

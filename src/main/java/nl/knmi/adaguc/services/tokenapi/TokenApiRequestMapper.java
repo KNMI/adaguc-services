@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
-import nl.knmi.adaguc.config.ConfigurationItemNotFoundException;
+import nl.knmi.adaguc.tools.ElementNotFoundException;
 import nl.knmi.adaguc.security.AuthenticatorFactory;
 import nl.knmi.adaguc.security.AuthenticatorInterface;
 import nl.knmi.adaguc.security.token.Token;
@@ -49,8 +49,8 @@ public class TokenApiRequestMapper {
 		} catch (AuthenticationException e) {
 			Debug.printStackTrace(e);
 			jsonResponse.setErrorMessage("Authentication error", 401);
-		} catch (ConfigurationItemNotFoundException e) {
-			jsonResponse.setException("ConfigurationItemNotFoundException",e);
+		} catch (ElementNotFoundException e) {
+			jsonResponse.setException("ElementNotFoundException",e);
 		} catch (ParseException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

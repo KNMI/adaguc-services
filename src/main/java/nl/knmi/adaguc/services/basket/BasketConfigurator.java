@@ -1,13 +1,14 @@
 package nl.knmi.adaguc.services.basket;
 
-import nl.knmi.adaguc.config.ConfigurationItemNotFoundException;
+import nl.knmi.adaguc.tools.ElementNotFoundException;
 import nl.knmi.adaguc.config.ConfigurationReader;
 import nl.knmi.adaguc.tools.MyXMLParser.XMLElement;
 
 public class BasketConfigurator implements nl.knmi.adaguc.config.ConfiguratorInterface{
 	private static boolean enabled=false;
+	static ConfigurationReader configurationReader = new ConfigurationReader ();
 	@Override
-	public void doConfig(XMLElement configReader) throws ConfigurationItemNotFoundException {
+	public void doConfig(XMLElement configReader) throws ElementNotFoundException {
 		if(configReader.getNodeValue("adaguc-services.basket") == null){
 			return;
 		}
@@ -20,8 +21,8 @@ public class BasketConfigurator implements nl.knmi.adaguc.config.ConfiguratorInt
 		}
 	}
 	
-	public static boolean getEnabled() throws ConfigurationItemNotFoundException {
-		ConfigurationReader.readConfig();
+	public static boolean getEnabled() throws ElementNotFoundException {
+		configurationReader.readConfig();
 		return enabled;
 	}
 	

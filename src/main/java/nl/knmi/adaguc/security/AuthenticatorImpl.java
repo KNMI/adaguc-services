@@ -6,11 +6,11 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.security.core.AuthenticationException;
 
-import nl.knmi.adaguc.config.ConfigurationItemNotFoundException;
 import nl.knmi.adaguc.security.PemX509Tools.X509Info;
 import nl.knmi.adaguc.security.token.Token;
 import nl.knmi.adaguc.security.token.TokenManager;
 import nl.knmi.adaguc.tools.Debug;
+import nl.knmi.adaguc.tools.ElementNotFoundException;
 import nl.knmi.adaguc.tools.HTTPTools;
 
 public class AuthenticatorImpl implements AuthenticatorInterface{
@@ -52,7 +52,7 @@ public class AuthenticatorImpl implements AuthenticatorInterface{
 //					Debug.println("Found token "+token);
 					x509 = new PemX509Tools().new X509Info(token.getUserId(), token.getToken());
 //					Debug.println("Found user "+x509.getCN());
-				} catch (AuthenticationException | IOException | ConfigurationItemNotFoundException e) {
+				} catch (AuthenticationException | IOException | ElementNotFoundException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}

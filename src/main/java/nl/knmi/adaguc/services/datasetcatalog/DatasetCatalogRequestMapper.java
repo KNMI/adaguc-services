@@ -20,7 +20,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JSR310Module;
 
-import nl.knmi.adaguc.config.ConfigurationItemNotFoundException;
+import nl.knmi.adaguc.tools.ElementNotFoundException;
 import nl.knmi.adaguc.services.datasetcatalog.DatasetDescription.DataOrganisation;
 import nl.knmi.adaguc.services.datasetcatalog.DatasetDescription.DataSource;
 import nl.knmi.adaguc.tools.Debug;
@@ -42,7 +42,7 @@ public class DatasetCatalogRequestMapper {
 
 	@ResponseBody
 	@RequestMapping("/list")
-	public void listCatalog(HttpServletResponse response, HttpServletRequest request) throws IOException, ConfigurationItemNotFoundException{
+	public void listCatalog(HttpServletResponse response, HttpServletRequest request) throws IOException, ElementNotFoundException{
 		JSONResponse jsonResponse = new JSONResponse(request);
 		ObjectMapper om=new ObjectMapper();
 		om.registerModule(new JSR310Module());
