@@ -12,7 +12,7 @@ import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.support.SpringBootServletInitializer;
 
 
-import nl.knmi.adaguc.config.ConfigurationReader;
+
 import nl.knmi.adaguc.config.MainServicesConfigurator;
 import nl.knmi.adaguc.security.SecurityConfigurator;
 import nl.knmi.adaguc.services.pywpsserver.PyWPSConfigurator;
