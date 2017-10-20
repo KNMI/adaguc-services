@@ -1,5 +1,10 @@
 # adaguc-services
-Services for adaguc-server
+
+[![Build Status](https://api.travis-ci.org/KNMI/adaguc-services.svg?branch=master)](https://travis-ci.org/KNMI/adaguc-services)
+[![Download](https://jitpack.io/v/KNMI/adaguc-services.svg)](https://jitpack.io/#KNMI/adaguc-services)
+
+
+Services for adaguc-server and pywps
 
 For setting up development environment:
 
@@ -19,6 +24,7 @@ For creating a new package:
 2) Type mvn package
 3) in directory target the file ./target/demo-${VERSION}-SNAPSHOT.jar is created.
 4) You can for example start this with java -jar demo-${VERSION}-SNAPSHOT.jar
+
 
 
 

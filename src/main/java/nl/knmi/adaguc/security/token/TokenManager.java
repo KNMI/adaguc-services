@@ -10,11 +10,13 @@ import java.util.regex.Pattern;
 
 import org.springframework.security.core.AuthenticationException;
 
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.MapType;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 
-import nl.knmi.adaguc.config.ConfigurationItemNotFoundException;
+import nl.knmi.adaguc.tools.ElementNotFoundException;
 import nl.knmi.adaguc.config.MainServicesConfigurator;
 import nl.knmi.adaguc.security.AuthenticationExceptionImpl;
 import nl.knmi.adaguc.security.AuthenticatorInterface;
@@ -28,15 +30,15 @@ import nl.knmi.adaguc.tools.Tools;
 public class TokenManager {
 	private static Map<String, Token> accesstokens = new ConcurrentHashMap<String,Token>();
 	  
-	public synchronized static Token getToken(String id) throws IOException, ConfigurationItemNotFoundException, AuthenticationException{
+	public synchronized static Token getToken(String id) throws IOException, ElementNotFoundException, AuthenticationException{
 		if(id == null){
 			throw new AuthenticationExceptionImpl("No token information provided");
 		}
 		loadTokensFromStore();
 		Token token = accesstokens.get(id);
 		if(token == null){
-			Debug.println("token not found");
-			throw new AuthenticationExceptionImpl("Token not found");
+			Debug.println("token not found "+id);
+			throw new AuthenticationExceptionImpl("Token not found "+id);
 		}
 		return token;
 	}
@@ -47,9 +49,10 @@ public class TokenManager {
 		if (matcher.find())	{
 		    return matcher.group();
 		}
+		Debug.println("No access token set in PATH URL via .../accesstoken/...");
 		return null;
 	}
-	public synchronized static Token registerToken(User user) throws IOException, ConfigurationItemNotFoundException, AuthenticationException, ParseException{
+	public synchronized static Token registerToken(User user) throws IOException, ElementNotFoundException, AuthenticationException, ParseException{
 		if(user == null)return null;
 		String idOne = UUID.randomUUID().toString();
 		Token token = new Token(idOne, user);
@@ -62,9 +65,10 @@ public class TokenManager {
 	
 	static boolean tokenStoreIsLoaded = false;
 
-	public static synchronized void saveTokensToStore() throws IOException, ConfigurationItemNotFoundException{
+	public static synchronized void saveTokensToStore() throws IOException, ElementNotFoundException{
 		if(tokenStoreIsLoaded == false){
-			throw new IOException("Trying to save a store which was not yet loaded");
+//			throw new IOException("Trying to save a store which was not yet loaded");
+			loadTokensFromStore();
 		}
 		ObjectMapper om=new ObjectMapper();
 		String tokenStoreStr = om.writeValueAsString(accesstokens);
@@ -73,20 +77,40 @@ public class TokenManager {
 		Tools.writeFile(tokenStoreDir+"/tokenstore.json", tokenStoreStr);
 	}
 	
-	public static synchronized void loadTokensFromStore()  throws IOException, ConfigurationItemNotFoundException{
+	public static synchronized void loadTokensFromStore()  throws  ElementNotFoundException{
 		if(LazyCaller.getInstance().isCallable("tokenstore", 1000) == false){
 			return;
 		};
 		tokenStoreIsLoaded = true;
-		String tokenStoreStr = Tools.readFile(MainServicesConfigurator.getBaseDir()+"/tokenstore/tokenstore.json");
+		
+		String tokenStoreStr = null;
+		try {
+			Tools.mksubdirs(MainServicesConfigurator.getBaseDir()+"/tokenstore/");
+			tokenStoreStr = Tools.readFile(MainServicesConfigurator.getBaseDir()+"/tokenstore/tokenstore.json");
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return;
+		}
 		ObjectMapper om=new ObjectMapper();
 		TypeFactory factory = TypeFactory.defaultInstance();
 		MapType type    = factory.constructMapType(ConcurrentHashMap.class, String.class, Token.class);
-		accesstokens = om.readValue(tokenStoreStr, type );
+		try {
+			accesstokens = om.readValue(tokenStoreStr, type );
+		} catch (JsonParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (JsonMappingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		Debug.println("Loaded tokenstore: there are " + accesstokens.size() +" tokens.");		
 	}
 	
-	public synchronized static Token getToken(AuthenticatorInterface authenticator) throws IOException, ConfigurationItemNotFoundException, AuthenticationException {
+	public synchronized static Token getToken(AuthenticatorInterface authenticator) throws IOException, ElementNotFoundException, AuthenticationException {
 		return getToken(authenticator.getClientId());
 	}
 }

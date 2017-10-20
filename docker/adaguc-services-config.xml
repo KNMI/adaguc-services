@@ -2,7 +2,7 @@
 <adaguc-services>
   <userworkspace>/data/adaguc-services-space</userworkspace>
 
-  <external-home-url>https://andrews-air-3.knmi.nl:9000</external-home-url>
+  <external-home-url>https://example.com:9000</external-home-url>
 
   <basedir>/src/adaguc-services-base</basedir>
 
@@ -14,7 +14,7 @@
     <truststorepassword>changeit</truststorepassword>
     <truststore>/config/esg-truststore.ts</truststore>
     <trustrootscadirectory>/src/.globus/certificates/</trustrootscadirectory>
-    <keystore>/keystore/c4i_keystore.jks</keystore>
+    <keystore>/config/keystore.jks</keystore>
     <keystorepassword>password</keystorepassword>
     <keystoretype>JKS</keystoretype>
     <keyalias>tomcat</keyalias>
@@ -32,7 +32,7 @@
   <pywps-server>
     <pywpsexecutable>/src/pywps-pywps-3.2.5/wps.py</pywpsexecutable>
     <pywpsconfigtemplate>/src/pywps-pywps-3.2.5/pywps/default.cfg</pywpsconfigtemplate>
-    <pywpsoutputdir>/src/wpsoutputs</pywpsoutputdir>
+    <pywpsoutputdir>/data/wpsoutputs</pywpsoutputdir>
     <pywpsprocessesdir>/src/pywps-pywps-3.2.5/pywps/processes/</pywpsprocessesdir>
     <tmp>/src/adaguc-services-tmp</tmp>
     <export>ADAGUC_CONFIG=/src/adaguc-server/adagucserver.xml</export>
@@ -40,11 +40,9 @@
     <export>ADAGUC_TMP=/src/adaguc-services-tmp/</export>
     <export>ADAGUC_LOGFILE=/src/adaguc-services-tmp/adagucserver-wps.log</export>
     <export>ADAGUC_DATARESTRICTION=FALSE</export>
-    <!--<export>PATH=/src/src/adagucserver/bin/:/src/conda/bin/:/src/conda/bin/:/src/conda/bin/:/src/bin:/src/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin</export>-->
-    <!--<export>PATH=/home/c3smagic/code/KNMI/wps_prov/climexp:/home/c3smagic/code/KNMI/adagucserver/bin/:/home/c3smagic/conda/bin/:/home/c3smagic/conda/bin/:/home/c3smagic/conda/bin/:/home/c3smagic/bin:/home/c3smagic/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin</export>-->
-    <export>PATH=/src/adaguc-server/bin/:/src/conda/bin/:/src/conda/bin/:/src/conda/bin/:/src/bin:/src/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin</export>
+        <export>PATH=/src/adaguc-server/bin/:{ENV.PATH}</export>
     <export>PYWPS_TEMPLATES=/src/pywps-pywps-3.2.5/pywps/Templates</export>
-    <export>PORTAL_OUTPUT_PATH=/src/wpsoutputs/</export>
+    <export>PORTAL_OUTPUT_PATH=/data/wpsoutputs/</export>
     <export>USE_FONTCONFIG=False</export>
   </pywps-server>
 
