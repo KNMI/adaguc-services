@@ -36,6 +36,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.apache.http.ParseException;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.conn.ssl.AllowAllHostnameVerifier;
 import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
@@ -61,6 +62,7 @@ import org.bouncycastle.cert.jcajce.JcaX509ExtensionUtils;
 import org.bouncycastle.cert.jcajce.JcaX509v3CertificateBuilder;
 import org.bouncycastle.openssl.PEMKeyPair;
 import org.bouncycastle.openssl.PEMParser;
+import org.bouncycastle.openssl.PKCS8Generator;
 import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
 import org.bouncycastle.openssl.jcajce.JcaPEMWriter;
 import org.bouncycastle.operator.ContentSigner;
@@ -101,6 +103,21 @@ public class PemX509Tools {
 		}
 		String uniqueId;
 		String CN;
+	}
+
+	/**
+	 * 
+	 * @author maartenplieger
+	 *
+	 */
+	@Getter
+	public class X509UserCertAndKey{
+		public X509UserCertAndKey(X509Certificate userSlCertificate, PrivateKey privateKey) {
+			this.userSlCertificate = userSlCertificate;
+			this.privateKey = privateKey;
+		}
+		X509Certificate userSlCertificate;
+		PrivateKey privateKey;
 	}
 
 	/**
@@ -150,7 +167,6 @@ public class PemX509Tools {
 		if (null != certs && certs.length > 0) {
 			return getUserIdFromCertificate(certs[0]);
 		}
-		Debug.println("No user cert found");
 		return null;
 	}
 
@@ -196,37 +212,41 @@ public class PemX509Tools {
 	 */
 	public static X509Certificate signCSR(PKCS10CertificationRequest csr, X509Certificate caCert, PrivateKey caPrivateKey)
 			throws NoSuchAlgorithmException, InvalidKeyException, CertificateException, CertIOException, OperatorCreationException {
-		Calendar cal = Calendar.getInstance();
-		cal.add(Calendar.YEAR, 1);
+		Calendar notAfter = Calendar.getInstance();
+		notAfter.add(Calendar.YEAR, 1);
 
+		Calendar notBefore = Calendar.getInstance();
+		//notBefore.add(Calendar., -1);
+
+		
 		JcaPKCS10CertificationRequest jcaRequest = new JcaPKCS10CertificationRequest(csr);
 		X509v3CertificateBuilder certificateBuilder = new JcaX509v3CertificateBuilder(caCert,
-				BigInteger.valueOf(System.currentTimeMillis()), new Date(), cal.getTime(), jcaRequest.getSubject(), jcaRequest.getPublicKey());
+				BigInteger.valueOf(System.currentTimeMillis()), notBefore.getTime(), notAfter.getTime(), jcaRequest.getSubject(), jcaRequest.getPublicKey());
 
-		JcaX509ExtensionUtils extUtils = new JcaX509ExtensionUtils();
-		certificateBuilder.addExtension(Extension.authorityKeyIdentifier, false, extUtils.createAuthorityKeyIdentifier(caCert))
-		.addExtension(Extension.subjectKeyIdentifier, false, extUtils.createSubjectKeyIdentifier(jcaRequest.getPublicKey()))
-		.addExtension(Extension.basicConstraints, true, new BasicConstraints(0))
-		.addExtension(Extension.keyUsage, true, new KeyUsage(KeyUsage.digitalSignature | KeyUsage.keyEncipherment))
-		.addExtension(Extension.extendedKeyUsage, true, new ExtendedKeyUsage(KeyPurposeId.id_kp_serverAuth));
+//		JcaX509ExtensionUtils extUtils = new JcaX509ExtensionUtils();
+//		certificateBuilder.addExtension(Extension.authorityKeyIdentifier, false, extUtils.createAuthorityKeyIdentifier(caCert))
+//		.addExtension(Extension.subjectKeyIdentifier, false, extUtils.createSubjectKeyIdentifier(jcaRequest.getPublicKey()))
+//		.addExtension(Extension.basicConstraints, true, new BasicConstraints(0))
+//		.addExtension(Extension.keyUsage, true, new KeyUsage(KeyUsage.digitalSignature | KeyUsage.keyEncipherment))
+//		.addExtension(Extension.extendedKeyUsage, true, new ExtendedKeyUsage(KeyPurposeId.id_kp_serverAuth));
 
-		// add pkcs extensions
-		Attribute[] attributes = csr.getAttributes();
-		for (Attribute attr : attributes) {
-			// process extension request
-			if (attr.getAttrType().equals(PKCSObjectIdentifiers.pkcs_9_at_extensionRequest)) {
-				Extensions extensions = Extensions.getInstance(attr.getAttrValues().getObjectAt(0));
-				@SuppressWarnings("unchecked")
-				Enumeration<ASN1ObjectIdentifier> e = (Enumeration<ASN1ObjectIdentifier>  )extensions.oids();
-				while (e.hasMoreElements()) {
-					ASN1ObjectIdentifier oid =  e.nextElement();
-					Extension ext = extensions.getExtension(oid);
-					certificateBuilder.addExtension(oid, ext.isCritical(), ext.getParsedValue());
-				}
-			}
-		}
+//		// add pkcs extensions
+//		Attribute[] attributes = csr.getAttributes();
+//		for (Attribute attr : attributes) {
+//			// process extension request
+//			if (attr.getAttrType().equals(PKCSObjectIdentifiers.pkcs_9_at_extensionRequest)) {
+//				Extensions extensions = Extensions.getInstance(attr.getAttrValues().getObjectAt(0));
+//				@SuppressWarnings("unchecked")
+//				Enumeration<ASN1ObjectIdentifier> e = (Enumeration<ASN1ObjectIdentifier>  )extensions.oids();
+//				while (e.hasMoreElements()) {
+//					ASN1ObjectIdentifier oid =  e.nextElement();
+//					Extension ext = extensions.getExtension(oid);
+//					certificateBuilder.addExtension(oid, ext.isCritical(), ext.getParsedValue());
+//				}
+//			}
+//		}
 
-		ContentSigner signer = new JcaContentSignerBuilder("SHA1withRSA").setProvider("BC").build(caPrivateKey);
+		ContentSigner signer = new JcaContentSignerBuilder("SHA256withRSA").setProvider("BC").build(caPrivateKey);
 		return new JcaX509CertificateConverter().setProvider("BC").getCertificate(certificateBuilder.build(signer));
 	}
 
@@ -254,7 +274,20 @@ public class PemX509Tools {
 	public static void writeCertificateToPemFile(Object certHolder, String fileName) throws IOException {
 		Tools.writeFile(fileName, certificateToPemString(certHolder));		
 	}
+	
+	public static void writePrivateKeyToPemFile(PrivateKey certHolder, String fileName) throws IOException {
+		Tools.writeFile(fileName, privateKeyToPemString(certHolder));		
+	}
 
+
+	private static String privateKeyToPemString(PrivateKey certHolder) throws IOException {
+		StringWriter str = new StringWriter();
+		JcaPEMWriter pemWriter = new JcaPEMWriter(str);
+		pemWriter.writeObject(certHolder);
+		pemWriter.close();
+		str.close();
+		return str.toString();
+	}
 	/**
 	 * Creates a selfsigned certificate authority 
 	 * @param CN The common name of the CA
@@ -369,6 +402,52 @@ public class PemX509Tools {
 		PemX509Tools.writeCertificateToPemFile(caCertificate,trustRootsDir +"/ca.pem");
 		PemX509Tools.writeCertificateToPemFile(signedCrt, clientCertLocation);
 	}
+	/**
+	 * Setup the certificate for specific user.
+	 * @param clientId
+	 * @param caCertificate
+	 * @param privateKey
+	 * @throws NoSuchAlgorithmException
+	 * @throws OperatorCreationException
+	 * @throws InvalidKeyException
+	 * @throws CertificateException
+	 * @throws CertIOException
+	 */
+	public X509UserCertAndKey setupSLCertificateUser(String clientId, X509Certificate caCertificate, PrivateKey privateKey)
+			throws NoSuchAlgorithmException, OperatorCreationException, InvalidKeyException, CertificateException, CertIOException {
+		Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
+		KeyPairGenerator keyGenkeyGeneratorRSA = KeyPairGenerator.getInstance("RSA");
+		int keySize = 2048;
+		keyGenkeyGeneratorRSA.initialize(keySize, new SecureRandom());
+		/* Step 4 - Generate KeyPair for CSR */
+		KeyPair keyPairCSR = keyGenkeyGeneratorRSA.generateKeyPair();
+
+		/* Step 5 - Generate CSR */
+		PKCS10CertificationRequest csr = PemX509Tools.createCSR("CN="+clientId, keyPairCSR);
+		
+//		 try {
+//			PemX509Tools.writeCertificateToPemFile(csr, "/tmp/_usercsr.csr");
+//			PemX509Tools.writeCertificateToPemFile(caCertificate, "/tmp/_ca.pem");
+//			PemX509Tools.writePrivateKeyToPemFile(privateKey, "/tmp/_ca.key");
+//		} catch (IOException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+
+		/* Step 6 - Sign CSR with CA */		
+		X509Certificate signedCrt = PemX509Tools.signCSR(csr, caCertificate, privateKey);
+
+//		try {
+//			PemX509Tools.writeCertificateToPemFile(signedCrt, "/tmp/_user.crt");
+//			PemX509Tools.writePrivateKeyToPemFile(keyPairCSR.getPrivate(), "/tmp/_user.key");
+//		} catch (IOException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+		
+
+		return new X509UserCertAndKey(signedCrt, keyPairCSR.getPrivate());
+	}
 
 	/**
 	 * Sets up a closable http client for two way SSL or client authentication
@@ -387,10 +466,45 @@ public class PemX509Tools {
 	 * @throws SignatureException
 	 * @throws GSSException
 	 */
-	public CloseableHttpClient getHTTPClientForPEMBasedClientAuth(
+	public CloseableHttpClient getHTTPClientForPEMBasedClientAuthPEM(
 			String trustStoreLocation,
 			char [] trustStorePassword, 
 			String clientCertificate
+			) throws KeyManagementException, UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException, CertificateException, IOException, InvalidKeyException, NoSuchProviderException, SignatureException, GSSException{
+
+
+		X509UserCertAndKey certAndKey = null;
+		if(clientCertificate!=null){
+			/* Read the client auth certificates */
+			KeyPair clientPrivateCred = readPrivateKeyFromPEM(clientCertificate);
+			X509Certificate clientCert = readCertificateFromPEM(clientCertificate);
+			certAndKey = new X509UserCertAndKey(clientCert,clientPrivateCred.getPrivate());
+
+		}
+		return getHTTPClientForPEMBasedClientAuth(trustStoreLocation,trustStorePassword,certAndKey);
+	}
+	
+	/**
+	 * 
+	 * @param trustStoreLocation
+	 * @param trustStorePassword
+	 * @param certAndKey
+	 * @return
+	 * @throws KeyManagementException
+	 * @throws UnrecoverableKeyException
+	 * @throws NoSuchAlgorithmException
+	 * @throws KeyStoreException
+	 * @throws CertificateException
+	 * @throws IOException
+	 * @throws InvalidKeyException
+	 * @throws NoSuchProviderException
+	 * @throws SignatureException
+	 * @throws GSSException
+	 */
+	public CloseableHttpClient getHTTPClientForPEMBasedClientAuth(
+			String trustStoreLocation,
+			char [] trustStorePassword, 
+			X509UserCertAndKey certAndKey
 			) throws KeyManagementException, UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException, CertificateException, IOException, InvalidKeyException, NoSuchProviderException, SignatureException, GSSException{
 		KeyStore trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
 
@@ -405,22 +519,18 @@ public class PemX509Tools {
 			}
 		}
 		trustStoreStream.close();
-
-		if(clientCertificate!=null){
-			/* Read the client auth certificates */
-			KeyPair clientPrivateCred = readPrivateKeyFromPEM(clientCertificate);
-			X509Certificate clientCert = readCertificateFromPEM(clientCertificate);
-
-			trustStore.setKeyEntry("privateKeyAlias", clientPrivateCred.getPrivate(),
-					trustStorePassword, new Certificate[] { clientCert});
+		if(certAndKey!=null){
+			trustStore.setKeyEntry("privateKeyAlias", certAndKey.getPrivateKey(),
+					trustStorePassword, new Certificate[] { certAndKey.getUserSlCertificate()});
 		}
+
 		SSLContext sslContext =
 				new SSLContextBuilder()
 				.loadTrustMaterial(trustStore, new TrustSelfSignedStrategy())
 				.loadKeyMaterial(trustStore, trustStorePassword)
 				.build();
 
-		return HttpClients.custom().setSSLContext(sslContext).build();
+		return HttpClients.custom().setSSLContext(sslContext).setHostnameVerifier(AllowAllHostnameVerifier.INSTANCE).build();
 	}
 
 
@@ -432,7 +542,7 @@ public class PemX509Tools {
 			String CLIENT_TRUSTSTORE = "/home/c3smagic/config/esg-truststore.ts";
 			String certLoc = "/home/c3smagic/impactspace/esg-dn1.nsc.liu.se.esgf-idp.openid.maartenplieger/certs/creds.pem";
 			String url = "https://compute-test.c3s-magic.eu:9000/user/getuserinfofromcert";
-			CloseableHttpClient httpClient = (new PemX509Tools()).getHTTPClientForPEMBasedClientAuth(CLIENT_TRUSTSTORE, CLIENT_TRUSTSTORE_PASSWORD, certLoc);
+			CloseableHttpClient httpClient = (new PemX509Tools()).getHTTPClientForPEMBasedClientAuthPEM(CLIENT_TRUSTSTORE, CLIENT_TRUSTSTORE_PASSWORD, certLoc);
 			CloseableHttpResponse httpResponse = httpClient.execute(new HttpGet(url));
 			String result = EntityUtils.toString(httpResponse.getEntity());
 			Debug.println(result);
