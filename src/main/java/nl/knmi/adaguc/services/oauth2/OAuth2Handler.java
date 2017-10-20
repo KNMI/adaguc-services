@@ -531,22 +531,28 @@ keytool -import -v -trustcacerts -alias slcs.ceda.ac.uk -file  slcs.ceda.ac.uk -
     
     try {
     	JSONObject accessToken = makeUserCertificate(userInfo.user_identifier.replaceAll("/", "."));
-	    request.getSession().setAttribute("services_access_token", accessToken.get("token"));
-	    request.getSession().setAttribute("domain", accessToken.get("domain"));
-	    Debug.println("makeUserCertificate succeeded: "+accessToken);
+    	if ( accessToken.has("error")){
+    		Debug.errprintln("Error getting user cert: " + accessToken.toString());
+    		request.getSession().setAttribute("services_access_token", accessToken.toString());
+    	} else {
+	    	Debug.println("makeUserCertificate succeeded: "+accessToken.toString());
+		    request.getSession().setAttribute("services_access_token", accessToken.get("token"));
+		    request.getSession().setAttribute("domain", accessToken.get("domain"));
+		    Debug.println("makeUserCertificate succeeded: "+accessToken);
+    	}
 
 	} catch (Exception e) {
 			request.getSession().setAttribute("services_access_token", null);
 			Debug.errprintln("makeUserCertificate Failed");
-		e.printStackTrace();
+			Debug.printStackTrace(e);
 	} 
   };
   
   private static JSONObject makeUserCertificate(String clientId) throws CertificateException, IOException, InvalidKeyException, NoSuchAlgorithmException, OperatorCreationException, KeyManagementException, UnrecoverableKeyException, KeyStoreException, NoSuchProviderException, SignatureException, GSSException, ElementNotFoundException, CertificateVerificationException, JSONException {
 
 	Debug.println("Making user cert for "+clientId);
-    X509Certificate caCertificate = PemX509Tools.readCertificateFromPEM("/usr/people/tjalma/hackaton_config/config/knmi_ds_ca.pem");
-    PrivateKey privateKey = PemX509Tools.readPrivateKeyFromPEM("/usr/people/tjalma/hackaton_config/config/knmi_ds_rootca.key").getPrivate();
+    X509Certificate caCertificate = PemX509Tools.readCertificateFromPEM(SecurityConfigurator.getCACertificate());
+    PrivateKey privateKey = PemX509Tools.readPrivateKeyFromPEM(SecurityConfigurator.getCAPrivateKey()).getPrivate();
 
 //    X509Certificate caCertificate = PemX509Tools.readCertificateFromPEM("/net/pc160117/nobackup/users/wagenaar/adaguc-services-dir/config/knmi_ds_ca.pem");
 //    PrivateKey privateKey = PemX509Tools.readPrivateKeyFromPEM("/net/pc160117/nobackup/users/wagenaar/adaguc-services-dir/config/knmi_ds_rootca.key").getPrivate();
@@ -593,6 +599,9 @@ openssl req -noout -modulus -in /tmp/test.csr | openssl md5
 
 wget --no-check-certificate --private-key /tmp/test.key --certificate /tmp/test.crt "https://pc160116.knmi.nl:8090/wps?service=wps&request=getcapabilities" -O /tmp/test.xml && cat /tmp/test.xml
 
+
+wget --no-check-certificate --private-key /tmp/test.key --certificate /tmp/test.crt "https://compute-test.c3s-magic.eu:9000/wms?service=wms&request=getcapabilities" -O /tmp/test.xml && cat /tmp/test.xml
+
      */
     
     
@@ -606,7 +615,7 @@ wget --no-check-certificate --private-key /tmp/test.key --certificate /tmp/test.
     Debug.println("Created user cert");
     //String url = "https://pc160116.knmi.nl:8090/wps?service=wps&request=getcapabilities";
     //String url = "https://pc160116.knmi.nl:8090/registertoken";
-    String url = "https://bhw485.knmi.nl:9000/registertoken";
+    String url = "https://compute-test.c3s-magic.eu:9000/registertoken";
     //String url = "https://bhw512.knmi.nl:8090/registertoken";
     Debug.println("Requesting token from " + url);
     //String url = "https://bhw451.knmi.nl:8090/registertoken";

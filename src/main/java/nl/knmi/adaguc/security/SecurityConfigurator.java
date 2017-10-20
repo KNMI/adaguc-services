@@ -36,6 +36,8 @@ public class SecurityConfigurator implements nl.knmi.adaguc.config.ConfiguratorI
 	private static String keyStorePassword=null;
 	private static String keyStoreType="JKS";
 	private static String keyAlias="tomcat";
+	private static String caCertificate = null;
+	private static String caPrivateKey = null;		
 	
 	static ConfigurationReader configurationReader = new ConfigurationReader ();
 	
@@ -53,10 +55,24 @@ public class SecurityConfigurator implements nl.knmi.adaguc.config.ConfiguratorI
 		keyStorePassword=configReader.getNodeValue("adaguc-services.security.keystorepassword");
 		keyStoreType=configReader.getNodeValue("adaguc-services.security.keystoretype");
 		keyAlias=configReader.getNodeValue("adaguc-services.security.keyalias");
-		Debug.println("trustStorePassword" + trustStorePassword);
+		if (configReader.getNodeValue("adaguc-services.security.tokenapi")!=null){
+			caCertificate=configReader.getNodeValue("adaguc-services.security.tokenapi.cacertificate");
+			caPrivateKey=configReader.getNodeValue("adaguc-services.security.tokenapi.caprivatekey");
+		} else {
+			Debug.println("tokenapi is not enabled");
+		}
+		
 	
 	}
-
+	
+	public static String getCACertificate() throws ElementNotFoundException {
+		configurationReader.readConfig();
+		return caCertificate;
+	}
+	public static String getCAPrivateKey() throws ElementNotFoundException {
+		configurationReader.readConfig();
+		return caPrivateKey;
+	}
 	public static String getTrustStorePassword() throws ElementNotFoundException {
 		configurationReader.readConfig();
 		return trustStorePassword;

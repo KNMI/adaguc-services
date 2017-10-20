@@ -28,9 +28,8 @@ public class AuthenticatorImpl implements AuthenticatorInterface{
 	@Override
 	public void init(HttpServletRequest request) {
 //		Debug.println("Init");
-		// TODO Auto-generated method stub
 		x509 = new PemX509Tools().getUserIdFromCertificate(request);
-		
+		Debug.println("No user info found from certificates");
 		if(x509 == null){
 			String path = request.getServletPath();
 			
@@ -40,8 +39,7 @@ public class AuthenticatorImpl implements AuthenticatorInterface{
 			    try {
 					tokenStr = HTTPTools.getHTTPParam(request, "key");
 				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					Debug.println("No access token set in URL via key=<accesstoken> KVP");
 				}
 		    }
 		    
@@ -54,13 +52,13 @@ public class AuthenticatorImpl implements AuthenticatorInterface{
 //					Debug.println("Found user "+x509.getCN());
 				} catch (AuthenticationException | IOException | ElementNotFoundException e) {
 					// TODO Auto-generated catch block
-					e.printStackTrace();
+					Debug.printStackTrace(e);
 				}
 			    
 			    
 			    
 			}else{
-				Debug.println("not found");
+				Debug.println("Unable to find user info from certificate or accesstoken");
 			}
 			
 
