@@ -8,7 +8,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.context.annotation.Bean;
-import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -19,8 +18,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
-import nl.knmi.adaguc.services.oauth2.OAuth2Handler;
-import nl.knmi.adaguc.tools.Debug;
 import nl.knmi.adaguc.tools.ElementNotFoundException;
 import nl.knmi.adaguc.tools.JSONResponse;
 
@@ -81,21 +78,21 @@ public class OAuth2RequestMapper {
 		
 		if(servicesAccessToken == null || servicesAccessToken.length() == 0
 				|| isIdUnknown(id)){
-			jsonObj.put("services_access_token",null);
+			jsonObj.put("services_access_token","undefined");
 		}else{
 			jsonObj.put("services_access_token",servicesAccessToken);
 		}
 		
 		if(emailAddress == null || emailAddress.length() == 0
 				|| isIdUnknown(id)){
-			jsonObj.put("email_address",null);
+			jsonObj.put("email_address","undefined");
 		}else{
 			jsonObj.put("email_address",emailAddress);
 		}
 		
 		if(domain == null || domain.length() == 0
 				|| isIdUnknown(id)){
-			jsonObj.put("domain",null);
+			jsonObj.put("domain","undefined");
 		}else{
 			jsonObj.put("domain",domain);
 		}
