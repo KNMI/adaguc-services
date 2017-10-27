@@ -59,31 +59,22 @@ RUN tar xvf pywps-3.2.5.tar.gz
 # Install adaguc-services from the context
 WORKDIR /src
 RUN mkdir adaguc-services
-COPY src/ /src/adaguc-services/src/
+COPY /src/ /src/adaguc-services/src/
 COPY pom.xml /src/adaguc-services/pom.xml
 WORKDIR /src/adaguc-services
 RUN mvn package
+RUN cp ./target/adaguc-services-*.war /src/adaguc-services.war
 
 # Configure adaguc-services
 ENV ADAGUC_SERVICES_CONFIG=/config/adaguc-services-config.xml
 
 WORKDIR /src/adaguc-services
-CMD echo "Starting POSTGRESQL DB" && \
-    runuser -l postgres -c "pg_ctl -D /postgresql -l /var/log/postgresql.log start" && \
-    sleep 1 && \
-    mkdir -p /data/adaguc-autowms/ && \
-    mkdir -p /data/adaguc-datasets/ && \
-    mkdir -p /data/adaguc-datasets-spaces/ && \
-    mkdir -p /data/wpsoutputs/ && \
-    mkdir -p /data/adaguc-services-tmp/ && \
-    cp /src/adaguc-server/data/datasets/testdata.nc /data/adaguc-autowms/ && \
-    cp /src/adaguc-server/data/config/datasets/dataset_a.xml /data/adaguc-datasets/ && \
-    echo "Configuring POSTGRESQL DB" && \
-    runuser -l postgres -c "createuser --superuser adaguc" && \
-    runuser -l postgres -c "psql postgres -c \"ALTER USER adaguc PASSWORD 'adaguc';\"" && \
-    runuser -l postgres -c "psql postgres -c \"CREATE DATABASE adaguc;\"" && \
-    echo "Starting TOMCAT Server" && \
-    java -jar ./target/adaguc-services-1.0.0-SNAPSHOT.war
+
+COPY ./docker/start.sh /src/
+
+RUN chmod +x /src/start.sh
+ENTRYPOINT /src/start.sh
+
 
 
 
