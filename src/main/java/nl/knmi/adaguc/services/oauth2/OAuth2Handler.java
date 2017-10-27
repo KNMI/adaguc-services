@@ -553,7 +553,7 @@ keytool -import -v -trustcacerts -alias slcs.ceda.ac.uk -file  slcs.ceda.ac.uk -
 
 	Debug.println("Making user cert for "+clientId);
     X509Certificate caCertificate = PemX509Tools.readCertificateFromPEM(SecurityConfigurator.getCACertificate());
-    PrivateKey privateKey = PemX509Tools.readPrivateKeyFromPEM(SecurityConfigurator.getCAPrivateKey()).getPrivate();
+    PrivateKey privateKey = PemX509Tools.readPrivateKeyFromPEM(SecurityConfigurator.getCAPrivateKey());
     X509UserCertAndKey userCert = new PemX509Tools().setupSLCertificateUser(clientId, caCertificate, privateKey);
     
     /* TODO could optinally write cert to user basket */

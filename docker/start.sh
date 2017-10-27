@@ -1,5 +1,6 @@
 #!/bin/bash
 
+
 echo "Starting POSTGRESQL DB" && \
 runuser -l postgres -c "pg_ctl -w -D /postgresql -l /var/log/postgresql.log start" && \
 mkdir -p /data/adaguc-autowms/ && \

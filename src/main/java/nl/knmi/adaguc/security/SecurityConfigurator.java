@@ -101,7 +101,9 @@ public class SecurityConfigurator implements nl.knmi.adaguc.config.ConfiguratorI
 		return computeNodes;
 	}
 	public static String getCACertificate() throws ElementNotFoundException {
+		Debug.println("getCACertificate");
 		configurationReader.readConfig();
+		Debug.println("getCACertificate="+caCertificate);
 		return caCertificate;
 	}
 	public static String getCAPrivateKey() throws ElementNotFoundException {

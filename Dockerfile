@@ -31,9 +31,9 @@ RUN yum update -y && yum install -y \
     postgresql-server \
     gdal-devel \
     tomcat \
-    maven
+    maven \
+    openssl
 
-RUN mkdir /src
 WORKDIR /src
 # Configure postgres
 RUN mkdir /postgresql
@@ -55,15 +55,14 @@ RUN bash compile.sh
 WORKDIR /src
 RUN curl -L -O https://github.com/geopython/pywps/archive/pywps-3.2.5.tar.gz
 RUN tar xvf pywps-3.2.5.tar.gz
+RUN mv pywps-pywps-3.2.5 pywps
 
 # Install adaguc-services from the context
-WORKDIR /src
-RUN mkdir adaguc-services
+WORKDIR /src/adaguc-services
 COPY /src/ /src/adaguc-services/src/
 COPY pom.xml /src/adaguc-services/pom.xml
-WORKDIR /src/adaguc-services
 RUN mvn package
-RUN cp ./target/adaguc-services-*.war /src/adaguc-services.war
+RUN cp /src/adaguc-services/target/adaguc-services-*.war /src/adaguc-services.war
 
 # Configure adaguc-services
 ENV ADAGUC_SERVICES_CONFIG=/config/adaguc-services-config.xml
