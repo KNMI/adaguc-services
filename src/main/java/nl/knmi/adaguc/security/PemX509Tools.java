@@ -45,6 +45,7 @@ import org.apache.http.util.EntityUtils;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.pkcs.Attribute;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
+import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x509.BasicConstraints;
 import org.bouncycastle.asn1.x509.ExtendedKeyUsage;
@@ -126,15 +127,26 @@ public class PemX509Tools {
 	 * @return KeyPair, containing the private key
 	 * @throws IOException
 	 */
-	public static KeyPair readPrivateKeyFromPEM (String fileName) throws IOException{
+	public static PrivateKey readPrivateKeyFromPEM (String fileName) throws IOException{
 		JcaPEMKeyConverter converter = new JcaPEMKeyConverter().setProvider("BC");
 		String pemData = Tools.readFile(fileName);
-		String privateKeyPem = "-----BEGIN RSA PRIVATE KEY-----\n"+pemData.split("-----BEGIN RSA PRIVATE KEY-----")[1];
-		PEMParser pemParser = new PEMParser(new StringReader(privateKeyPem));
-		Object object = pemParser.readObject();
-		pemParser.close();
-		PEMKeyPair ukp = (PEMKeyPair) object;
-		return converter.getKeyPair(ukp);
+		String privateKeyPem = null;
+		try{
+			privateKeyPem = "-----BEGIN RSA PRIVATE KEY-----\n"+pemData.split("-----BEGIN RSA PRIVATE KEY-----")[1];
+			PEMParser pemParser = new PEMParser(new StringReader(privateKeyPem));
+			Object object = pemParser.readObject();
+			pemParser.close();
+			PEMKeyPair ukp = (PEMKeyPair) object;
+			return converter.getKeyPair(ukp).getPrivate();
+		}catch(Exception e){
+			privateKeyPem = "-----BEGIN PRIVATE KEY-----\n"+pemData.split("-----BEGIN PRIVATE KEY-----")[1];
+			PEMParser pemParser = new PEMParser(new StringReader(privateKeyPem));
+			Object object = pemParser.readObject();
+			pemParser.close();
+			PrivateKeyInfo ukp = (PrivateKeyInfo) object;
+			return converter.getPrivateKey(ukp);
+		}
+	
 	}
 
 	/**
@@ -476,9 +488,9 @@ public class PemX509Tools {
 		X509UserCertAndKey certAndKey = null;
 		if(clientCertificate!=null){
 			/* Read the client auth certificates */
-			KeyPair clientPrivateCred = readPrivateKeyFromPEM(clientCertificate);
+			PrivateKey clientPrivateCred = readPrivateKeyFromPEM(clientCertificate);
 			X509Certificate clientCert = readCertificateFromPEM(clientCertificate);
-			certAndKey = new X509UserCertAndKey(clientCert,clientPrivateCred.getPrivate());
+			certAndKey = new X509UserCertAndKey(clientCert,clientPrivateCred);
 
 		}
 		return getHTTPClientForPEMBasedClientAuth(trustStoreLocation,trustStorePassword,certAndKey);

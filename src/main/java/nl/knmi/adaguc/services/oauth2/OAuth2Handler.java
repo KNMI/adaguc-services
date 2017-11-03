@@ -96,6 +96,7 @@ import nl.knmi.adaguc.security.CertificateVerificationException;
 import nl.knmi.adaguc.security.PemX509Tools;
 import nl.knmi.adaguc.security.PemX509Tools.X509UserCertAndKey;
 import nl.knmi.adaguc.security.SecurityConfigurator;
+import nl.knmi.adaguc.security.SecurityConfigurator.ComputeNode;
 import nl.knmi.adaguc.services.oauth2.OAuthConfigurator.Oauth2Settings;
 import nl.knmi.adaguc.tools.DateFunctions;
 import nl.knmi.adaguc.tools.Debug;
@@ -552,79 +553,28 @@ keytool -import -v -trustcacerts -alias slcs.ceda.ac.uk -file  slcs.ceda.ac.uk -
 
 	Debug.println("Making user cert for "+clientId);
     X509Certificate caCertificate = PemX509Tools.readCertificateFromPEM(SecurityConfigurator.getCACertificate());
-    PrivateKey privateKey = PemX509Tools.readPrivateKeyFromPEM(SecurityConfigurator.getCAPrivateKey()).getPrivate();
-
-//    X509Certificate caCertificate = PemX509Tools.readCertificateFromPEM("/net/pc160117/nobackup/users/wagenaar/adaguc-services-dir/config/knmi_ds_ca.pem");
-//    PrivateKey privateKey = PemX509Tools.readPrivateKeyFromPEM("/net/pc160117/nobackup/users/wagenaar/adaguc-services-dir/config/knmi_ds_rootca.key").getPrivate();
-
-	  
+    PrivateKey privateKey = PemX509Tools.readPrivateKeyFromPEM(SecurityConfigurator.getCAPrivateKey());
     X509UserCertAndKey userCert = new PemX509Tools().setupSLCertificateUser(clientId, caCertificate, privateKey);
     
-    
-//    PemX509Tools.writePrivateKeyToPemFile(privateKey, "/tmp/caprivate.key");
-//    
-    PemX509Tools.writeCertificateToPemFile(userCert.getUserSlCertificate(), "/tmp/cert.crt");
-    PemX509Tools.writePrivateKeyToPemFile(userCert.getPrivateKey(), "/tmp/cert.key");
-    
-    /*
-     * 
-     * 
-# TEST MET JAVA
-openssl x509 -noout -modulus -in /tmp/cert.crt | openssl md5
-openssl rsa -noout -modulus -in /tmp/cert.key | openssl md5
-openssl req -noout -modulus -in /tmp/cert.csr | openssl md5
-openssl x509 -noout -modulus -in /tmp/customcert.crt | openssl md5
-wget --no-check-certificate --private-key /tmp/cert.key --certificate /tmp/cert.crt "https://pc160116.knmi.nl:8090/wps?service=wps&request=getcapabilities" -O /tmp/test.xml && cat /tmp/test.xml
-
-#TEST VANAF CSR
-openssl x509 -req -in /tmp/_usercsr.csr  -CA /tmp/_ca.pem  -CAkey /tmp/_ca.key -CAcreateserial -out /tmp/customcert.crt -days 3600
-wget --no-check-certificate --private-key /tmp/cert.key --certificate /tmp/customcert.crt "https://pc160116.knmi.nl:8090/wps?service=wps&request=getcapabilities" -O /tmp/test.xml && cat /tmp/test.xml
-
-
-# TEST MET OPENSSL
-cacert="/net/pc160117/nobackup/users/wagenaar/adaguc-services-dir/config/knmi_ds_ca.pem"
-cakey="/net/pc160117/nobackup/users/wagenaar/adaguc-services-dir/config/knmi_ds_rootca.key"
-
-openssl genrsa -des3 -out /tmp/testpass.key 2048  -subj '/CN=testuser'
-openssl rsa -in /tmp/testpass.key -out /tmp/test.key
-
-openssl req -new -key /tmp/test.key -out /tmp/test.csr -subj '/CN=TESTER'
-openssl x509 -req -in /tmp/test.csr  -CA $cacert  -CAkey $cakey -CAcreateserial -out /tmp/test.crt -days 3600
-
-wget --no-check-certificate --private-key /tmp/test.key --certificate /tmp/test.crt "https://pc160116.knmi.nl:8090/wps?service=wps&request=getcapabilities" -O /tmp/test.txt && cat /tmp/test.txt
-openssl x509 -noout -modulus -in /tmp/test.crt | openssl md5
-openssl rsa -noout -modulus -in /tmp/test.key | openssl md5
-openssl req -noout -modulus -in /tmp/test.csr | openssl md5
-
-
-wget --no-check-certificate --private-key /tmp/test.key --certificate /tmp/test.crt "https://pc160116.knmi.nl:8090/wps?service=wps&request=getcapabilities" -O /tmp/test.xml && cat /tmp/test.xml
-
-
-wget --no-check-certificate --private-key /tmp/test.key --certificate /tmp/test.crt "https://compute-test.c3s-magic.eu:9000/wms?service=wms&request=getcapabilities" -O /tmp/test.xml && cat /tmp/test.xml
-
-     */
-    
+    /* TODO could optinally write cert to user basket */
+//    PemX509Tools.writeCertificateToPemFile(userCert.getUserSlCertificate(), "/tmp/cert.crt");
+//    PemX509Tools.writePrivateKeyToPemFile(userCert.getPrivateKey(), "/tmp/cert.key");
+   
     
     CloseableHttpClient httpClient = new PemX509Tools().getHTTPClientForPEMBasedClientAuth(
 			SecurityConfigurator.getTrustStore(),
 			SecurityConfigurator.getTrustStorePassword().toCharArray(), 
 			userCert);
-//    [tjalma@pc150232 config]$ echo | openssl s_client -connect pc160116.knmi.nl:8090 2>&1 | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p'  > pc160116.knmi.nl
-//    [tjalma@pc150232 config]$ keytool -import -v -trustcacerts -alias pc160116.knmi.nl -file pc160116.knmi.nl -keystore ../esg-truststore.ts -storepass changeit -noprompt
-
     Debug.println("Created user cert");
-    //String url = "https://pc160116.knmi.nl:8090/wps?service=wps&request=getcapabilities";
-    //String url = "https://pc160116.knmi.nl:8090/registertoken";
-    String url = "https://compute-test.c3s-magic.eu:9000/registertoken";
-    //String url = "https://bhw512.knmi.nl:8090/registertoken";
+    Vector<ComputeNode> computeNodes = SecurityConfigurator.getComputeNodes();
+    
+    String url = computeNodes.get(0).url + "/registertoken";
     Debug.println("Requesting token from " + url);
-    //String url = "https://bhw451.knmi.nl:8090/registertoken";
     CloseableHttpResponse httpResponse = httpClient.execute(new HttpGet(url));
 	String result = EntityUtils.toString(httpResponse.getEntity());
 	JSONObject resultAsJSON = new JSONObject(result);
 	resultAsJSON.put("domain", url.substring(0,url.lastIndexOf("/")).replaceAll("https://", ""));
 	httpResponse.close();
-	
 	Debug.println("resultAsJSON:["+resultAsJSON+"]");
 	return resultAsJSON;
 
