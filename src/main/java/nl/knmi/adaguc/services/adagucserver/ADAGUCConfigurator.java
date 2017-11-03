@@ -1,6 +1,6 @@
 package nl.knmi.adaguc.services.adagucserver;
 
-import nl.knmi.adaguc.config.ConfigurationItemNotFoundException;
+import nl.knmi.adaguc.tools.ElementNotFoundException;
 import nl.knmi.adaguc.config.ConfigurationReader;
 import nl.knmi.adaguc.tools.MyXMLParser.XMLElement;
 
@@ -27,7 +27,7 @@ import nl.knmi.adaguc.tools.MyXMLParser.XMLElement;
 
 public class ADAGUCConfigurator implements nl.knmi.adaguc.config.ConfiguratorInterface {
 	private static String ADAGUCExecutable="/usr/bin/adagucserver";
-
+	static ConfigurationReader configurationReader = new ConfigurationReader ();
 	private static String[] environmentVariables = {
 	};
 
@@ -36,13 +36,14 @@ public class ADAGUCConfigurator implements nl.knmi.adaguc.config.ConfiguratorInt
 		environmentVariables = configReader.getNodeValues("adaguc-services.adaguc-server.export");
 	}
 
-	public static String getADAGUCExecutable() throws ConfigurationItemNotFoundException {
-		ConfigurationReader.readConfig();
+	public static String getADAGUCExecutable() throws ElementNotFoundException {
+		configurationReader.readConfig();
 		return ADAGUCExecutable;
 	}
 
-	public static String[] getADAGUCEnvironment() throws ConfigurationItemNotFoundException {
-		ConfigurationReader.readConfig();
+	public static String[] getADAGUCEnvironment() throws ElementNotFoundException {
+		
+		configurationReader.readConfig();
 		return environmentVariables;
 	}	
 }

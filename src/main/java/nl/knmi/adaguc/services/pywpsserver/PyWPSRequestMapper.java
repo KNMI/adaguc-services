@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
-import nl.knmi.adaguc.config.ConfigurationItemNotFoundException;
+import nl.knmi.adaguc.tools.ElementNotFoundException;
 import nl.knmi.adaguc.tools.Debug;
 import nl.knmi.adaguc.tools.JSONResponse;
 
@@ -40,8 +40,8 @@ public class PyWPSRequestMapper {
 				new JSONResponse(request).setErrorMessage("Authentication error", 401).print(response);
 		} catch (IOException e) {
 			new JSONResponse(request).setException("IOException",e).print(response);
-		} catch (ConfigurationItemNotFoundException e) {
-			new JSONResponse(request).setException("ConfigurationItemNotFoundException",e).print(response);
+		} catch (ElementNotFoundException e) {
+			new JSONResponse(request).setException("ElementNotFoundException",e).print(response);
 		} catch (InterruptedException e) {
 			new JSONResponse(request).setException("InterruptedException",e).print(response);
 		}

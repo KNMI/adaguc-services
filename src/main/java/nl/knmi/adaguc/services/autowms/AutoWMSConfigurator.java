@@ -1,6 +1,6 @@
 package nl.knmi.adaguc.services.autowms;
 
-import nl.knmi.adaguc.config.ConfigurationItemNotFoundException;
+import nl.knmi.adaguc.tools.ElementNotFoundException;
 import nl.knmi.adaguc.config.ConfigurationReader;
 import nl.knmi.adaguc.tools.MyXMLParser.XMLElement;
 
@@ -16,7 +16,7 @@ public class AutoWMSConfigurator implements nl.knmi.adaguc.config.ConfiguratorIn
 	private static boolean enabled=false;
 	private static String adagucAutoWMS = null;
 	private static String adagucDataset = null;
-	
+	static ConfigurationReader configurationReader = new ConfigurationReader ();
 	public void doConfig(XMLElement  configReader){
 		if(configReader.getNodeValue("adaguc-services.autowms") == null){
 			return;
@@ -34,17 +34,17 @@ public class AutoWMSConfigurator implements nl.knmi.adaguc.config.ConfiguratorIn
 	}
 
 
-	public static String getAdagucDataset() throws ConfigurationItemNotFoundException {
-		ConfigurationReader.readConfig();
+	public static String getAdagucDataset() throws ElementNotFoundException {
+		configurationReader.readConfig();
 		return adagucDataset;
 	}
-	public static String getAdagucAutoWMS() throws ConfigurationItemNotFoundException {
-		ConfigurationReader.readConfig();
+	public static String getAdagucAutoWMS() throws ElementNotFoundException {
+		configurationReader.readConfig();
 		return adagucAutoWMS;
 	}
 
-	public static boolean getEnabled() throws ConfigurationItemNotFoundException {
-		ConfigurationReader.readConfig();
+	public static boolean getEnabled() throws ElementNotFoundException {
+		configurationReader.readConfig();
 		return enabled;
 	}
 }

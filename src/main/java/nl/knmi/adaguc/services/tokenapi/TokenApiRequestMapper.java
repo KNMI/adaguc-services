@@ -16,11 +16,12 @@ import org.springframework.web.bind.annotation.RestController;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
-import nl.knmi.adaguc.config.ConfigurationItemNotFoundException;
+import nl.knmi.adaguc.tools.ElementNotFoundException;
 import nl.knmi.adaguc.security.AuthenticatorFactory;
 import nl.knmi.adaguc.security.AuthenticatorInterface;
 import nl.knmi.adaguc.security.token.Token;
 import nl.knmi.adaguc.security.token.TokenManager;
+import nl.knmi.adaguc.security.user.User;
 import nl.knmi.adaguc.security.user.UserManager;
 import nl.knmi.adaguc.tools.Debug;
 import nl.knmi.adaguc.tools.JSONResponse;
@@ -39,27 +40,40 @@ public class TokenApiRequestMapper {
 	@ResponseBody
 	@RequestMapping("registertoken")
 	public void registerToken(HttpServletRequest request, HttpServletResponse response) throws IOException{
+		Debug.println("registerToken");
 		JSONResponse jsonResponse = new JSONResponse(request);
 
 		AuthenticatorInterface authenticator = AuthenticatorFactory.getAuthenticator(request);
+		User user = null;
 		try {
-			Token token = TokenManager.registerToken(UserManager.getUser(authenticator));
-			ObjectMapper om=new ObjectMapper();
-			jsonResponse.setMessage(om.writeValueAsString(token));
-		} catch (AuthenticationException e) {
-			Debug.printStackTrace(e);
+			user = UserManager.getUser(authenticator);
+		} catch (AuthenticationException e1) {
+			Debug.printStackTrace(e1);
 			jsonResponse.setErrorMessage("Authentication error", 401);
-		} catch (ConfigurationItemNotFoundException e) {
-			jsonResponse.setException("ConfigurationItemNotFoundException",e);
-		} catch (ParseException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		} catch (ElementNotFoundException e1) {
+			Debug.printStackTrace(e1);
+			jsonResponse.setErrorMessage("Authentication error", 401);
 		}
-
+		if (user == null) {
+			Debug.println("No user found.");
+		}
+		if (user != null) {
+			try {
+				Token token = TokenManager.registerToken(user);
+				ObjectMapper om=new ObjectMapper();
+				jsonResponse.setMessage(om.writeValueAsString(token));
+			} catch (AuthenticationException e) {
+				Debug.printStackTrace(e);
+				jsonResponse.setErrorMessage("Authentication error", 401);
+			} catch (ElementNotFoundException e) {
+				jsonResponse.setException("ElementNotFoundException",e);
+			} catch (ParseException e) {
+				e.printStackTrace();
+			}
+		}
 		try {
 			jsonResponse.print(response);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
