@@ -97,6 +97,8 @@ import nl.knmi.adaguc.security.PemX509Tools;
 import nl.knmi.adaguc.security.PemX509Tools.X509UserCertAndKey;
 import nl.knmi.adaguc.security.SecurityConfigurator;
 import nl.knmi.adaguc.security.SecurityConfigurator.ComputeNode;
+import nl.knmi.adaguc.security.user.User;
+import nl.knmi.adaguc.security.user.UserManager;
 import nl.knmi.adaguc.services.oauth2.OAuthConfigurator.Oauth2Settings;
 import nl.knmi.adaguc.tools.DateFunctions;
 import nl.knmi.adaguc.tools.Debug;
@@ -531,7 +533,7 @@ keytool -import -v -trustcacerts -alias slcs.ceda.ac.uk -file  slcs.ceda.ac.uk -
     request.getSession().setAttribute("login_method", "oauth2");
     
     try {
-    	JSONObject accessToken = makeUserCertificate(userInfo.user_identifier.replaceAll("/", "."));
+    	JSONObject accessToken = makeUserCertificate(User.makePosixUserId(userInfo.user_identifier));
     	if ( accessToken.has("error")){
     		Debug.errprintln("Error getting user cert: " + accessToken.toString());
     		request.getSession().setAttribute("services_access_token", accessToken.toString());
@@ -549,16 +551,15 @@ keytool -import -v -trustcacerts -alias slcs.ceda.ac.uk -file  slcs.ceda.ac.uk -
 	} 
   };
   
-  private static JSONObject makeUserCertificate(String clientId) throws CertificateException, IOException, InvalidKeyException, NoSuchAlgorithmException, OperatorCreationException, KeyManagementException, UnrecoverableKeyException, KeyStoreException, NoSuchProviderException, SignatureException, GSSException, ElementNotFoundException, CertificateVerificationException, JSONException {
+  public static JSONObject makeUserCertificate(String clientId) throws CertificateException, IOException, InvalidKeyException, NoSuchAlgorithmException, OperatorCreationException, KeyManagementException, UnrecoverableKeyException, KeyStoreException, NoSuchProviderException, SignatureException, GSSException, ElementNotFoundException, CertificateVerificationException, JSONException {
 
+	  
+	User user = UserManager.getUser(clientId);
 	Debug.println("Making user cert for "+clientId);
     X509Certificate caCertificate = PemX509Tools.readCertificateFromPEM(SecurityConfigurator.getCACertificate());
     PrivateKey privateKey = PemX509Tools.readPrivateKeyFromPEM(SecurityConfigurator.getCAPrivateKey());
     X509UserCertAndKey userCert = new PemX509Tools().setupSLCertificateUser(clientId, caCertificate, privateKey);
-    
-    /* TODO could optinally write cert to user basket */
-//    PemX509Tools.writeCertificateToPemFile(userCert.getUserSlCertificate(), "/tmp/cert.crt");
-//    PemX509Tools.writePrivateKeyToPemFile(userCert.getPrivateKey(), "/tmp/cert.key");
+    user.setCertificate(userCert);
    
     
     CloseableHttpClient httpClient = new PemX509Tools().getHTTPClientForPEMBasedClientAuth(
