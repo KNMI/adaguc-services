@@ -26,6 +26,7 @@ public class ADAGUCRequestMapper {
 		return converter;
 	}
 	@ResponseBody
+	@CrossOrigin
 	@RequestMapping("wms")
 	public void ADAGUCSERVERWMS(HttpServletResponse response, HttpServletRequest request){
 
