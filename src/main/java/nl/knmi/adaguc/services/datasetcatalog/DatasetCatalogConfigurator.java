@@ -13,6 +13,9 @@ public class DatasetCatalogConfigurator implements nl.knmi.adaguc.config.Configu
 		if(configReader.getNodeValue("adaguc-services.basket") == null){
 			return;
 		}
+		if(configReader.getNodeValue("adaguc-services.datasetcatalog") == null){
+			return;
+		}
 		String enabledStr=configReader.getNodeValue("adaguc-services.datasetcatalog.enabled");
 		if(enabledStr != null && enabledStr.equals("true")){
 			enabled = true;

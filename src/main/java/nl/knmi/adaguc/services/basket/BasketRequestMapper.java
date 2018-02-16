@@ -2,13 +2,28 @@ package nl.knmi.adaguc.services.basket;
 
 import java.io.File;
 import java.io.IOException;
+import java.security.InvalidKeyException;
+import java.security.KeyManagementException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.SignatureException;
+import java.security.UnrecoverableKeyException;
+import java.security.cert.CertificateException;
+import java.util.Vector;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.util.EntityUtils;
+import org.ietf.jgss.GSSException;
 import org.json.JSONObject;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -23,8 +38,14 @@ import com.fasterxml.jackson.datatype.jsr310.JSR310Module;
 
 import nl.knmi.adaguc.security.AuthenticatorFactory;
 import nl.knmi.adaguc.security.AuthenticatorInterface;
+import nl.knmi.adaguc.security.PemX509Tools;
+import nl.knmi.adaguc.security.SecurityConfigurator;
+import nl.knmi.adaguc.security.PemX509Tools.X509UserCertAndKey;
+import nl.knmi.adaguc.security.SecurityConfigurator.ComputeNode;
+import nl.knmi.adaguc.security.user.User;
 import nl.knmi.adaguc.security.user.UserManager;
 import nl.knmi.adaguc.tools.Debug;
+import nl.knmi.adaguc.tools.ElementNotFoundException;
 import nl.knmi.adaguc.tools.HTTPTools;
 import nl.knmi.adaguc.tools.JSONResponse;
 
@@ -41,6 +62,7 @@ public class BasketRequestMapper {
 		return converter;
 	}
 
+	
 	@ResponseBody
 	@RequestMapping("/list")
 	public void listBasket(HttpServletResponse response, HttpServletRequest request) throws IOException{
@@ -48,11 +70,27 @@ public class BasketRequestMapper {
 		ObjectMapper om=new ObjectMapper();
 		om.registerModule(new JSR310Module());
 		om.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+		
+		Debug.println("basket/list received");
 		try {
 			boolean enabled = BasketConfigurator.getEnabled();
 			if(!enabled){
-				jsonResponse.setMessage(new JSONObject().put("error","ADAGUC basket is not enabled"));
+				/* Make a basket of the remote instance */
+				Vector<ComputeNode> computeNodes = SecurityConfigurator.getComputeNodes();
+			    if (computeNodes.size() == 0) {
+			    	jsonResponse.setMessage(new JSONObject().put("error","ADAGUC basket is not enabled and no computenodes are available"));			    	
+			    } else {
+				    String url = computeNodes.get(0).url + "/basket/list";
+				    Debug.println("Getting basket from " + url);
+				    String basketResponse = UserManager.makeGetRequestWithUserFromServletRequest(request, url);
+					Debug.println(basketResponse);
+					jsonResponse.setMessage(new JSONObject().
+							put("type","ROOT").
+							put("name",computeNodes.get(0).url.replace("https://","")).
+							put("children", new JSONObject(basketResponse)));
+			    }
 			}else{
+				/*Try to use the basket locally available */
 				Debug.println("getoverview");
 				String tokenStr=null;
 				try {

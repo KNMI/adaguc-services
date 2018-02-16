@@ -71,11 +71,16 @@ public class ADAGUCServer extends HttpServlet{
     List<String> environmentVariables = new ArrayList<String>();
     String userHomeDir="/tmp/";
     
-//    AuthenticatorInterface authenticator = AuthenticatorFactory.getAuthenticator(request);
-//	if(authenticator != null){
-//		userHomeDir = UserManager.getUser(authenticator).getHomeDir();
-//	}
+    AuthenticatorInterface authenticator = AuthenticatorFactory.getAuthenticator(request);
+	if(authenticator != null){
+		try {
+			userHomeDir = UserManager.getUser(authenticator).getHomeDir();
+		} catch(Exception e){
+			
+		}
 	
+	} 
+	Debug.println("Using home " + userHomeDir);
     String homeURL=MainServicesConfigurator.getServerExternalURL();
     String adagucExecutableLocation = ADAGUCConfigurator.getADAGUCExecutable();
     Debug.println("adagucExecutableLocation: "+adagucExecutableLocation);
