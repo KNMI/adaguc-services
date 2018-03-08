@@ -78,4 +78,21 @@ public class ADAGUCRequestMapper {
 		}
 
 	}
+	@ResponseBody
+	@RequestMapping("adagucopendap/**")
+	public void ADAGUCSERVEROPENDAP(HttpServletResponse response, HttpServletRequest request){
+
+		try {
+			ADAGUCServer.runADAGUCOpenDAP(request,response,null,null);
+		} catch (Exception e) {
+			JSONResponse jsonResponse = new JSONResponse(request);
+			jsonResponse.setException("ADAGUCServer OPENDAP request failed",e);
+			try {
+				jsonResponse.print(response);
+			} catch (Exception e1) {
+
+			}
+		}
+
+	}
 }
