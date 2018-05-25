@@ -76,7 +76,7 @@ public class ADAGUCServer extends HttpServlet{
 			try {
 				userHomeDir = UserManager.getUser(authenticator).getHomeDir();
 			} catch(Exception e){
-
+				Debug.println("No user information provided: " + e.getMessage());
 			}
 
 		} 
