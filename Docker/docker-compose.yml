@@ -1,0 +1,42 @@
+version: '2'
+
+services:
+    adaguc-viewer:
+        image: openearth/adaguc-viewer
+        container_name: adaguc-viewer
+        ports:
+            - "8091:80"
+        environment:
+            - "LOCAL_ADAGUCSERVER_ADDR=http://localhost:8090/" # Should be same as adaguc-server's EXTERNALADDRESS
+            - "REMOTE_ADAGUCSERVER_ADDR=http://adaguc-server:8080/" # Do not change this within the docker-compose environment
+            - "ADAGUCSERVICES_AUTOWMS=http://localhost:8090/adaguc-services/autowms?" 
+    adaguc-server:
+        image: openearth/adaguc-server
+        container_name: adaguc-server
+        ports:
+            - "8090:8080"
+        volumes:
+            - $HOME/adaguc-server-docker/adaguc-datasets:/data/adaguc-datasets
+            - $HOME/adaguc-server-docker/adaguc-autowms:/data/adaguc-autowms
+            - $HOME/adaguc-server-docker/adaguc-data:/data/adaguc-data
+            - $HOME/adaguc-server-docker/adagucdb:/adaguc/adagucdb
+            - $HOME/adaguc-server-docker/adaguc-logs:/var/log/adaguc
+        environment:
+            - "EXTERNALADDRESS=http://localhost:8090/"
+
+#cd ./adaguc-server/
+#docker pull openearth/adaguc-viewer
+#Either do:
+#docker pull openearth/adaguc-server #<-- Pull docker image from dockerhub, or do docker build -t openearth/adaguc-server . 
+
+#mkdir -p $HOME/adaguc-server-docker/adaguc-data
+#mkdir -p $HOME/adaguc-server-docker/adaguc-datasets
+#mkdir -p $HOME/adaguc-server-docker/adaguc-autowms
+#mkdir -p $HOME/adaguc-server-docker/adagucdb && chmod 777 $HOME/adaguc-server-docker/adagucdb
+#mkdir -p $HOME/adaguc-server-docker/adaguc-logs && chmod 777 $HOME/adaguc-server-docker/adaguc-logs
+
+# docker-compose -f ./Docker/docker-compose.yml up 
+# Go to http://localhost:8091/adaguc-viewer/ or http://localhost:8090/adaguc-services/wms.cgi? 
+
+# CTRL+C and docker-compose down # To stop 
+

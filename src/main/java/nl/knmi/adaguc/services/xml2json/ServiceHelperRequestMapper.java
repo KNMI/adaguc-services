@@ -105,7 +105,12 @@ public class ServiceHelperRequestMapper {
 					
 					AuthenticatorInterface authenticator = AuthenticatorFactory.getAuthenticator(servletRequest);
 					if(authenticator!=null){
-						User user = UserManager.getUser(authenticator);
+						User user = null;
+						try {
+						user = UserManager.getUser(authenticator);
+						} catch(Exception e) {
+							
+						}
 						if(user!=null){
 							userCertificate = user.getCertificate();
 						}
