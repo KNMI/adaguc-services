@@ -1,4 +1,5 @@
-FROM centos:7
+FROM centos/devtoolset-7-toolchain-centos7:7
+USER root
 
 MAINTAINER Adaguc Team at KNMI <adaguc@knmi.nl>
 
