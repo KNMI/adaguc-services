@@ -62,6 +62,7 @@ public class ADAGUCRequestMapper {
 
 	}
 	@ResponseBody
+	@CrossOrigin
 	@RequestMapping("wcs")
 	public void ADAGUCSERVERWCS(HttpServletResponse response, HttpServletRequest request){
 
@@ -79,6 +80,7 @@ public class ADAGUCRequestMapper {
 
 	}
 	@ResponseBody
+	@CrossOrigin
 	@RequestMapping("adagucopendap/**")
 	public void ADAGUCSERVEROPENDAP(HttpServletResponse response, HttpServletRequest request){
 

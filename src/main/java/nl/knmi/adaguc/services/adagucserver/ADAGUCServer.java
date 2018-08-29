@@ -118,6 +118,7 @@ public class ADAGUCServer extends HttpServlet{
 
 		environmentVariables.add("HOME="+userHomeDir);
 		environmentVariables.add("QUERY_STRING="+queryString);
+		environmentVariables.add("CONTENT_TYPE="+request.getHeader("Content-Type"));
 		if(serviceType == ADAGUCServiceType.WMS){
 			environmentVariables.add("ADAGUC_ONLINERESOURCE="+homeURL+"/wms?");
 		}
