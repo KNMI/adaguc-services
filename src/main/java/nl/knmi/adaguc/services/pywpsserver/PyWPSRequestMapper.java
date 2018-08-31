@@ -8,6 +8,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -30,6 +31,7 @@ public class PyWPSRequestMapper {
 		return converter;
 	}
 	@ResponseBody
+	@CrossOrigin
 	@RequestMapping("wps")
 	public void PyWPSServer(HttpServletResponse response, HttpServletRequest request) throws IOException{
 

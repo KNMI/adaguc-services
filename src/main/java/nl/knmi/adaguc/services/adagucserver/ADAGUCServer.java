@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.List;
 
 import javax.servlet.ServletException;
@@ -18,6 +19,7 @@ import nl.knmi.adaguc.security.AuthenticatorInterface;
 import nl.knmi.adaguc.security.user.UserManager;
 import nl.knmi.adaguc.tools.CGIRunner;
 import nl.knmi.adaguc.tools.Debug;
+import nl.knmi.adaguc.tools.HTTPTools;
 import nl.knmi.adaguc.tools.Tools;
 
 
@@ -66,8 +68,16 @@ public class ADAGUCServer extends HttpServlet{
 		WMS, WCS, OPENDAP
 	}
 	public static void runADAGUC(HttpServletRequest request,HttpServletResponse response,String queryString,OutputStream outputStream, ADAGUCServiceType serviceType) throws Exception{
-
 		Debug.println("runADAGUCWMS");
+		
+//		Debug.println("Headers:");
+//		Enumeration<String> headerNames = request.getHeaderNames();
+//		while (headerNames.hasMoreElements()) {
+//			String headerName = headerNames.nextElement();
+//			String headerValue = request.getHeader(headerName);
+//			Debug.println(headerName + ":" + headerValue);
+//		}
+//			
 		List<String> environmentVariables = new ArrayList<String>();
 		String userHomeDir="/tmp/";
 
@@ -113,8 +123,9 @@ public class ADAGUCServer extends HttpServlet{
 		if(queryString == null){
 			queryString = request.getQueryString();
 		}
-
-
+		Debug.println("[ADAGUC-Server]" + queryString);
+		
+		
 
 		environmentVariables.add("HOME="+userHomeDir);
 		environmentVariables.add("QUERY_STRING="+queryString);
