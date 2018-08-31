@@ -2,6 +2,7 @@ package nl.knmi.adaguc.security;
 
 import java.util.Vector;
 
+import lombok.Synchronized;
 import nl.knmi.adaguc.config.ConfigurationReader;
 import nl.knmi.adaguc.services.oauth2.OAuthConfigurator.Oauth2Settings;
 import nl.knmi.adaguc.tools.Debug;
@@ -39,20 +40,23 @@ public class SecurityConfigurator implements nl.knmi.adaguc.config.ConfiguratorI
 	private static String keyStorePassword=null;
 	private static String keyStoreType="JKS";
 	private static String keyAlias="tomcat";
+	private static String userHeader=null;	
 	private static String caCertificate = null;
 	private static String caPrivateKey = null;		
 
 	public static class ComputeNode {
 		public String url = null;
+		public String name = null;
 	};
 
 	static Vector<ComputeNode> computeNodes = new Vector<ComputeNode>();
 
 	static ConfigurationReader configurationReader = new ConfigurationReader ();
 
+	@Synchronized
 	@Override
 	public void doConfig(XMLElement  configReader){
-
+		
 		if(configReader.getNodeValue ("adaguc-services.security")==null){
 			Debug.println("adaguc-services.security is not configured");
 			return;
@@ -63,20 +67,24 @@ public class SecurityConfigurator implements nl.knmi.adaguc.config.ConfiguratorI
 		keyStore=configReader.getNodeValue("adaguc-services.security.keystore");
 		keyStorePassword=configReader.getNodeValue("adaguc-services.security.keystorepassword");
 		keyStoreType=configReader.getNodeValue("adaguc-services.security.keystoretype");
+		computeNodes.clear();
 		keyAlias=configReader.getNodeValue("adaguc-services.security.keyalias");
+		userHeader=configReader.getNodeValue("adaguc-services.security.userheader");
+		
 		if (configReader.getNodeValue("adaguc-services.security.tokenapi")!=null){
 			caCertificate=configReader.getNodeValue("adaguc-services.security.tokenapi.cacertificate");
 			caPrivateKey=configReader.getNodeValue("adaguc-services.security.tokenapi.caprivatekey");
 			if (configReader.getNodeValue("adaguc-services.security.tokenapi.remote-instances")!=null){
 				try {
-					Vector<XMLElement> computeNodeElements = configReader.get("adaguc-services").get("security").get("tokenapi").getList("remote-instances");
+					Vector<XMLElement> computeNodeElements = configReader.get("adaguc-services").get("security").get("tokenapi").get("remote-instances").getList("adaguc-service");
 					for(int j=0;j<computeNodeElements.size();j++){
 						XMLElement computeNodeElement = computeNodeElements.get(j);
 
 						try {
 							ComputeNode computeNode = new ComputeNode();
-							computeNode.url = computeNodeElement.get("adaguc-service").getValue();
-							Debug.println("Added remote instance " + computeNode.url);
+							computeNode.url = computeNodeElement.getValue();
+							computeNode.name = computeNodeElement.getAttrValue("name");
+//							Debug.println("Added remote instance " + computeNode.url + " with name " + computeNode.name);
 							computeNodes.add(computeNode);
 						} catch (Exception e) {
 							Debug.printStackTrace(e);
@@ -141,6 +149,11 @@ public class SecurityConfigurator implements nl.knmi.adaguc.config.ConfiguratorI
 	public static Object getKeyAlias() throws ElementNotFoundException {
 		configurationReader.readConfig();
 		return keyAlias;
+	}
+
+	public static String getUserHeader() throws ElementNotFoundException {
+		configurationReader.readConfig();
+		return userHeader;
 	}
 }
 

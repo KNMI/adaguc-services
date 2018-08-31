@@ -16,6 +16,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.bouncycastle.operator.OperatorCreationException;
 import org.ietf.jgss.GSSException;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.context.annotation.Bean;
@@ -56,56 +57,56 @@ public class OAuth2RequestMapper {
 			method = RequestMethod.GET 
 		)
 	public void doOauth(HttpServletResponse response, HttpServletRequest request) throws JSONException, IOException, ElementNotFoundException{
-		boolean useDev = false;
-		if (useDev) {
-			request.getSession().setAttribute("user_identifier","maarten");
-			Vector<ComputeNode> computeNodes = SecurityConfigurator.getComputeNodes();
-		    request.getSession().setAttribute("domain",computeNodes.get(0).url.replace("https://", ""));
-		    try {
-				OAuth2Handler.makeUserCertificate("maarten");
-			} catch (InvalidKeyException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			} catch (KeyManagementException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			} catch (UnrecoverableKeyException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			} catch (CertificateException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			} catch (NoSuchAlgorithmException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			} catch (OperatorCreationException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			} catch (KeyStoreException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			} catch (NoSuchProviderException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			} catch (SignatureException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			} catch (GSSException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			} catch (CertificateVerificationException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
-;			try {
-				response.sendRedirect(HTTPTools.getHTTPParam(request, "returnurl"));
-			} catch (Exception e) {
-				e.printStackTrace();
-				response.sendRedirect(MainServicesConfigurator.getServerExternalURL());
-			}
-			return;
-		} 
-	
+//		boolean useDev = false; // TODO
+//		if (useDev) {
+//			request.getSession().setAttribute("user_identifier","maarten");
+//			Vector<ComputeNode> computeNodes = SecurityConfigurator.getComputeNodes();
+//		    request.getSession().setAttribute("domain",computeNodes.get(0).url.replace("https://", ""));
+//		    try {
+//				OAuth2Handler.makeUserCertificate("maarten");// TODO
+//			} catch (InvalidKeyException e1) {
+//				// TODO Auto-generated catch block
+//				e1.printStackTrace();
+//			} catch (KeyManagementException e1) {
+//				// TODO Auto-generated catch block
+//				e1.printStackTrace();
+//			} catch (UnrecoverableKeyException e1) {
+//				// TODO Auto-generated catch block
+//				e1.printStackTrace();
+//			} catch (CertificateException e1) {
+//				// TODO Auto-generated catch block
+//				e1.printStackTrace();
+//			} catch (NoSuchAlgorithmException e1) {
+//				// TODO Auto-generated catch block
+//				e1.printStackTrace();
+//			} catch (OperatorCreationException e1) {
+//				// TODO Auto-generated catch block
+//				e1.printStackTrace();
+//			} catch (KeyStoreException e1) {
+//				// TODO Auto-generated catch block
+//				e1.printStackTrace();
+//			} catch (NoSuchProviderException e1) {
+//				// TODO Auto-generated catch block
+//				e1.printStackTrace();
+//			} catch (SignatureException e1) {
+//				// TODO Auto-generated catch block
+//				e1.printStackTrace();
+//			} catch (GSSException e1) {
+//				// TODO Auto-generated catch block
+//				e1.printStackTrace();
+//			} catch (CertificateVerificationException e1) {
+//				// TODO Auto-generated catch block
+//				e1.printStackTrace();
+//			}
+//;			try {
+//				response.sendRedirect(HTTPTools.getHTTPParam(request, "returnurl"));
+//			} catch (Exception e) {
+//				e.printStackTrace();
+//				response.sendRedirect(MainServicesConfigurator.getServerExternalURL());
+//			}
+//			return;
+//		} 
+//	
 		OAuth2Handler.doGet(request, response);
 	}
 	/**
@@ -128,7 +129,6 @@ public class OAuth2RequestMapper {
 		String id = (String) request.getSession().getAttribute("user_identifier");
 		String servicesAccessToken = (String) request.getSession().getAttribute("services_access_token");
 		String emailAddress = (String) request.getSession().getAttribute("emailaddress");
-		String domain = (String) request.getSession().getAttribute("domain");
 
 		JSONObject jsonObj = new JSONObject();
 		
@@ -152,12 +152,13 @@ public class OAuth2RequestMapper {
 			jsonObj.put("email_address",emailAddress);
 		}
 		
-		if(domain == null || domain.length() == 0
-				|| isIdUnknown(id)){
-			jsonObj.put("domain","undefined");
-		}else{
-			jsonObj.put("domain",domain);
+		jsonObj.put("backend",MainServicesConfigurator.getServerExternalURL());
+		Vector<ComputeNode> computeNodes = SecurityConfigurator.getComputeNodes();
+		JSONArray jsonArray = new JSONArray();
+		for (final ComputeNode computeNode : computeNodes) {
+			jsonArray.put(new JSONObject().put("url", computeNode.url).put("name", computeNode.name));
 		}
+		jsonObj.put("compute", jsonArray);
 		
 		jsonResponse.setMessage(jsonObj);
 		jsonResponse.print(response);

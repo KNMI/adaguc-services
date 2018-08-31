@@ -146,7 +146,7 @@ public class PemX509Tools {
 			PrivateKeyInfo ukp = (PrivateKeyInfo) object;
 			return converter.getPrivateKey(ukp);
 		}
-	
+
 	}
 
 	/**
@@ -182,6 +182,17 @@ public class PemX509Tools {
 		return null;
 	}
 
+	public String getUserIdFromSubjectDN (String subjectDN) {
+		String[] dnItems = subjectDN.split(", ");
+		for (int j = 0; j < dnItems.length; j++) {
+			int CNIndex = dnItems[j].indexOf("CN");
+			if (CNIndex != -1) {
+				return dnItems[j].substring("CN=".length()
+						+ CNIndex);
+			}
+		}
+		return null;
+	}
 	/**
 	 * Returns information about the given certificate, like CN and serial number. This method does not verify
 	 * the certificate against trustroots. 
@@ -194,15 +205,7 @@ public class PemX509Tools {
 		String uniqueId = null;
 		uniqueId = "x509_"+cert.getSerialNumber();
 		String subjectDN = cert.getSubjectDN().toString();
-		//Debug.println("getSubjectDN: " + subjectDN);
-		String[] dnItems = subjectDN.split(", ");
-		for (int j = 0; j < dnItems.length; j++) {
-			int CNIndex = dnItems[j].indexOf("CN");
-			if (CNIndex != -1) {
-				CertOpenIdIdentifier = dnItems[j].substring("CN=".length()
-						+ CNIndex);
-			}
-		}
+		CertOpenIdIdentifier = getUserIdFromSubjectDN(subjectDN);
 		if(CertOpenIdIdentifier == null || uniqueId == null){
 			return null;
 		}
@@ -230,33 +233,33 @@ public class PemX509Tools {
 		Calendar notBefore = Calendar.getInstance();
 		//notBefore.add(Calendar., -1);
 
-		
+
 		JcaPKCS10CertificationRequest jcaRequest = new JcaPKCS10CertificationRequest(csr);
 		X509v3CertificateBuilder certificateBuilder = new JcaX509v3CertificateBuilder(caCert,
 				BigInteger.valueOf(System.currentTimeMillis()), notBefore.getTime(), notAfter.getTime(), jcaRequest.getSubject(), jcaRequest.getPublicKey());
 
-//		JcaX509ExtensionUtils extUtils = new JcaX509ExtensionUtils();
-//		certificateBuilder.addExtension(Extension.authorityKeyIdentifier, false, extUtils.createAuthorityKeyIdentifier(caCert))
-//		.addExtension(Extension.subjectKeyIdentifier, false, extUtils.createSubjectKeyIdentifier(jcaRequest.getPublicKey()))
-//		.addExtension(Extension.basicConstraints, true, new BasicConstraints(0))
-//		.addExtension(Extension.keyUsage, true, new KeyUsage(KeyUsage.digitalSignature | KeyUsage.keyEncipherment))
-//		.addExtension(Extension.extendedKeyUsage, true, new ExtendedKeyUsage(KeyPurposeId.id_kp_serverAuth));
+		//		JcaX509ExtensionUtils extUtils = new JcaX509ExtensionUtils();
+		//		certificateBuilder.addExtension(Extension.authorityKeyIdentifier, false, extUtils.createAuthorityKeyIdentifier(caCert))
+		//		.addExtension(Extension.subjectKeyIdentifier, false, extUtils.createSubjectKeyIdentifier(jcaRequest.getPublicKey()))
+		//		.addExtension(Extension.basicConstraints, true, new BasicConstraints(0))
+		//		.addExtension(Extension.keyUsage, true, new KeyUsage(KeyUsage.digitalSignature | KeyUsage.keyEncipherment))
+		//		.addExtension(Extension.extendedKeyUsage, true, new ExtendedKeyUsage(KeyPurposeId.id_kp_serverAuth));
 
-//		// add pkcs extensions
-//		Attribute[] attributes = csr.getAttributes();
-//		for (Attribute attr : attributes) {
-//			// process extension request
-//			if (attr.getAttrType().equals(PKCSObjectIdentifiers.pkcs_9_at_extensionRequest)) {
-//				Extensions extensions = Extensions.getInstance(attr.getAttrValues().getObjectAt(0));
-//				@SuppressWarnings("unchecked")
-//				Enumeration<ASN1ObjectIdentifier> e = (Enumeration<ASN1ObjectIdentifier>  )extensions.oids();
-//				while (e.hasMoreElements()) {
-//					ASN1ObjectIdentifier oid =  e.nextElement();
-//					Extension ext = extensions.getExtension(oid);
-//					certificateBuilder.addExtension(oid, ext.isCritical(), ext.getParsedValue());
-//				}
-//			}
-//		}
+		//		// add pkcs extensions
+		//		Attribute[] attributes = csr.getAttributes();
+		//		for (Attribute attr : attributes) {
+		//			// process extension request
+		//			if (attr.getAttrType().equals(PKCSObjectIdentifiers.pkcs_9_at_extensionRequest)) {
+		//				Extensions extensions = Extensions.getInstance(attr.getAttrValues().getObjectAt(0));
+		//				@SuppressWarnings("unchecked")
+		//				Enumeration<ASN1ObjectIdentifier> e = (Enumeration<ASN1ObjectIdentifier>  )extensions.oids();
+		//				while (e.hasMoreElements()) {
+		//					ASN1ObjectIdentifier oid =  e.nextElement();
+		//					Extension ext = extensions.getExtension(oid);
+		//					certificateBuilder.addExtension(oid, ext.isCritical(), ext.getParsedValue());
+		//				}
+		//			}
+		//		}
 
 		ContentSigner signer = new JcaContentSignerBuilder("SHA256withRSA").setProvider("BC").build(caPrivateKey);
 		return new JcaX509CertificateConverter().setProvider("BC").getCertificate(certificateBuilder.build(signer));
@@ -286,7 +289,7 @@ public class PemX509Tools {
 	public static void writeCertificateToPemFile(Object certHolder, String fileName) throws IOException {
 		Tools.writeFile(fileName, certificateToPemString(certHolder));		
 	}
-	
+
 	public static void writePrivateKeyToPemFile(PrivateKey certHolder, String fileName) throws IOException {
 		Tools.writeFile(fileName, privateKeyToPemString(certHolder));		
 	}
@@ -436,27 +439,27 @@ public class PemX509Tools {
 
 		/* Step 5 - Generate CSR */
 		PKCS10CertificationRequest csr = PemX509Tools.createCSR("CN="+clientId, keyPairCSR);
-		
-//		 try {
-//			PemX509Tools.writeCertificateToPemFile(csr, "/tmp/_usercsr.csr");
-//			PemX509Tools.writeCertificateToPemFile(caCertificate, "/tmp/_ca.pem");
-//			PemX509Tools.writePrivateKeyToPemFile(privateKey, "/tmp/_ca.key");
-//		} catch (IOException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
+
+		//		 try {
+		//			PemX509Tools.writeCertificateToPemFile(csr, "/tmp/_usercsr.csr");
+		//			PemX509Tools.writeCertificateToPemFile(caCertificate, "/tmp/_ca.pem");
+		//			PemX509Tools.writePrivateKeyToPemFile(privateKey, "/tmp/_ca.key");
+		//		} catch (IOException e) {
+		//			// TODO Auto-generated catch block
+		//			e.printStackTrace();
+		//		}
 
 		/* Step 6 - Sign CSR with CA */		
 		X509Certificate signedCrt = PemX509Tools.signCSR(csr, caCertificate, privateKey);
 
-//		try {
-//			PemX509Tools.writeCertificateToPemFile(signedCrt, "/tmp/_user.crt");
-//			PemX509Tools.writePrivateKeyToPemFile(keyPairCSR.getPrivate(), "/tmp/_user.key");
-//		} catch (IOException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
-		
+		//		try {
+		//			PemX509Tools.writeCertificateToPemFile(signedCrt, "/tmp/_user.crt");
+		//			PemX509Tools.writePrivateKeyToPemFile(keyPairCSR.getPrivate(), "/tmp/_user.key");
+		//		} catch (IOException e) {
+		//			// TODO Auto-generated catch block
+		//			e.printStackTrace();
+		//		}
+
 
 		return new X509UserCertAndKey(signedCrt, keyPairCSR.getPrivate());
 	}
@@ -495,7 +498,7 @@ public class PemX509Tools {
 		}
 		return getHTTPClientForPEMBasedClientAuth(trustStoreLocation,trustStorePassword,certAndKey);
 	}
-	
+
 	/**
 	 * 
 	 * @param trustStoreLocation
