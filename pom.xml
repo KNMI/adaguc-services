@@ -5,7 +5,7 @@
 
 	<groupId>nl.knmi.adagucservices</groupId>
 	<artifactId>adaguc-services</artifactId>
-	<version>1.0.7</version>
+	<version>1.0.3</version>
 	<packaging>war</packaging>
 
 	<name>adaguc-services</name>
@@ -146,17 +146,18 @@
 			<version>4.2.2.RELEASE</version>
 		</dependency>
 		<dependency>
+			<!-- <groupId>nl.knmi.adaguc.tools</groupId>
+			<artifactId>adaguc-services-tools</artifactId>-->
 			<groupId>com.github.maartenplieger</groupId>
 			<artifactId>nl.knmi.adaguc.tools</artifactId>
-			<version>1.0.10</version>
+			<version>1.0.11</version>
 		</dependency>
 		<dependency>
 			<groupId>com.github.maartenplieger</groupId>
 			<artifactId>nl.knmi.adaguc.config</artifactId>
-			<!-- 
-			<groupId>nl.knmi.adaguc.config</groupId>
-			<artifactId>adaguc-services-config</artifactId>-->
-			<version>1.0.10</version>
+			<!-- <groupId>nl.knmi.adaguc.config</groupId>
+			<artifactId>adaguc-services-config</artifactId> -->
+			<version>1.0.11</version>
 			<exclusions>
 				<exclusion>
 					<groupId>com.github.maartenplieger</groupId>
