@@ -34,7 +34,7 @@ public class ESGFSearchRequestMapper implements DisposableBean {
 
 	public ESGFSearchRequestMapper() throws ElementNotFoundException {
 		super();
-		esgfSearch=getESGFSearchInstance();
+		
 	}
 	
 	public void destroy() {
@@ -68,7 +68,7 @@ public class ESGFSearchRequestMapper implements DisposableBean {
 				jsonResponse.setMessage(new JSONObject().put("error", "ADAGUC esgfsearch is not enabled"));
 			}else{
 				Debug.println("getoverview");
-				esgfSearch.doGet(request,response);
+				getESGFSearchInstance().doGet(request,response);
 			}
 		} catch (Exception e) {
 			jsonResponse.setException("error: "+e.getMessage(), e);
