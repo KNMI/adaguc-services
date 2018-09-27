@@ -86,7 +86,13 @@ public class AutoWMSRequestMapper {
 						if( directory.exists() ) {
 							File[] files = directory.listFiles();
 							for( File file : files){
-								if(file.isDirectory() || file.getName().endsWith(".nc") || file.getName().endsWith(".geojson") 
+								if(file.isDirectory() || 
+										file.getName().endsWith(".png") || 
+										file.getName().endsWith(".h5") || 
+										file.getName().endsWith(".hdf5") ||
+										file.getName().endsWith(".nc") || 
+										file.getName().endsWith(".nc4") ||
+										file.getName().endsWith(".geojson") 
 										){
 									String filePath = file.getAbsolutePath().substring(basePath.length()+1);
 									fileList.put(
