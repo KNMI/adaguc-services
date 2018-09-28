@@ -49,20 +49,31 @@ public class AuthenticatorImpl implements AuthenticatorInterface{
 		if (request == null ) {
 			return;
 		}
-		//		Debug.println("Init");
+		/* Get user from session */
 		String sessionId = null;
 		HttpSession session = request.getSession();
 		if (session!=null) {
 			sessionId = (String) session.getAttribute("user_identifier");
 		}
-
-
 		if (sessionId!=null) {
 			x509 = new PemX509Tools().new X509Info(sessionId, sessionId);
 			Debug.println("Got userid from session");
 			return;
-		} else {
-			Debug.println("No userinfo from session");
+		}
+
+		/* Get user from header (Set by SSL client cert verification in NGINX)*/
+		try {
+			String userHeader = SecurityConfigurator.getUserHeader();
+			if (userHeader != null) {
+				String userIdFromHeader = request.getHeader(userHeader);
+				if (userIdFromHeader != null && userIdFromHeader.length() > 4) {
+					String userID = new PemX509Tools().getUserIdFromSubjectDN(userIdFromHeader);
+					Debug.println("Found user from header: " + userID);
+					x509 = new PemX509Tools().new X509Info(userID, userID);
+					return;
+				}
+			}
+		} catch (ElementNotFoundException e) {
 		}
 
 		x509 = new PemX509Tools().getUserIdFromCertificate(request);

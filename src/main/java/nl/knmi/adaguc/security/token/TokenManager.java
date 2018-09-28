@@ -49,7 +49,6 @@ public class TokenManager {
 		if (matcher.find())	{
 		    return matcher.group();
 		}
-		Debug.println("No access token set in PATH URL via .../accesstoken/...");
 		return null;
 	}
 	public synchronized static Token registerToken(User user) throws IOException, ElementNotFoundException, AuthenticationException, ParseException{

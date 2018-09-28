@@ -75,21 +75,23 @@ public class BasketRequestMapper {
 		try {
 			boolean enabled = BasketConfigurator.getEnabled();
 			if(!enabled){
-				/* Make a basket of the remote instance */
-				Vector<ComputeNode> computeNodes = SecurityConfigurator.getComputeNodes();
-			    if (computeNodes.size() == 0) {
-			    	jsonResponse.setMessage(new JSONObject().put("error","ADAGUC basket is not enabled and no computenodes are available"));			    	
-			    } else {
-				    String url = computeNodes.get(0).url + "/basket/list";
-				    Debug.println("Getting basket from " + url);
-				    String basketResponse = UserManager.makeGetRequestWithUserFromServletRequest(request, url);
-					Debug.println(basketResponse);
-					jsonResponse.setMessage(new JSONObject().
-							put("type","ROOT").
-							put("name",computeNodes.get(0).url.replace("https://","")).
-							put("children", new JSONObject(basketResponse)));
-			    }
-			}else{
+				jsonResponse.setMessage(new JSONObject().put("error", "ADAGUC basket is not enabled"));
+//				/* Make a basket of the remote instance */
+//				Vector<ComputeNode> computeNodes = SecurityConfigurator.getComputeNodes();
+//			    if (computeNodes.size() == 0) {
+//			    	jsonResponse.setMessage(new JSONObject().put("error","ADAGUC basket is not enabled and no computenodes are available"));			    	
+//			    } else {
+//				    String url = computeNodes.get(0).url + "/basket/list";
+//				    Debug.println("Getting basket from " + url);
+//				    String basketResponse = UserManager.makeGetRequestWithUserFromServletRequest(request, url);
+//					Debug.println(basketResponse);
+//					jsonResponse.setMessage(new JSONObject().
+//							put("type","ROOT").
+//							put("name",computeNodes.get(0).url.replace("https://","")).
+//							put("children", new JSONObject(basketResponse)));
+//			    }
+			}else
+			{
 				/*Try to use the basket locally available */
 				Debug.println("getoverview");
 				String tokenStr=null;
@@ -156,6 +158,7 @@ public class BasketRequestMapper {
 		try {
 			boolean enabled = BasketConfigurator.getEnabled();
 			if(!enabled){
+				Debug.errprintln("Basket is not enabled");
 				jsonResponse.setMessage(new JSONObject().put("error","ADAGUC basket is not enabled"));
 			}else{
 				Debug.println("uploadToBasket");
