@@ -120,6 +120,14 @@
 		<!-- <dependency> <groupId>log4j</groupId> <artifactId>log4j</artifactId> 
 			<version>1.2.17</version> </dependency> -->
 
+		<!-- https://mvnrepository.com/artifact/edu.ucar/opendap -->
+		<dependency>
+			<groupId>edu.ucar</groupId>
+			<artifactId>opendap</artifactId>
+			<version>4.5.5</version>
+		</dependency>
+
+
 		<!-- https://mvnrepository.com/artifact/edu.ucar/cdm -->
 		<dependency>
 			<groupId>edu.ucar</groupId>
@@ -143,11 +151,18 @@
 		<dependency>
 			<groupId>org.springframework.security</groupId>
 			<artifactId>spring-security-core</artifactId>
-			<version>4.2.2.RELEASE</version>
+			<version>4.2.4.RELEASE</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.github.maartenplieger</groupId>
+			<artifactId>nl.knmi.adaguc.config</artifactId>
+			<!-- <groupId>nl.knmi.adaguc.config</groupId> <artifactId>adaguc-services-config</artifactId> -->
+
+			<version>1.0.9</version>
 		</dependency>
 		<dependency>
-			<!-- <groupId>nl.knmi.adaguc.tools</groupId>
-			<artifactId>adaguc-services-tools</artifactId>-->
+			<!-- <groupId>nl.knmi.adaguc.tools</groupId> <artifactId>adaguc-services-tools</artifactId> -->
 			<groupId>com.github.maartenplieger</groupId>
 			<artifactId>nl.knmi.adaguc.tools</artifactId>
 			<version>1.0.11</version>
@@ -155,8 +170,7 @@
 		<dependency>
 			<groupId>com.github.maartenplieger</groupId>
 			<artifactId>nl.knmi.adaguc.config</artifactId>
-			<!-- <groupId>nl.knmi.adaguc.config</groupId>
-			<artifactId>adaguc-services-config</artifactId> -->
+			<!-- <groupId>nl.knmi.adaguc.config</groupId> <artifactId>adaguc-services-config</artifactId> -->
 			<version>1.0.11</version>
 			<exclusions>
 				<exclusion>
@@ -178,9 +192,9 @@
 		</dependency>
 		<!-- https://mvnrepository.com/artifact/commons-io/commons-io -->
 		<dependency>
-		    <groupId>commons-io</groupId>
-		    <artifactId>commons-io</artifactId>
-		    <version>2.5</version>
+			<groupId>commons-io</groupId>
+			<artifactId>commons-io</artifactId>
+			<version>2.5</version>
 		</dependency>
 
 	</dependencies>
@@ -215,6 +229,13 @@
 			<id>jitpack.io</id>
 			<url>https://jitpack.io</url>
 		</repository>
+
+		<repository>
+			<id>artifacts.unidata.ucar.edu</id>
+			<url>https://artifacts.unidata.ucar.edu/content/repositories/unidata-releases/</url>
+		</repository>
+
+
 	</repositories>
 	<pluginRepositories>
 		<pluginRepository>
