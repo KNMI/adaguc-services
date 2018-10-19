@@ -5,7 +5,7 @@
 
 	<groupId>nl.knmi.adagucservices</groupId>
 	<artifactId>adaguc-services</artifactId>
-	<version>1.0.0-SNAPSHOT</version>
+	<version>1.0.8</version>
 	<packaging>war</packaging>
 
 	<name>adaguc-services</name>
@@ -163,18 +163,43 @@
 			<version>1.0.9</version>
 		</dependency>
 		<dependency>
-			<groupId>com.github.maartenplieger</groupId>
-			<artifactId>nl.knmi.adaguc.tools</artifactId>
 			<!-- <groupId>nl.knmi.adaguc.tools</groupId>
 			<artifactId>adaguc-services-tools</artifactId>-->
-			<version>1.0.7</version>
+			<groupId>com.github.maartenplieger</groupId>
+			<artifactId>nl.knmi.adaguc.tools</artifactId>
+			<version>1.0.11</version>
 		</dependency>
-
-		<!-- <dependency>
+		<dependency>
 			<groupId>com.github.maartenplieger</groupId>
 			<artifactId>nl.knmi.adaguc.config</artifactId>
+			<!-- <groupId>nl.knmi.adaguc.config</groupId>
+			<artifactId>adaguc-services-config</artifactId> -->
+			<version>1.0.11</version>
+			<exclusions>
+				<exclusion>
+					<groupId>com.github.maartenplieger</groupId>
+					<artifactId>nl.knmi.adaguc.tools</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.oltu.oauth2</groupId>
+			<artifactId>org.apache.oltu.oauth2.client</artifactId>
+			<version>1.0.2</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.oltu.commons</groupId>
+			<artifactId>org.apache.oltu.commons.encodedtoken</artifactId>
 			<version>1.0.1</version>
-		</dependency>-->
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/commons-io/commons-io -->
+		<dependency>
+		    <groupId>commons-io</groupId>
+		    <artifactId>commons-io</artifactId>
+		    <version>2.5</version>
+		</dependency>
+
 	</dependencies>
 
 	<build>

@@ -38,7 +38,7 @@ public class PyWPSConfigurator implements ConfiguratorInterface {
 	static ConfigurationReader configurationReader = new ConfigurationReader ();
 	public void doConfig(XMLElement  configReader) throws ElementNotFoundException {
 		if(configReader.getNodeValue ("adaguc-services.pywps-server")==null){
-			Debug.println("adaguc-services.pywps-server is not configured");
+//			Debug.println("adaguc-services.pywps-server is not configured");
 			return;
 		}
 		PyWPSExecutable      = configReader.getNodeValueMustNotBeUndefined ("adaguc-services.pywps-server.pywpsexecutable");

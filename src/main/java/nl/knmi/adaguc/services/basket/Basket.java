@@ -71,13 +71,5 @@ public class Basket {
 	}
 
 
-	public static void main(String[]argv) {
-		Basket b=new Basket("/nobackup/users/vreedede/testimpactspace", "testBasket", null);
-		try {
-			System.err.println(b.listFiles());
-		} catch (ElementNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
+	
 }
