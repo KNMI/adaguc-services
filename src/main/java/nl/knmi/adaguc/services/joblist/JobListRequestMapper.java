@@ -49,34 +49,48 @@ public class JobListRequestMapper {
 	public MappingJackson2HttpMessageConverter mappingJackson2HttpMessageConverter() {
 		ObjectMapper mapper = new ObjectMapper();
 		mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, true);
-		MappingJackson2HttpMessageConverter converter = 
-				new MappingJackson2HttpMessageConverter(mapper);
+		MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter(mapper);
 		return converter;
 	}
 
-	private static JSONObject NewStatusLocation(String queryString, String statusLocation) throws InvalidTokenException, ElementNotFoundException, InvalidHTTPKeyValueTokensException, IOException  {
-		//  Check for status location first.
-		Debug.println("Checking ["+statusLocation+"]");
-		if (statusLocation!=null){ 
-			String portalOutputPath = PyWPSConfigurator.getPyWPSOutputDir();
-			String output=statusLocation.substring(statusLocation.lastIndexOf("/"));
-			//Remove first "/" token;
-			output = output.substring(1);
-			portalOutputPath = Tools.makeCleanPath(portalOutputPath);
-			String fileName = portalOutputPath+"/"+output;
-			Debug.println("NewStatusLocation request: "+fileName);
-
-			Tools.checkValidCharsForFile(output);
-			String data = Tools.readFile(fileName);
-			JSONObject statusJson=null;
+	private static JSONObject NewStatusLocation(String queryString, String statusLocation)
+			throws InvalidTokenException, ElementNotFoundException, InvalidHTTPKeyValueTokensException, IOException {
+		// Check for status location first.
+		Debug.println("Checking [" + statusLocation + "]");
+//		if (statusLocation != null) {
+//			String portalOutputPath = PyWPSConfigurator.getPyWPSOutputDir();
+//			if (portalOutputPath == null) {
+//				return null;
+//			}
+//			String output = statusLocation.substring(statusLocation.lastIndexOf("/"));
+//			// Remove first "/" token;
+//			output = output.substring(1);
+//			portalOutputPath = Tools.makeCleanPath(portalOutputPath);
+//			String fileName = portalOutputPath + "/" + output;
+//			Debug.println("NewStatusLocation request: " + fileName);
+//
+//			Tools.checkValidCharsForFile(output);
+//			String data = Tools.readFile(fileName);
+//			JSONObject statusJson = null;
+//			try {
+//				statusJson = PyWPSServer.xmlStatusToJSONStatus(queryString, data);
+//			} catch (Exception e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}
+//			return statusJson;
+//
+//		}
+		if (statusLocation != null) {
+			JSONObject statusJson = null;
 			try {
-				statusJson=PyWPSServer.xmlStatusToJSONStatus(queryString, data);
+				String data = HTTPTools.makeHTTPGetRequest(statusLocation);
+				statusJson = PyWPSServer.statusLocationDataAsXMLToWPSStatusObject(queryString, data);
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 			return statusJson;
-
 		}
 		Debug.println("No Output found");
 		return null;
@@ -85,47 +99,72 @@ public class JobListRequestMapper {
 
 	@ResponseBody
 	@RequestMapping("/remove")
-	public void removeFromJobList(HttpServletResponse response, HttpServletRequest request, @RequestParam("job") String job) throws IOException{
+	public void removeFromJobList(HttpServletResponse response, HttpServletRequest request,
+			@RequestParam("job") String job) throws IOException {
 		JSONResponse jsonResponse = new JSONResponse(request);
 		try {
 			boolean enabled = JobListConfigurator.getEnabled();
-			if(!enabled){
-				jsonResponse.setMessage(new JSONObject().put("error","ADAGUC joblist is not enabled"));
-			}else{
+			if (!enabled) {
+				jsonResponse.setMessage(new JSONObject().put("error", "ADAGUC joblist is not enabled"));
+			} else {
 				Debug.println("removeFromJobList()");
-				if (job!=null) {
+				if (job != null) {
 					AuthenticatorInterface authenticator = AuthenticatorFactory.getAuthenticator(request);
 					String userDataDir = UserManager.getUser(authenticator).getDataDir();
-					String cleanPath=Tools.makeCleanPath(job);
-					String wpsSettingsName=cleanPath.replace(".xml", ".wpssettings");
-					File f=new File(userDataDir+"/WPS_Settings/"+wpsSettingsName);
-					Debug.println("removing:"+ f.getPath());
+					String cleanPath = Tools.makeCleanPath(job);
+					String wpsSettingsName = cleanPath.replace(".xml", ".wpssettings");
+					File f = new File(userDataDir + "/WPS_Settings/" + wpsSettingsName);
+					Debug.println("removing:" + f.getPath());
 					if (f.delete()) {
 						jsonResponse.setMessage(new JSONObject().put("message", "jobfile deleted"));
 					} else {
-						jsonResponse.setErrorMessage("delete file failed for "+f.getName(), 200);
+						jsonResponse.setErrorMessage("delete file failed for " + f.getName(), 200);
 					}
 				} else {
 					jsonResponse.setErrorMessage("job parameter missing", 200);
 				}
 			}
 		} catch (Exception e) {
-			jsonResponse.setException("error: "+e.getMessage(), e);
+			jsonResponse.setException("error: " + e.getMessage(), e);
 		}
 		jsonResponse.print(response);
 	}
 
+	public static void saveExecuteResponseToJob(String queryString, String executeResponse, HttpServletRequest request) throws Exception {
+		boolean enabled = JobListConfigurator.getEnabled();
+		if (!enabled) {
+			throw new Exception("ADAGUC joblist is not enabled");
+		}
+		
+		JSONObject data=PyWPSServer.statusLocationDataAsXMLToWPSStatusObject(queryString, executeResponse);
+		if (data!=null) {
+
+			//  		  Tools.mksubdirs(userDataDir+"/WPS_Settings/");
+			String statusLocation=data.getString("statuslocation");
+			String baseName = statusLocation.substring(statusLocation.lastIndexOf("/")).replace(".xml", ".wpssettings");
+			AuthenticatorInterface authenticator = AuthenticatorFactory.getAuthenticator(request);
+			String userDataDir = UserManager.getUser(authenticator).getDataDir();
+			String wpsSettingsFile = userDataDir+"/WPS_Settings/";
+			Tools.mksubdirs(wpsSettingsFile);
+			wpsSettingsFile+=baseName;
+			Tools.writeFile(wpsSettingsFile, data.toString());
+		} else {
+			Debug.println("Synchronous execution");
+		}
+
+	}
+
 	@ResponseBody
 	@RequestMapping("/list")
-	public void listJobs(HttpServletResponse response, HttpServletRequest request) throws IOException{
+	public void listJobs(HttpServletResponse response, HttpServletRequest request) throws IOException {
 		JSONResponse jsonResponse = new JSONResponse(request);
-		ObjectMapper om=new ObjectMapper();
+		ObjectMapper om = new ObjectMapper();
 		om.registerModule(new JSR310Module());
 		om.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-		//List all jobfiles in WPS_Settings
+		// List all jobfiles in WPS_Settings
 		Debug.println("/joblist/list");
-		JSONObject jobs=new JSONObject();
-		JSONArray jobArray=new JSONArray();
+		JSONObject jobs = new JSONObject();
+		JSONArray jobArray = new JSONArray();
 		try {
 			jobs.put("jobs", jobArray);
 		} catch (JSONException e1) {
@@ -136,63 +175,72 @@ public class JobListRequestMapper {
 			AuthenticatorInterface authenticator = AuthenticatorFactory.getAuthenticator(request);
 
 			String userDataDir = UserManager.getUser(authenticator).getDataDir();
-			String dir=userDataDir+"/WPS_Settings";
-			File d=new File(dir);
-			//			Debug.println(dir+" "+d.isDirectory());
+			String dir = userDataDir + "/WPS_Settings";
+			File d = new File(dir);
+			// Debug.println(dir+" "+d.isDirectory());
 			if (d.isDirectory()) {
-				String[] filesIndir=d.list();
-				for (String fn: filesIndir){
-					File f=new File(dir+"/"+fn);
-					//					Debug.println("fn:"+fn+" "+f.isFile()+" ; "+fn.endsWith("settings"));
-					if (f.isFile()&&fn.endsWith("settings")){
-						String fileString=new String(Files.readAllBytes(Paths.get(f.getAbsolutePath())));
-//						Debug.println("found: "+fn+" "+fileString.length());
-						JSONObject job=new JSONObject(fileString);
-						//if status==Accepted
+				String[] filesIndir = d.list();
+				for (String fn : filesIndir) {
+					File f = new File(dir + "/" + fn);
+					// Debug.println("fn:"+fn+" "+f.isFile()+" ;
+					// "+fn.endsWith("settings"));
+					if (f.isFile() && fn.endsWith("settings")) {
+						String fileString = new String(Files.readAllBytes(Paths.get(f.getAbsolutePath())));
+						// Debug.println("found: "+fn+" "+fileString.length());
+						JSONObject job = new JSONObject(fileString);
+						// if status==Accepted
 
-						String status=null;
+						String status = null;
 						try {
-							status=job.getString("wpsstatus");
-						}catch (JSONException e){}
-						if (status!=null) {
-							if (status.equalsIgnoreCase("PROCESSACCEPTED")||
-									status.equalsIgnoreCase("PROCESSSTARTED")||	
-									status.equalsIgnoreCase("PROCESSPAUSED")){
-								Debug.println(fn+": with status "+status+" let's look again");
-								String statusLocation=job.getString("statuslocation");
-								String queryString=null;
+							status = job.getString("wpsstatus");
+						} catch (JSONException e) {
+						}
+						if (status != null) {
+							if (status.equalsIgnoreCase("PROCESSACCEPTED") || status.equalsIgnoreCase("PROCESSSTARTED")
+									|| status.equalsIgnoreCase("PROCESSPAUSED")) {
+								Debug.println(fn + ": with status " + status + " let's look again");
+								String statusLocation = job.getString("statuslocation");
+								String queryString = null;
 								try {
 									URLDecoder.decode(job.getString("querystring"), "utf-8");
-								} catch (Exception e){}
-								JSONObject newJobStatus=NewStatusLocation(queryString, statusLocation);
-								Debug.println("newJobStatus: "+newJobStatus.getString("percentage"));
-								Debug.println("st:"+newJobStatus.getString("wpsstatus")+ "<==="+status);
-								if (status.equalsIgnoreCase("PROCESSSTARTED")||((newJobStatus!=null)&&!status.equals(newJobStatus.getString("wpsstatus")))) {
-									//  		  Tools.mksubdirs(userDataDir+"/WPS_Settings/");
-									String baseName = statusLocation.substring(statusLocation.lastIndexOf("/")).replace(".xml", ".wpssettings");
-									String wpsSettingsFile = userDataDir+"/WPS_Settings/";
+								} catch (Exception e) {
+								}
+								JSONObject newJobStatus = NewStatusLocation(queryString, statusLocation);
+								Debug.println("newJobStatus: " + newJobStatus.getString("percentage"));
+								String newWPSStatus = newJobStatus.getString("wpsstatus");
+								Debug.println("st:" + newWPSStatus + "<===" + status);
+								if (newWPSStatus!=null && status!=null && !newWPSStatus.equals(status) && newWPSStatus.equals("PROCESSSUCCEEDED")) {
+									Debug.println("Do something");
+								}
+								if (status.equalsIgnoreCase("PROCESSSTARTED") || ((newJobStatus != null)
+										&& !status.equals(newJobStatus.getString("wpsstatus")))) {
+									// Tools.mksubdirs(userDataDir+"/WPS_Settings/");
+									String baseName = statusLocation.substring(statusLocation.lastIndexOf("/"))
+											.replace(".xml", ".wpssettings");
+									String wpsSettingsFile = userDataDir + "/WPS_Settings/";
 									Tools.mksubdirs(wpsSettingsFile);
-									wpsSettingsFile+=baseName;
+									wpsSettingsFile += baseName;
 									Tools.writeFile(wpsSettingsFile, newJobStatus.toString());
-									Debug.println("re-written "+wpsSettingsFile);
-									job=newJobStatus;
-								}								
+									Debug.println("re-written " + wpsSettingsFile);
+									job = newJobStatus;
+								}
 
 							} else {
-//								Debug.println(fn+": finished");
+								// Debug.println(fn+": finished");
 							}
 
 						}
-//						Debug.println(job.toString());
+						// Debug.println(job.toString());
 						jobArray.put(job);
 					}
 				}
 			}
-
+			jsonResponse.setMessage(jobs);
 		} catch (Exception e) {
-			jsonResponse.setException("error: "+e.getMessage(), e);
+			Debug.printStackTrace(e);
+			jsonResponse.setException("error: " + e.getMessage(), e);
 		}
-		jsonResponse.setMessage(jobs);
+		
 		jsonResponse.print(response);
-	}	
+	}
 }
