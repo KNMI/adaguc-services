@@ -27,13 +27,9 @@
 
 package nl.knmi.adaguc.services.oauth2;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.StringWriter;
-import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.KeyFactory;
 import java.security.KeyManagementException;
@@ -43,7 +39,6 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.PrivateKey;
-import java.security.Provider;
 import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.Security;
@@ -51,24 +46,23 @@ import java.security.Signature;
 import java.security.SignatureException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
-import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.RSAPublicKeySpec;
-import java.util.Arrays;
 import java.util.Map;
 import java.util.UUID;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
 
-import javax.net.ssl.SSLPeerUnverifiedException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 import org.apache.oltu.commons.encodedtoken.TokenDecoder;
 import org.apache.oltu.oauth2.client.OAuthClient;
@@ -78,11 +72,8 @@ import org.apache.oltu.oauth2.client.response.OAuthAccessTokenResponse;
 import org.apache.oltu.oauth2.client.response.OAuthAuthzResponse;
 import org.apache.oltu.oauth2.common.exception.OAuthSystemException;
 import org.apache.oltu.oauth2.common.message.types.GrantType;
-import org.bouncycastle.asn1.x509.X509Name;
-import org.bouncycastle.jce.PKCS10CertificationRequest;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.openssl.PEMWriter;
 import org.bouncycastle.operator.OperatorCreationException;
+import org.bouncycastle.pkcs.PKCS10CertificationRequest;
 import org.ietf.jgss.GSSException;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -96,7 +87,6 @@ import nl.knmi.adaguc.security.CertificateVerificationException;
 import nl.knmi.adaguc.security.PemX509Tools;
 import nl.knmi.adaguc.security.PemX509Tools.X509UserCertAndKey;
 import nl.knmi.adaguc.security.SecurityConfigurator;
-import nl.knmi.adaguc.security.SecurityConfigurator.ComputeNode;
 import nl.knmi.adaguc.security.token.Token;
 import nl.knmi.adaguc.security.token.TokenManager;
 import nl.knmi.adaguc.security.user.User;
@@ -106,10 +96,11 @@ import nl.knmi.adaguc.tools.DateFunctions;
 import nl.knmi.adaguc.tools.Debug;
 import nl.knmi.adaguc.tools.ElementNotFoundException;
 import nl.knmi.adaguc.tools.HTTPTools;
-
 import nl.knmi.adaguc.tools.JSONResponse;
 import nl.knmi.adaguc.tools.KVPKey;
 import nl.knmi.adaguc.tools.WebRequestBadStatusException;
+
+
 
 /**
  * Class which helps handling OAuth requests. Uses APACHE oltu, bouncycastle and
@@ -179,7 +170,7 @@ public class OAuth2Handler {
 	 */
 
 	static Map<String, StateObject> oauthStatesMapper = new ConcurrentHashMap<String, StateObject>();// Remembered
-																										// states
+	// states
 
 	public static class StateObject {
 		StateObject(String redirectURL) {
@@ -202,7 +193,7 @@ public class OAuth2Handler {
 		}
 	}
 
-	static String oAuthCallbackURL = "/oauth"; // The external Servlet location
+	static String defaultOAuthCallbackURL = "/oauth"; // The external Servlet location
 
 	/**
 	 * UserInfo object used to share multiple userinfo attributes over
@@ -307,6 +298,12 @@ public class OAuth2Handler {
 			Debug.errprintln("  OAuth2 Step 1 getCode: No Oauth settings set");
 			return;
 		}
+
+		String oAuthCallbackURL = MainServicesConfigurator.getServerExternalURL() + defaultOAuthCallbackURL;
+		if (settings.oauthCallbackURL != null && settings.oauthCallbackURL.length() > 0) {
+			oAuthCallbackURL = settings.oauthCallbackURL;  
+		}
+
 		Debug.println("  OAuth2 Step 1 getCode: Using " + settings.id);
 
 		JSONObject state = new JSONObject();
@@ -320,7 +317,7 @@ public class OAuth2Handler {
 
 		OAuthClientRequest oauth2ClientRequest = OAuthClientRequest.authorizationLocation(settings.OAuthAuthLoc)
 				.setClientId(settings.OAuthClientId)
-				.setRedirectURI(MainServicesConfigurator.getServerExternalURL() + oAuthCallbackURL)
+				.setRedirectURI(oAuthCallbackURL)
 				.setScope(settings.OAuthClientScope).setResponseType("code").setState(state.toString())
 				.buildQueryMessage();
 
@@ -373,10 +370,16 @@ public class OAuth2Handler {
 
 			// Debug.println(settings.OAuthTokenLoc);
 			// Debug.println(settings.OAuthClientSecret);
+			String oAuthCallbackURL = MainServicesConfigurator.getServerExternalURL() + defaultOAuthCallbackURL;
+			if (settings.oauthCallbackURL != null && settings.oauthCallbackURL.length() > 0) {
+				oAuthCallbackURL = settings.oauthCallbackURL;  
+			}
+
+
 
 			OAuthClientRequest tokenRequest = OAuthClientRequest.tokenLocation(settings.OAuthTokenLoc)
 					.setGrantType(GrantType.AUTHORIZATION_CODE)
-					.setRedirectURI(MainServicesConfigurator.getServerExternalURL() + oAuthCallbackURL)
+					.setRedirectURI(oAuthCallbackURL)
 					.setCode(oar.getCode()).setScope(settings.OAuthClientScope).setClientId(settings.OAuthClientId)
 					.setClientSecret(settings.OAuthClientSecret)
 
@@ -450,6 +453,27 @@ public class OAuth2Handler {
 	 */
 	private static void handleSpecificProviderCharacteristics(HttpServletRequest request, Oauth2Settings settings,
 			OAuthAccessTokenResponse oauth2Response) throws Exception {
+		if (settings.id.equals("ceda")) {
+
+			UserInfo userInfo = makeSLCSCertificateRequest(settings.id,oauth2Response.getAccessToken());
+			Token token = TokenManager.registerToken(UserManager.getUser(userInfo.user_identifier));
+			ObjectMapper om = new ObjectMapper();
+			String result = om.writeValueAsString(token);
+			Debug.println(result);
+			JSONObject accessToken1 = new JSONObject(result);
+			if (accessToken1.has("error")) {
+				Debug.errprintln("Error getting user cert: " + accessToken1.toString());
+				request.getSession().setAttribute("services_access_token", accessToken1.toString());
+			} else {
+				Debug.println("makeUserCertificate succeeded: " + accessToken1.toString());
+				request.getSession().setAttribute("services_access_token", accessToken1.get("token"));
+				Debug.println("makeUserCertificate succeeded: " + accessToken1);
+			}
+
+
+			setSessionInfo(request, userInfo);
+			return;
+		}
 
 		if (settings.id.equals("google")) {
 			try {
@@ -464,21 +488,34 @@ public class OAuth2Handler {
 						UserInfo userInfo = getIdentifierFromJWTPayload(
 								TokenDecoder.base64Decode(id_token.split("\\.")[1]));
 
-						// userInfo.user_openid =userInfo.user_identifier;
-						// userInfo.user_openid =
-						// userInfo.user_openid.replaceAll("\\/", "_");
-						// userInfo.user_openid =
-						// userInfo.user_openid.replaceAll("\\.", "_");
-						// userInfo.user_openid =
-						// "https://climate4impact.eu/"+userInfo.user_openid ;
-						// Debug.println("Setting openid to ["+
-						// userInfo.user_openid+"]");
 						if (userInfo == null) {
 							Debug.errprintln(
 									"Error in OAuth2 service getIdentifierFromJWTPayload failed. Check logs!!!");
 							return;
 						}
 						setSessionInfo(request, userInfo);
+
+						try {
+							makeUserCertificate(User.makePosixUserId(userInfo.user_identifier));
+							Token token = TokenManager.registerToken(UserManager.getUser(userInfo.user_identifier));
+							ObjectMapper om = new ObjectMapper();
+							String result = om.writeValueAsString(token);
+							Debug.println(result);
+							JSONObject accessToken = new JSONObject(result);
+							if (accessToken.has("error")) {
+								Debug.errprintln("Error getting user cert: " + accessToken.toString());
+								request.getSession().setAttribute("services_access_token", accessToken.toString());
+							} else {
+								Debug.println("makeUserCertificate succeeded: " + accessToken.toString());
+								request.getSession().setAttribute("services_access_token", accessToken.get("token"));
+								Debug.println("makeUserCertificate succeeded: " + accessToken);
+							}
+
+						} catch (Exception e) {
+							request.getSession().setAttribute("services_access_token", null);
+							Debug.errprintln("makeUserCertificate Failed");
+							Debug.printStackTrace(e);
+						}
 
 						String accessToken = oauth2Response.getAccessToken();
 						Debug.println("ACCESS TOKEN:" + accessToken);
@@ -489,7 +526,9 @@ public class OAuth2Handler {
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
+			return;
 		}
+		Debug.errprintln("Provider with id [" + settings.id + "] not recognized");
 	};
 
 	/**
@@ -501,8 +540,79 @@ public class OAuth2Handler {
 	 * @param currentProvider
 	 * @param accessToken
 	 * @return
+	 * @throws IOException 
+	 * @throws OperatorCreationException 
+	 * @throws NoSuchAlgorithmException 
+	 * @throws ElementNotFoundException 
+	 * @throws CertificateException 
 	 * @throws Exception
 	 */
+
+	private static UserInfo makeSLCSCertificateRequest(String id, String accessToken) throws IOException, OperatorCreationException, NoSuchAlgorithmException, ElementNotFoundException, CertificateException {
+		Debug .println("Step 3 - Make SLCS certificate request to external OAuth2 service");
+
+		UserInfo userInfo = new UserInfo();
+		userInfo.user_identifier = null;//retrieved from slc x509 CN
+
+		/* Step 1 - Initialize security provider and key generator*/
+		Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
+		int keySize = 2048;
+		KeyPairGenerator keyGenkeyGeneratorRSA = KeyPairGenerator.getInstance("RSA");
+		keyGenkeyGeneratorRSA.initialize(keySize, new SecureRandom());
+
+		/* Step 2 - Generate KeyPair for CSR */
+		KeyPair keyPairCSR = keyGenkeyGeneratorRSA.generateKeyPair();
+
+		/* Step 3 - Generate CSR */
+		PKCS10CertificationRequest csr = PemX509Tools.createCSR("CN=Requested Test Certificate", keyPairCSR);
+
+		/* Create post body */
+		String postData = "certificate_request=" + URLEncoder.encode(PemX509Tools.certificateToPemString(csr), "UTF-8");
+
+		String shortLivedCertFromOAuthServiceInPemFormat = null;
+
+		/* Make HTTP post request to CEDA OAuth service with short lived certificate service */
+		CloseableHttpClient httpclient = HttpClients.createDefault();
+		try {
+			HttpPost httppost = new HttpPost("https://slcs.ceda.ac.uk/oauth/certificate/");
+			httppost.addHeader("Authorization", "Bearer " + accessToken);
+			httppost.addHeader("Content-Type","application/x-www-form-urlencoded ");
+			httppost.setEntity(new StringEntity(postData));
+			CloseableHttpResponse response = httpclient.execute(httppost);
+			try {
+				shortLivedCertFromOAuthServiceInPemFormat = EntityUtils.toString(response.getEntity()); 
+			} finally {
+				response.close();
+			}
+		} finally {
+			httpclient.close();
+		}	    	 
+
+		if (shortLivedCertFromOAuthServiceInPemFormat != null) {
+			Debug.println("Succesfully retrieved an SLCS\n");
+		}else{
+			throw new IOException("Unable to retrieve SLC from SLCS");
+		}
+		
+		/* Convert the certificate in PEM format to a X509Certificate object */
+		Debug.println(shortLivedCertFromOAuthServiceInPemFormat);
+		X509Certificate cert = PemX509Tools.readCertificateFromPEMString(shortLivedCertFromOAuthServiceInPemFormat);
+		
+		/* Get user id from certificate */
+		String identifierFromSLCSCertificate = new PemX509Tools().getUserIdFromSubjectDN(cert.getSubjectDN().toString());
+		
+		/* Set user id in userInfo object */		
+		userInfo.user_identifier = User.makePosixUserId(identifierFromSLCSCertificate);
+		userInfo.user_openid = identifierFromSLCSCertificate;
+		
+		/* Find user object matching to openid */
+		User user = UserManager.getUser(identifierFromSLCSCertificate);
+		
+		/* Write cert and private key to disk and configure netcdf library */
+		X509UserCertAndKey userCert = new PemX509Tools().new X509UserCertAndKey(cert,keyPairCSR.getPrivate());
+		user.setCertificate(userCert);
+		return userInfo;
+	}
 
 	/**
 	 * Sets session parameters for the impactportal
@@ -519,69 +629,22 @@ public class OAuth2Handler {
 		request.getSession().setAttribute("oauth_access_token", userInfo.oauth_access_token);
 		request.getSession().setAttribute("login_method", "oauth2");
 
-		try {
-			makeUserCertificate(User.makePosixUserId(userInfo.user_identifier));
-			Token token = TokenManager.registerToken(UserManager.getUser(userInfo.user_identifier));
-			ObjectMapper om = new ObjectMapper();
-			String result = om.writeValueAsString(token);
-			Debug.println(result);
-			JSONObject accessToken = new JSONObject(result);
-			// accessToken.put("domain",
-			// url.substring(0,url.lastIndexOf("/")).replaceAll("https://",
-			// ""));
-			if (accessToken.has("error")) {
-				Debug.errprintln("Error getting user cert: " + accessToken.toString());
-				request.getSession().setAttribute("services_access_token", accessToken.toString());
-			} else {
-				Debug.println("makeUserCertificate succeeded: " + accessToken.toString());
-				request.getSession().setAttribute("services_access_token", accessToken.get("token"));
-				// request.getSession().setAttribute("backend", MainServicesConfigurator.getServerExternalURL());
-				Debug.println("makeUserCertificate succeeded: " + accessToken);
-			}
-
-		} catch (Exception e) {
-			request.getSession().setAttribute("services_access_token", null);
-			Debug.errprintln("makeUserCertificate Failed");
-			Debug.printStackTrace(e);
-		}
 	};
 
 	public static int makeUserCertificate(String clientId) throws CertificateException, IOException,
-			InvalidKeyException, NoSuchAlgorithmException, OperatorCreationException, KeyManagementException,
-			UnrecoverableKeyException, KeyStoreException, NoSuchProviderException, SignatureException, GSSException,
-			ElementNotFoundException, CertificateVerificationException, JSONException {
+	InvalidKeyException, NoSuchAlgorithmException, OperatorCreationException, KeyManagementException,
+	UnrecoverableKeyException, KeyStoreException, NoSuchProviderException, SignatureException, GSSException,
+	ElementNotFoundException, CertificateVerificationException, JSONException {
 
 		User user = UserManager.getUser(clientId);
 		Debug.println("Making user cert for " + clientId);
-		X509Certificate caCertificate = PemX509Tools.readCertificateFromPEM(SecurityConfigurator.getCACertificate());
+		X509Certificate caCertificate = PemX509Tools.readCertificateFromPEMFile(SecurityConfigurator.getCACertificate());
 		PrivateKey privateKey = PemX509Tools.readPrivateKeyFromPEM(SecurityConfigurator.getCAPrivateKey());
 		X509UserCertAndKey userCert = new PemX509Tools().setupSLCertificateUser(clientId, caCertificate, privateKey);
 		user.setCertificate(userCert);
 
 		Debug.println("Created user cert");
 		return 0;
-
-		// CloseableHttpClient httpClient = new
-		// PemX509Tools().getHTTPClientForPEMBasedClientAuth(
-		// SecurityConfigurator.getTrustStore(),
-		// SecurityConfigurator.getTrustStorePassword().toCharArray(),
-		// userCert);
-		//
-		//
-		// Vector<ComputeNode> computeNodes =
-		// SecurityConfigurator.getComputeNodes();
-		// String url = computeNodes.get(0).url + "/registertoken";
-		// Debug.println("Requesting token from " + url);
-		// CloseableHttpResponse httpResponse = httpClient.execute(new
-		// HttpGet(url));
-		// String result = EntityUtils.toString(httpResponse.getEntity());
-		// JSONObject resultAsJSON = new JSONObject(result);
-		// resultAsJSON.put("domain",
-		// url.substring(0,url.lastIndexOf("/")).replaceAll("https://", ""));
-		// httpResponse.close();
-		// Debug.println("resultAsJSON:["+resultAsJSON+"]");
-		// return resultAsJSON;
-
 	}
 
 	/**
@@ -599,7 +662,7 @@ public class OAuth2Handler {
 	 */
 	@SuppressWarnings("unused")
 	private static boolean verify_JWT_IdToken(String id_token) throws JSONException, WebRequestBadStatusException,
-			IOException, SignatureException, InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException {
+	IOException, SignatureException, InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException {
 		// http://self-issued.info/docs/draft-jones-json-web-token-01.html#DefiningRSA
 		// The JWT Signing Input is always the concatenation of a JWT Header
 		// Segment, a period ('.') character, and the JWT Payload Segment
@@ -712,7 +775,7 @@ public class OAuth2Handler {
 	 */
 	static boolean RSASSA_PKCS1_V1_5_VERIFY(String modulus_n, String exponent_e, String signinInput_M,
 			String signature_S)
-			throws SignatureException, InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException {
+					throws SignatureException, InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException {
 		Debug.println("Starting verification");
 		/* RSA SHA-256 RSASSA-PKCS1-V1_5-VERIFY */
 		// Modulus (n from https://www.googleapis.com/oauth2/v2/certs)
@@ -910,8 +973,8 @@ public class OAuth2Handler {
 		key.addKVP("Authorization", access_token);
 		Debug.println("Starting request");
 		String id_token = HTTPTools.makeHTTPGetRequestWithHeaders(userInfoEndpoint, key);// ,"Authorization:
-																							// Bearer
-																							// "+access_token);
+		// Bearer
+		// "+access_token);
 		Debug.println("Finished request");
 
 		// 6) The ID token is retrieved, now return the identifier from this

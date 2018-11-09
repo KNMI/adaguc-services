@@ -5,7 +5,7 @@
 
 	<groupId>nl.knmi.adagucservices</groupId>
 	<artifactId>adaguc-services</artifactId>
-	<version>1.0.9</version>
+	<version>1.0.11</version>
 	<packaging>war</packaging>
 
 	<name>adaguc-services</name>
@@ -87,7 +87,7 @@
 		<dependency>
 			<groupId>org.reflections</groupId>
 			<artifactId>reflections</artifactId>
-			<version>0.9.9-RC1</version>
+			<version>0.9.11</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.commons</groupId>
