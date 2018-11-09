@@ -43,11 +43,11 @@ public class UserManager {
 		if(id == null){
 			throw new AuthenticationExceptionImpl("No user information provided");
 		}
-		id = harmonizeUserId(id);
+		String harmonizedId = harmonizeUserId(id);
 		
-		User user = users.get(id);
+		User user = users.get(harmonizedId);
 		if(user == null){
-			users.put(id, new User(id));
+			users.put(harmonizedId, new User(id));
 			return getUser(id);
 		}
 		return user;

@@ -70,13 +70,13 @@ public class AuthenticatorImplTest {
 
 		/* Get common name from certificate */
 		Debug.println("  Step 2 - Get CN from verified cert");
-		X509Info x509 = new PemX509Tools().getUserIdFromCertificate(PemX509Tools.readCertificateFromPEM(clientCertLocation));
+		X509Info x509 = new PemX509Tools().getUserIdFromCertificate(PemX509Tools.readCertificateFromPEMFile(clientCertLocation));
 		if(x509 != null){
 			Debug.println("  CN = ["+ x509.getCN()+"]");
 		}
 		assertThat(x509.getCN(),is(clientCN));
 		MvcResult result = mockMvc.perform(get("/user/getuserinfofromcert")
-				.sessionAttr("javax.servlet.request.X509Certificate", PemX509Tools.readCertificateFromPEM(clientCertLocation))
+				.sessionAttr("javax.servlet.request.X509Certificate", PemX509Tools.readCertificateFromPEMFile(clientCertLocation))
 				.contentType(MediaType.APPLICATION_JSON_UTF8).content("{}"))
 				//                .andExpect(status().isMethodNotAllowed())
 				.andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))

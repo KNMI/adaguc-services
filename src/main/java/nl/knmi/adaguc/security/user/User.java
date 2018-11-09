@@ -18,6 +18,9 @@ public class User {
 
 	@Getter
 	String userId = null;
+	
+	@Getter
+	String openId = null;
 
 	@Getter
 	String dataDir = null;
@@ -39,6 +42,7 @@ public class User {
 	public User(String _id) throws IOException, ElementNotFoundException {
 		Debug.println("New user ID is made :["+_id+"]");
 		String userWorkspace = MainServicesConfigurator.getUserWorkspace();
+		openId = _id;
 		userId = makePosixUserId(_id);
 		homeDir=userWorkspace+"/"+userId;
 		dataDir = homeDir+"/data";
@@ -83,5 +87,7 @@ public class User {
 	public X509UserCertAndKey getCertificate() {
 		return this.userCert;
 	}
+
+
 
 }

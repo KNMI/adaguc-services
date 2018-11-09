@@ -165,6 +165,13 @@ public class ServiceHelperRequestMapper {
 				if (wpsID!=null && test.getString("wpsstatus").equals(PyWPSServer.WPSStatus.PROCESSSUCCEEDED.toString())) {
 					Debug.println("============== OK WPS SUCCESFULLY FINISHED, START COPY TO BASKET ================ ");
 					/* Parse outputs and copy them to local basket */
+					if (user == null){
+						throw new Exception("Error, user is null");
+					}
+					if (user.getDataDir() == null){
+						throw new Exception("Error, user.getDataDir() is null");
+					}
+
 					Vector<XMLElement> processOutputs = rootElement.get("wps:ExecuteResponse").get("wps:ProcessOutputs").getList("wps:Output");
 					for(int j=0;j<processOutputs.size();j++){
 //						Debug.println(j + ")" + processOutputs.get(j).toString());
@@ -176,6 +183,7 @@ public class ServiceHelperRequestMapper {
 						try {
 							XMLElement refObj = processOutputs.get(j).get("wps:Reference");
 							String reference = refObj.getAttrValue("href");
+							Debug.println("Processfolder is " + processFolder);
 							String destLoc = user.getDataDir() + "/" + "/" + processFolder;
 							String basketLocalFilename = FilenameUtils.getBaseName(reference) + "." + FilenameUtils.getExtension(reference);
 							String fullPath = destLoc + "/" + basketLocalFilename;

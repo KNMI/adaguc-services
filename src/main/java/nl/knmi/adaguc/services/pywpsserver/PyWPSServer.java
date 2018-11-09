@@ -180,7 +180,7 @@ public class PyWPSServer extends HttpServlet{
 		String statusLocation=null;
 		String creationTime=null;
 		Debug.println("statusLocationDataAsJSONElementToWPSStatusObject");
-		Debug.println(json.toString());
+		//Debug.println(json.toString());
 		MyXMLParser.XMLElement rootElement = new MyXMLParser.XMLElement();
 		rootElement.parse(json);
 		JSONObject data=new JSONObject();

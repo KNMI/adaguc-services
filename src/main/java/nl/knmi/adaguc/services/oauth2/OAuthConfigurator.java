@@ -29,6 +29,7 @@ public class OAuthConfigurator implements nl.knmi.adaguc.config.ConfiguratorInte
       
       
       public String id = null;
+      public String oauthCallbackURL = null;
       public String getConfig() {
         String config = "OAuthAuthLoc: "+OAuthAuthLoc+"\n";
         config += "OAuthTokenLoc: "+OAuthTokenLoc+"\n";
@@ -66,6 +67,8 @@ public class OAuthConfigurator implements nl.knmi.adaguc.config.ConfiguratorInte
         	Debug.println("adaguc-services.oauth2 not configured");
 			return;
 		}
+        
+        
         Vector<XMLElement> providers = null;
         try {
           providers = configReader.get("adaguc-services").get("oauth2").getList("provider");
@@ -91,6 +94,7 @@ public class OAuthConfigurator implements nl.knmi.adaguc.config.ConfiguratorInte
             try{oauthSetting.description = provider.get("description").getValue();}catch(Exception e){}
             try{oauthSetting.logo = provider.get("logo").getValue();}catch(Exception e){}
             try{oauthSetting.registerlink = provider.get("registerlink").getValue();}catch(Exception e){}
+            try{oauthSetting.oauthCallbackURL = provider.get("oauthcallbackurl").getValue();}catch(Exception e){}
             
             oauth2Providers.add(oauthSetting);
             //Debug.println(j+") Found Oauth2 provider "+oauthSetting.id);
