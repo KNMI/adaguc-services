@@ -55,40 +55,14 @@ public class JobListRequestMapper {
 
 	private static JSONObject NewStatusLocation(String queryString, String statusLocation)
 			throws InvalidTokenException, ElementNotFoundException, InvalidHTTPKeyValueTokensException, IOException {
-		// Check for status location first.
 		Debug.println("Checking [" + statusLocation + "]");
-//		if (statusLocation != null) {
-//			String portalOutputPath = PyWPSConfigurator.getPyWPSOutputDir();
-//			if (portalOutputPath == null) {
-//				return null;
-//			}
-//			String output = statusLocation.substring(statusLocation.lastIndexOf("/"));
-//			// Remove first "/" token;
-//			output = output.substring(1);
-//			portalOutputPath = Tools.makeCleanPath(portalOutputPath);
-//			String fileName = portalOutputPath + "/" + output;
-//			Debug.println("NewStatusLocation request: " + fileName);
-//
-//			Tools.checkValidCharsForFile(output);
-//			String data = Tools.readFile(fileName);
-//			JSONObject statusJson = null;
-//			try {
-//				statusJson = PyWPSServer.xmlStatusToJSONStatus(queryString, data);
-//			} catch (Exception e) {
-//				// TODO Auto-generated catch block
-//				e.printStackTrace();
-//			}
-//			return statusJson;
-//
-//		}
 		if (statusLocation != null) {
 			JSONObject statusJson = null;
 			try {
 				String data = HTTPTools.makeHTTPGetRequest(statusLocation);
 				statusJson = PyWPSServer.statusLocationDataAsXMLToWPSStatusObject(queryString, data);
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				Debug.errprintln("PyWPSServer.statusLocationDataAsXMLToWPSStatusObjec FAILED " + e.getMessage());
 			}
 			return statusJson;
 		}
@@ -198,7 +172,7 @@ public class JobListRequestMapper {
 						if (status != null) {
 							if (status.equalsIgnoreCase("PROCESSACCEPTED") || status.equalsIgnoreCase("PROCESSSTARTED")
 									|| status.equalsIgnoreCase("PROCESSPAUSED")) {
-								Debug.println(fn + ": with status " + status + " let's look again");
+//								Debug.println(fn + ": with status " + status + " let's look again");
 								String statusLocation = job.getString("statuslocation");
 								String queryString = null;
 								try {
@@ -206,25 +180,27 @@ public class JobListRequestMapper {
 								} catch (Exception e) {
 								}
 								JSONObject newJobStatus = NewStatusLocation(queryString, statusLocation);
-								Debug.println("newJobStatus: " + newJobStatus.getString("percentage"));
-								String newWPSStatus = newJobStatus.getString("wpsstatus");
-								Debug.println("st:" + newWPSStatus + "<===" + status);
-								if (newWPSStatus!=null && status!=null && !newWPSStatus.equals(status) && newWPSStatus.equals("PROCESSSUCCEEDED")) {
-									Debug.println("Do something");
+								if(newJobStatus!=null && newJobStatus.length() !=0) {
+									
+									// Debug.println("newJobStatus: " + newJobStatus.getString("percentage"));
+									String newWPSStatus = newJobStatus.getString("wpsstatus");
+//									Debug.println("st:" + newWPSStatus + "<===" + status);
+									if (newWPSStatus!=null && status!=null && !newWPSStatus.equals(status) && newWPSStatus.equals("PROCESSSUCCEEDED")) {
+										Debug.println("Do something");
+									}
+									if (status.equalsIgnoreCase("PROCESSSTARTED") || ((newJobStatus != null)
+											&& !status.equals(newJobStatus.getString("wpsstatus")))) {
+										// Tools.mksubdirs(userDataDir+"/WPS_Settings/");
+										String baseName = statusLocation.substring(statusLocation.lastIndexOf("/"))
+												.replace(".xml", ".wpssettings");
+										String wpsSettingsFile = userDataDir + "/WPS_Settings/";
+										Tools.mksubdirs(wpsSettingsFile);
+										wpsSettingsFile += baseName;
+										Tools.writeFile(wpsSettingsFile, newJobStatus.toString());
+										Debug.println("re-written " + wpsSettingsFile);
+										job = newJobStatus;
+									}
 								}
-								if (status.equalsIgnoreCase("PROCESSSTARTED") || ((newJobStatus != null)
-										&& !status.equals(newJobStatus.getString("wpsstatus")))) {
-									// Tools.mksubdirs(userDataDir+"/WPS_Settings/");
-									String baseName = statusLocation.substring(statusLocation.lastIndexOf("/"))
-											.replace(".xml", ".wpssettings");
-									String wpsSettingsFile = userDataDir + "/WPS_Settings/";
-									Tools.mksubdirs(wpsSettingsFile);
-									wpsSettingsFile += baseName;
-									Tools.writeFile(wpsSettingsFile, newJobStatus.toString());
-									Debug.println("re-written " + wpsSettingsFile);
-									job = newJobStatus;
-								}
-
 							} else {
 								// Debug.println(fn+": finished");
 							}
