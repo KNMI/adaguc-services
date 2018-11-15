@@ -785,7 +785,16 @@ public class TinyDapServer {
 		}
 		if(input!=null){
 			try {
-				response.setHeader("Content-Type", "application/netcdf");
+				String fileName = filename.toString();
+				if (fileName.endsWith(".txt")) {
+					response.setHeader("Content-Type", "text/plain");
+				} else if (fileName.endsWith(".svg")){
+					response.setHeader("Content-Type", "image/svg+xml");
+				} else if (fileName.endsWith(".png")){
+					response.setHeader("Content-Type", "image/png");
+				} else {
+					response.setHeader("Content-Type", "application/netcdf");
+				}
 				response.setHeader("Content-Length", String.valueOf(input.getChannel().size()));
 				IOUtils.copy(input, outputStream);
 				input.close();
