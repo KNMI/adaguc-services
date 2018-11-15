@@ -92,6 +92,8 @@ public class AutoWMSRequestMapper {
 										file.getName().endsWith(".hdf5") ||
 										file.getName().endsWith(".nc") || 
 										file.getName().endsWith(".nc4") ||
+										file.getName().endsWith(".csv") ||
+										file.getName().endsWith(".json") ||
 										file.getName().endsWith(".geojson") 
 										){
 									String filePath = file.getAbsolutePath().substring(basePath.length()+1);
