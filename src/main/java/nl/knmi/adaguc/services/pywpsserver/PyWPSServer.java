@@ -171,15 +171,20 @@ public class PyWPSServer extends HttpServlet{
 
 	}
 
-	public static JSONObject xmlStatusToJSONStatus(String queryString, String wpsResponse) throws Exception {
+	public static JSONObject statusLocationDataAsXMLToWPSStatusObject(String queryString, String wpsResponse) throws Exception {
 		MyXMLParser.XMLElement rootElement = new MyXMLParser.XMLElement();
 		rootElement.parseString(wpsResponse);
-//		Debug.println(rootElement.toJSON(Options.NONE));
+		return statusLocationDataAsJSONElementToWPSStatusObject(queryString, new JSONObject(rootElement.toJSON(Options.NONE)));
+	}
+	public static JSONObject statusLocationDataAsJSONElementToWPSStatusObject(String queryString, JSONObject json) throws Exception {
 		String statusLocation=null;
 		String creationTime=null;
+		Debug.println("statusLocationDataAsJSONElementToWPSStatusObject");
+		//Debug.println(json.toString());
+		MyXMLParser.XMLElement rootElement = new MyXMLParser.XMLElement();
+		rootElement.parse(json);
 		JSONObject data=new JSONObject();
 		try {
-			Debug.println(wpsResponse);
 			statusLocation = rootElement.get("wps:ExecuteResponse").getAttrValue("statusLocation");
 			Debug.println("statusLocation:"+statusLocation);
 			String status = null; // = rootElement.get("wps:ExecuteResponse").get("wps:Status").get("wps:ProcessAccepted").getValue();
@@ -280,10 +285,10 @@ public class PyWPSServer extends HttpServlet{
 
 	}
 
-	private static enum WPSStatus {PROCESSACCEPTED, PROCESSSTARTED, PROCESSPAUSED, PROCESSFAILED, PROCESSSUCCEEDED};
+	public static enum WPSStatus {PROCESSACCEPTED, PROCESSSTARTED, PROCESSPAUSED, PROCESSFAILED, PROCESSSUCCEEDED};
 
 	private static void getUserJobInfo(String queryString, String userDataDir, String wpsResponse) throws Exception {
-		JSONObject data=xmlStatusToJSONStatus(queryString, wpsResponse);
+		JSONObject data=statusLocationDataAsXMLToWPSStatusObject(queryString, wpsResponse);
 		if (data!=null) {
 
 			//  		  Tools.mksubdirs(userDataDir+"/WPS_Settings/");

@@ -7,8 +7,10 @@ import java.time.ZoneId;
 import java.util.Arrays;
 
 import lombok.Getter;
+import nl.knmi.adaguc.tools.Debug;
 import nl.knmi.adaguc.tools.ElementNotFoundException;
 import nl.knmi.adaguc.config.MainServicesConfigurator;
+import nl.knmi.adaguc.security.user.User;
 
 @Getter
 public class Basket {
@@ -18,6 +20,7 @@ public class Basket {
 	private String token;
 
 	public Basket(String dir, String name, String token) {
+		Debug.println("New basket for " + name);
 		this.userDir=dir;
 		this.token=token;
 		if (!this.userDir.endsWith("/")){
@@ -33,12 +36,18 @@ public class Basket {
 		}
 	}
 
-	public BasketNode listFiles() throws ElementNotFoundException{
+	private BasketNode listFiles() throws ElementNotFoundException{
 		BasketNode rootBn=new BasketNode(this.name, "root", null, null, null);
 		return this.listFiles(rootBn, userDir);	
 	}
 	
-	public BasketNode listFiles(BasketNode bn, String dir) throws ElementNotFoundException {
+	public static String GetRemotePrefix(User user) throws ElementNotFoundException {
+		return MainServicesConfigurator.getServerExternalURL() + "/opendap/"+user.makePosixUserId(user.getUserId()) + "/";
+	}
+	
+	
+	
+	private BasketNode listFiles(BasketNode bn, String dir) throws ElementNotFoundException {
 		String externalURL=MainServicesConfigurator.getServerExternalURL();
 		File d=new File(dir);
 		if (d.isDirectory()) {

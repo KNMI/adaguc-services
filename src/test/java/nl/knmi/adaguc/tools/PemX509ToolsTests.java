@@ -63,7 +63,7 @@ public class PemX509ToolsTests {
 
 		/* Get common name from certificate */
 		Debug.println("  Step 2 - Get CN from verified cert");
-		X509Info x509 = new PemX509Tools().getUserIdFromCertificate(PemX509Tools.readCertificateFromPEM(clientCertLocation));
+		X509Info x509 = new PemX509Tools().getUserIdFromCertificate(PemX509Tools.readCertificateFromPEMFile(clientCertLocation));
 		if(x509 != null){
 			Debug.println("  CN = ["+ x509.getCN()+"]");
 		}

@@ -1,18 +1,32 @@
 package nl.knmi.adaguc.services.xml2json;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URL;
 import java.net.URLDecoder;
+import java.security.InvalidKeyException;
+import java.security.KeyManagementException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.SignatureException;
+import java.security.UnrecoverableKeyException;
+import java.security.cert.CertificateException;
+import java.util.Vector;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.io.FilenameUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.util.EntityUtils;
+import org.ietf.jgss.GSSException;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -33,8 +47,16 @@ import nl.knmi.adaguc.security.SecurityConfigurator;
 import nl.knmi.adaguc.security.user.User;
 import nl.knmi.adaguc.security.user.UserManager;
 import nl.knmi.adaguc.services.adagucserver.ADAGUCServer;
+import nl.knmi.adaguc.services.basket.Basket;
+import nl.knmi.adaguc.services.joblist.JobListRequestMapper;
+import nl.knmi.adaguc.services.pywpsserver.PyWPSServer;
+import nl.knmi.adaguc.services.pywpsserver.PyWPSServer.WPSStatus;
 import nl.knmi.adaguc.tools.Debug;
+import nl.knmi.adaguc.tools.JSONResponse;
 import nl.knmi.adaguc.tools.MyXMLParser;
+import nl.knmi.adaguc.tools.Tools;
+import nl.knmi.adaguc.tools.MyXMLParser.Options;
+import nl.knmi.adaguc.tools.MyXMLParser.XMLElement;
 
 
 @RestController
@@ -60,16 +82,8 @@ public class ServiceHelperRequestMapper {
 		 * @param out1
 		 * @param response
 		 */
-
+		JSONResponse jsonResponse = new JSONResponse(servletRequest);
 		String requestStr;
-		OutputStream out;
-		try {
-			out = response.getOutputStream();
-		} catch (IOException e2) {
-			// TODO Auto-generated catch block
-			e2.printStackTrace();
-			return;
-		}
 		try {
 			requestStr=URLDecoder.decode(request,"UTF-8");
 			MyXMLParser.XMLElement rootElement = new MyXMLParser.XMLElement();
@@ -77,8 +91,8 @@ public class ServiceHelperRequestMapper {
 			System.err.println("Converting XML to JSON for "+requestStr);
 
 			boolean isLocal = false;
-			
-			if(requestStr.startsWith(MainServicesConfigurator.getServerExternalURL())){
+			Debug.println("xml2json " + requestStr);
+			if(requestStr.startsWith(MainServicesConfigurator.getServerExternalURL()) && requestStr.toUpperCase().contains("SERVICE=WMS")){
 				Debug.println("Running local adaguc for ["+requestStr+"]");
 				isLocal = true;
 				ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
@@ -90,42 +104,38 @@ public class ServiceHelperRequestMapper {
 				outputStream.close();
 				rootElement.parseString(getCapabilities);
 			}
-
+			
+			User user = null;
+			X509UserCertAndKey userCertificate = null;
+			String ts = null;
+			char [] tsPass = null;
 			if(isLocal == false){
-				String ts = null;
+				
+				
 				if(requestStr.startsWith("https://")){
 					ts = SecurityConfigurator.getTrustStore();
 				}
 				if(ts!=null ){
-					char [] tsPass = SecurityConfigurator.getTrustStorePassword().toCharArray();
-					
-					Debug.println("Running remote adaguc with truststore");
+					tsPass = SecurityConfigurator.getTrustStorePassword().toCharArray();
 
-					X509UserCertAndKey userCertificate = null;
+					Debug.println("Setting up user cert with truststore");
+
 					
+
 					AuthenticatorInterface authenticator = AuthenticatorFactory.getAuthenticator(servletRequest);
 					if(authenticator!=null){
-						User user = null;
+						
 						try {
-						user = UserManager.getUser(authenticator);
+							user = UserManager.getUser(authenticator);
 						} catch(Exception e) {
-							
+
 						}
 						if(user!=null){
 							userCertificate = user.getCertificate();
 						}
 					}
-					if (userCertificate!=null) {
-						Debug.println("Making request with user certificate");
-					} else {
-						Debug.println("Making request without user certificate");
-					}
-					
-					
-					CloseableHttpClient httpClient = (new PemX509Tools()).
-							getHTTPClientForPEMBasedClientAuth(ts, tsPass, userCertificate);
-					CloseableHttpResponse httpResponse = httpClient.execute(new HttpGet(requestStr));
-					String result = EntityUtils.toString(httpResponse.getEntity());
+					String result = new String(makeRequest(requestStr, userCertificate, ts, tsPass));
+
 					rootElement.parseString(result);
 				}else{
 					Debug.println("Running remote adaguc without truststore");
@@ -133,33 +143,106 @@ public class ServiceHelperRequestMapper {
 					rootElement.parse(new URL(requestStr));
 				}
 			}
-			if (callback==null) {
-				response.setContentType("application/json");
-				out.write(rootElement.toJSON(null).getBytes());
-			} else {
-				response.setContentType("application/javascript");
-				out.write(callback.getBytes());
-				out.write("(".getBytes());
-				out.write(rootElement.toJSON(null).getBytes());
-				out.write(");".getBytes());
-
+			
+			/* Hookup WPS request calls */
+			if (requestStr.toUpperCase().contains("SERVICE=WPS")) {
+				Debug.println("This is a WPS call");
+				if (requestStr.toUpperCase().contains("REQUEST=EXECUTE")) {
+					Debug.println("This is a WPS Execute call, store in jobs!");
+					JobListRequestMapper.saveExecuteResponseToJob(requestStr, rootElement.toString(), servletRequest);
+				}
 			}
+			
+			/* Hookup WPS response calls */
+			try{
+				JSONObject test = PyWPSServer.statusLocationDataAsJSONElementToWPSStatusObject(null, rootElement.toJSONObject(Options.NONE));
+				String wpsID = null;
+				try{
+					wpsID = test.getString("id");
+				}catch(Exception e){
+				}
+				
+				if (wpsID!=null && test.getString("wpsstatus").equals(PyWPSServer.WPSStatus.PROCESSSUCCEEDED.toString())) {
+					Debug.println("============== OK WPS SUCCESFULLY FINISHED, START COPY TO BASKET ================ ");
+					/* Parse outputs and copy them to local basket */
+					if (user == null){
+						throw new Exception("Error, user is null");
+					}
+					if (user.getDataDir() == null){
+						throw new Exception("Error, user.getDataDir() is null");
+					}
+
+					Vector<XMLElement> processOutputs = rootElement.get("wps:ExecuteResponse").get("wps:ProcessOutputs").getList("wps:Output");
+					for(int j=0;j<processOutputs.size();j++){
+//						Debug.println(j + ")" + processOutputs.get(j).toString());
+						String identifier = processOutputs.get(j).get("ows:Identifier").getValue();
+						String title = processOutputs.get(j).get("ows:Title").getValue();
+						
+						Debug.println("Identifying " + identifier + "/" + title);
+						String processFolder = test.getString("processid")+"_"+ test.getString("creationtime").replaceAll(":", "").replaceAll("-", "")+"_"+ wpsID;
+						try {
+							XMLElement refObj = processOutputs.get(j).get("wps:Reference");
+							String reference = refObj.getAttrValue("href");
+							Debug.println("Processfolder is " + processFolder);
+							String destLoc = user.getDataDir() + "/" + "/" + processFolder;
+							String basketLocalFilename = FilenameUtils.getBaseName(reference) + "." + FilenameUtils.getExtension(reference);
+							String fullPath = destLoc + "/" + basketLocalFilename;
+							if (new File(fullPath).exists() == false) {
+								Debug.println("Start copy " + reference);
+								// TODO: ADD SECURITY CHECKS
+								Tools.mksubdirs(destLoc);
+								Tools.writeFile(fullPath, makeRequest(reference, userCertificate, ts, tsPass));
+							} else {
+								Debug.println("Already copied " + reference);
+							}
+							String basketRemoteURL = Basket.GetRemotePrefix(user) + processFolder + "/" + basketLocalFilename;
+							refObj.setAttr("href", basketRemoteURL);
+							
+						}catch(Exception e){
+							Debug.printStackTrace(e);
+						}
+						
+						
+						
+					}
+				}
+				Debug.println(test.toString());
+			}catch(Exception e){
+				Debug.printStackTrace(e);
+			}
+			jsonResponse.setMessage(rootElement.toJSON(null));
 		} catch (Exception e) {
 			e.printStackTrace();
-			try {
-				if (callback==null) {
-					response.setContentType("application/json");
-					out.write("{\"error\":\"error\"}".getBytes());
-				} else {
-					response.setContentType("application/javascript");
-					out.write(callback.getBytes());
-					out.write("(".getBytes());
-					out.write("{\"error\":\"error\"}".getBytes());
-					out.write(");".getBytes());
+			jsonResponse.setException(e.getMessage(),e);
+		}
 
-				}
-			}catch (Exception e1) {
-				response.setStatus(500);
+	    try {
+	      jsonResponse.print(response);
+	    } catch (Exception e1) {
+
+	    }
+
+	}
+	private byte[] makeRequest(String requestStr, X509UserCertAndKey userCertificate, String ts, char[] tsPass) throws KeyManagementException, UnrecoverableKeyException, InvalidKeyException, NoSuchAlgorithmException, KeyStoreException, CertificateException, NoSuchProviderException, SignatureException, IOException, GSSException {
+		try {
+			/* First try without user certificate */
+			Debug.println("First try without user certificate");
+			CloseableHttpClient httpClient = (new PemX509Tools()).
+					getHTTPClientForPEMBasedClientAuth(ts, tsPass, null);
+			CloseableHttpResponse httpResponse = httpClient.execute(new HttpGet(requestStr));
+			return EntityUtils.toByteArray(httpResponse.getEntity());
+		} catch (Exception e){
+			if (userCertificate!=null) {
+			/* Second, try with user certificate */
+				Debug.println("Second, try with user certificate");
+				CloseableHttpClient httpClient = (new PemX509Tools()).
+						getHTTPClientForPEMBasedClientAuth(ts, tsPass, userCertificate);
+				CloseableHttpResponse httpResponse = httpClient.execute(new HttpGet(requestStr));
+				return EntityUtils.toByteArray(httpResponse.getEntity());
+				
+			} else{
+				Debug.println("Request without user certificate failed");
+				throw(e);
 			}
 		}
 	}

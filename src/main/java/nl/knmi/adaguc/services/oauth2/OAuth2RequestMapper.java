@@ -1,21 +1,11 @@
 package nl.knmi.adaguc.services.oauth2;
 
 import java.io.IOException;
-import java.security.InvalidKeyException;
-import java.security.KeyManagementException;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.SignatureException;
-import java.security.UnrecoverableKeyException;
-import java.security.cert.CertificateException;
 import java.util.Vector;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.bouncycastle.operator.OperatorCreationException;
-import org.ietf.jgss.GSSException;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -31,11 +21,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
 import nl.knmi.adaguc.config.MainServicesConfigurator;
-import nl.knmi.adaguc.security.CertificateVerificationException;
 import nl.knmi.adaguc.security.SecurityConfigurator;
 import nl.knmi.adaguc.security.SecurityConfigurator.ComputeNode;
 import nl.knmi.adaguc.tools.ElementNotFoundException;
-import nl.knmi.adaguc.tools.HTTPTools;
 import nl.knmi.adaguc.tools.JSONResponse;
 
 

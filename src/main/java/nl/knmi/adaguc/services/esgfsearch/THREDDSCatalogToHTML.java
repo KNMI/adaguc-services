@@ -280,7 +280,7 @@ public class THREDDSCatalogToHTML {
 						AuthenticatorInterface authenticator = AuthenticatorFactory.getAuthenticator(request);
 						if(authenticator != null){
 							try {
-								openid = UserManager.getUser(authenticator).getUserId();
+								openid = UserManager.getUser(authenticator).getOpenId();
 							} catch(Exception e){
 								Debug.println("No user information provided: " + e.getMessage());
 							}
