@@ -30,7 +30,7 @@ public class ADAGUCRequestMapper {
 	@CrossOrigin
 	@RequestMapping("wms")
 	public void ADAGUCSERVERWMS(HttpServletResponse response, HttpServletRequest request){
-		Debug.println("/wms");
+		Debug.println("#### SERVLET /wms ####");
 		try {
 			ADAGUCServer.runADAGUCWMS(request,response,null,null);
 		} catch (Exception e) {

@@ -76,6 +76,7 @@ public class ServiceHelperRequestMapper {
 			@RequestParam(value="request")String request,
 			@RequestParam(value="callback", 
 			required=false)String callback, HttpServletRequest servletRequest, HttpServletResponse response){
+		Debug.println("#### SERVLET /xml2json ####");
 		/**
 		 * Converts XML file pointed with request to JSON file
 		 * @param requestStr
