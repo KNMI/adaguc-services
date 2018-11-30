@@ -175,9 +175,9 @@ public class PemX509Tools {
 	}
 
 	public String getUserIdFromSubjectDN (String subjectDN) {
-		String[] dnItems = subjectDN.split(", ");
+		String[] dnItems = subjectDN.split(",");
 		for (int j = 0; j < dnItems.length; j++) {
-			int CNIndex = dnItems[j].indexOf("CN");
+			int CNIndex = dnItems[j].trim().indexOf("CN");
 			if (CNIndex != -1) {
 				return dnItems[j].substring("CN=".length()
 						+ CNIndex);
