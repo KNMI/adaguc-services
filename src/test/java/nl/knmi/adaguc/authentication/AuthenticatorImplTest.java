@@ -27,6 +27,7 @@ import org.springframework.web.context.WebApplicationContext;
 import nl.knmi.adaguc.security.PemX509Tools;
 import nl.knmi.adaguc.security.PemX509Tools.X509Info;
 import nl.knmi.adaguc.security.token.TokenManager;
+import nl.knmi.adaguc.services.tinyopendapserver.TinyDapServer;
 import nl.knmi.adaguc.tools.Debug;
 
 
@@ -64,6 +65,12 @@ public class AuthenticatorImplTest {
 		Debug.println(tokenNope);
 		assertThat(tokenNope,org.hamcrest.Matchers.isEmptyOrNullString());
 	}
+	
+//	@Test
+//	public void TestDAPDDS() throws Exception{
+//	
+//		TinyDapServer.handleOpenDapReqeuests("/home/c3smagic/Downloads/test-metric.nc","/","/",null,null);
+//	}
 
 	@Test
 	public void TestThis() throws Exception{

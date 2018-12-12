@@ -208,7 +208,7 @@ public class TinyDapServer {
 	};
 
 
-	enum CDMTypes {String,Byte,UInt16,Int16,UInt32,Int32,Float32,Float64 };
+	enum CDMTypes {String,Byte,UInt16,Int16,UInt32,Int32,UInt64, Int64, Float32,Float64 };
 
 	private static CDMTypes ncTypeToCDMType(String CDMType){
 		if(CDMType.equals("String"))return CDMTypes.String;
@@ -218,11 +218,11 @@ public class TinyDapServer {
 		if(CDMType.equals("short"))return CDMTypes.Int16;
 		if(CDMType.equals("uint"))return CDMTypes.UInt32;
 		if(CDMType.equals("int"))return CDMTypes.Int32;
+		if(CDMType.equals("ulong"))return CDMTypes.UInt64;
+		if(CDMType.equals("long"))return CDMTypes.Int64;
 		if(CDMType.equals("float"))return CDMTypes.Float32;
 		if(CDMType.equals("double"))return CDMTypes.Float64;
-		if(Debugger.DebugOpendap){
-			Debug.errprintln("Unknown type "+CDMType);
-		}
+		Debug.errprintln("Unknown type "+CDMType);
 		return null;
 	}
 
@@ -233,8 +233,11 @@ public class TinyDapServer {
 		if(cdmType == CDMTypes.Int16)return "Int16";
 		if(cdmType == CDMTypes.UInt32)return "UInt32";
 		if(cdmType == CDMTypes.Int32)return "Int32";
+		if(cdmType == CDMTypes.UInt64)return "Int32";
+		if(cdmType == CDMTypes.Int64)return "Int32";
 		if(cdmType == CDMTypes.Float32)return "Float32";
 		if(cdmType == CDMTypes.Float64)return "Float64";
+		Debug.errprintln("Unknown type "+cdmType);
 		return null;
 	}
 
@@ -350,6 +353,10 @@ public class TinyDapServer {
 				if(Debugger.DebugOpendap)Debug.println("Writing scalar int32");
 				writeInt(bos,variable.readScalarInt());
 			}
+			if(type == CDMTypes.Int64||type == CDMTypes.UInt64){
+				if(Debugger.DebugOpendap)Debug.println("Writing scalar int32 based on int64");
+				writeInt(bos,variable.readScalarInt());
+			}
 			if(type == CDMTypes.Float32){
 				if(Debugger.DebugOpendap)Debug.println("Writing scalar float32");
 				DataOutputStream dos = new DataOutputStream(bos);
@@ -396,6 +403,8 @@ public class TinyDapServer {
 			if(type == CDMTypes.Int16)elsize=2;
 			if(type == CDMTypes.UInt32)elsize=4;
 			if(type == CDMTypes.Int32)elsize=4;
+			if(type == CDMTypes.UInt64)elsize=8;
+			if(type == CDMTypes.Int64)elsize=8;
 			if(type == CDMTypes.Float32)elsize=4;
 			if(type == CDMTypes.Float64)elsize=8;
 			if(Debugger.DebugOpendap){
@@ -405,6 +414,9 @@ public class TinyDapServer {
 			int outSize = varSize*elsize;
 			if(type == CDMTypes.Int16 || type == CDMTypes.UInt16){
 				outSize*=2;
+			}
+			if(type == CDMTypes.Int64 || type == CDMTypes.UInt64){
+				outSize/=2;
 			}
 
 			byte[] b = byteBuffer.array();
@@ -422,6 +434,15 @@ public class TinyDapServer {
 					c[g*2+1]=0;
 					c[g*2+2]=b[g+0];
 					c[g*2+3]=b[g+1];
+				}
+			}
+			
+			if(type==CDMTypes.UInt64||type == CDMTypes.Int64){
+				for(int g=0;g<outSize;g=g+4){
+					c[g+0]=b[g * 2+4];
+					c[g+1]=b[g * 2+5];
+					c[g+2]=b[g * 2+6];
+					c[g+3]=b[g * 2+7];
 				}
 			}
 
