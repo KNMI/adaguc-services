@@ -3,7 +3,6 @@ package nl.knmi.adaguc.services.joblist;
 import java.io.File;
 import java.io.IOException;
 import java.net.URLDecoder;
-import java.net.URLEncoder;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
@@ -13,8 +12,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.springframework.context.annotation.Bean;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -25,35 +22,22 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JSR310Module;
 
-import nl.knmi.adaguc.tools.ElementNotFoundException;
 import nl.knmi.adaguc.security.AuthenticatorFactory;
 import nl.knmi.adaguc.security.AuthenticatorInterface;
 import nl.knmi.adaguc.security.user.UserManager;
-import nl.knmi.adaguc.services.basket.BasketConfigurator;
 import nl.knmi.adaguc.services.pywpsserver.PyWPSConfigurator;
 import nl.knmi.adaguc.services.pywpsserver.PyWPSServer;
 import nl.knmi.adaguc.tools.Debug;
-import nl.knmi.adaguc.tools.HTTPTools;
+import nl.knmi.adaguc.tools.ElementNotFoundException;
+import nl.knmi.adaguc.tools.HTTPTools.InvalidHTTPKeyValueTokensException;
 import nl.knmi.adaguc.tools.InvalidTokenException;
 import nl.knmi.adaguc.tools.JSONResponse;
-import nl.knmi.adaguc.tools.MyXMLParser;
-import nl.knmi.adaguc.tools.MyXMLParser.Options;
 import nl.knmi.adaguc.tools.Tools;
-import nl.knmi.adaguc.tools.HTTPTools.InvalidHTTPKeyValueTokensException;
 
 @RestController
 @RequestMapping("joblist")
 @CrossOrigin
 public class JobListRequestMapper {
-	@Bean
-	public MappingJackson2HttpMessageConverter mappingJackson2HttpMessageConverter() {
-		ObjectMapper mapper = new ObjectMapper();
-		mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, true);
-		MappingJackson2HttpMessageConverter converter = 
-				new MappingJackson2HttpMessageConverter(mapper);
-		return converter;
-	}
-
 	private static JSONObject NewStatusLocation(String queryString, String statusLocation) throws InvalidTokenException, ElementNotFoundException, InvalidHTTPKeyValueTokensException, IOException  {
 		//  Check for status location first.
 		Debug.println("Checking ["+statusLocation+"]");

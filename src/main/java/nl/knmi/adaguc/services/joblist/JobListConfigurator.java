@@ -7,8 +7,7 @@ import nl.knmi.adaguc.tools.MyXMLParser.XMLElement;
 public class JobListConfigurator implements nl.knmi.adaguc.config.ConfiguratorInterface{
 	private static boolean enabled=false;
 	static ConfigurationReader configurationReader = new ConfigurationReader ();
-	@Override
-	public void doConfig(XMLElement configReader) throws ElementNotFoundException {
+	public static void doConfig(XMLElement configReader) throws ElementNotFoundException {
 		if(configReader.getNodeValue("adaguc-services.joblist") == null){
 			return;
 		}

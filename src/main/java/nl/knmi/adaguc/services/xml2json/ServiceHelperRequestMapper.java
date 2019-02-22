@@ -13,16 +13,11 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.util.EntityUtils;
-import org.springframework.context.annotation.Bean;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 
 import nl.knmi.adaguc.config.MainServicesConfigurator;
 import nl.knmi.adaguc.security.AuthenticatorFactory;
@@ -39,14 +34,14 @@ import nl.knmi.adaguc.tools.MyXMLParser;
 
 @RestController
 public class ServiceHelperRequestMapper {
-	@Bean
-	public MappingJackson2HttpMessageConverter mappingJackson2HttpMessageConverter() {
-		ObjectMapper mapper = new ObjectMapper();
-		mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, true);
-		MappingJackson2HttpMessageConverter converter = 
-				new MappingJackson2HttpMessageConverter(mapper);
-		return converter;
-	}
+//	@Bean
+//	public MappingJackson2HttpMessageConverter mappingJackson2HttpMessageConverter() {
+//		ObjectMapper mapper = new ObjectMapper();
+//		mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, true);
+//		MappingJackson2HttpMessageConverter converter = 
+//				new MappingJackson2HttpMessageConverter(mapper);
+//		return converter;
+//	}
 	@ResponseBody
 	@CrossOrigin
 	@RequestMapping("xml2json")

@@ -31,7 +31,7 @@ public class ADAGUCConfigurator implements nl.knmi.adaguc.config.ConfiguratorInt
 	private static String[] environmentVariables = {
 	};
 
-	public void doConfig(XMLElement  configReader){
+	public static void doConfig(XMLElement  configReader){
 		ADAGUCExecutable=configReader.getNodeValue("adaguc-services.adaguc-server.adagucexecutable");
 		environmentVariables = configReader.getNodeValues("adaguc-services.adaguc-server.export");
 	}

@@ -8,8 +8,8 @@ public class DatasetCatalogConfigurator implements nl.knmi.adaguc.config.Configu
 	private static boolean enabled=false;
 	private static String catalogPath=null;
 	static ConfigurationReader configurationReader = new ConfigurationReader ();
-	@Override
-	public void doConfig(XMLElement configReader) throws ElementNotFoundException {
+
+	public static void doConfig(XMLElement configReader) throws ElementNotFoundException {
 		if(configReader.getNodeValue("adaguc-services.basket") == null){
 			return;
 		}

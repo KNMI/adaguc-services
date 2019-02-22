@@ -27,8 +27,7 @@ public class ESGFSearchConfigurator implements nl.knmi.adaguc.config.Configurato
 	static ConfigurationReader configurationReader = new ConfigurationReader ();
 
 	@Synchronized
-	@Override
-	public void doConfig(XMLElement  configReader){
+	public static void doConfig(XMLElement  configReader){
 		if(configReader.getNodeValue ("adaguc-services.esgfsearch")==null){
 			return;
 		}
