@@ -1,5 +1,6 @@
 package nl.knmi.adaguc.security;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileReader;
@@ -7,6 +8,7 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.KeyManagementException;
 import java.security.KeyPair;
@@ -22,10 +24,10 @@ import java.security.SignatureException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -42,28 +44,17 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.ssl.SSLContextBuilder;
 import org.apache.http.util.EntityUtils;
-import org.bouncycastle.asn1.ASN1ObjectIdentifier;
-import org.bouncycastle.asn1.pkcs.Attribute;
-import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
 import org.bouncycastle.asn1.x500.X500Name;
-import org.bouncycastle.asn1.x509.BasicConstraints;
-import org.bouncycastle.asn1.x509.ExtendedKeyUsage;
-import org.bouncycastle.asn1.x509.Extension;
-import org.bouncycastle.asn1.x509.Extensions;
-import org.bouncycastle.asn1.x509.KeyPurposeId;
-import org.bouncycastle.asn1.x509.KeyUsage;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.cert.CertIOException;
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.cert.X509v1CertificateBuilder;
 import org.bouncycastle.cert.X509v3CertificateBuilder;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
-import org.bouncycastle.cert.jcajce.JcaX509ExtensionUtils;
 import org.bouncycastle.cert.jcajce.JcaX509v3CertificateBuilder;
 import org.bouncycastle.openssl.PEMKeyPair;
 import org.bouncycastle.openssl.PEMParser;
-import org.bouncycastle.openssl.PKCS8Generator;
 import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
 import org.bouncycastle.openssl.jcajce.JcaPEMWriter;
 import org.bouncycastle.operator.ContentSigner;
@@ -89,6 +80,7 @@ import nl.knmi.adaguc.tools.Tools;
  */
 
 
+@SuppressWarnings("deprecation")
 public class PemX509Tools {
 
 	/**
@@ -156,7 +148,7 @@ public class PemX509Tools {
 	 * @throws IOException
 	 * @throws CertificateException
 	 */
-	public static X509Certificate readCertificateFromPEM (String fileName) throws IOException, CertificateException{
+	public static X509Certificate readCertificateFromPEMFile (String fileName) throws IOException, CertificateException{
 		PemReader pemReader = new PemReader(new FileReader(fileName));
 		PemObject obj = pemReader.readPemObject();
 		pemReader.close();
@@ -183,9 +175,9 @@ public class PemX509Tools {
 	}
 
 	public String getUserIdFromSubjectDN (String subjectDN) {
-		String[] dnItems = subjectDN.split(", ");
+		String[] dnItems = subjectDN.split(",");
 		for (int j = 0; j < dnItems.length; j++) {
-			int CNIndex = dnItems[j].indexOf("CN");
+			int CNIndex = dnItems[j].trim().indexOf("CN");
 			if (CNIndex != -1) {
 				return dnItems[j].substring("CN=".length()
 						+ CNIndex);
@@ -295,7 +287,7 @@ public class PemX509Tools {
 	}
 
 
-	private static String privateKeyToPemString(PrivateKey certHolder) throws IOException {
+	public static String privateKeyToPemString(PrivateKey certHolder) throws IOException {
 		StringWriter str = new StringWriter();
 		JcaPEMWriter pemWriter = new JcaPEMWriter(str);
 		pemWriter.writeObject(certHolder);
@@ -353,12 +345,12 @@ public class PemX509Tools {
 						file.equals("439ce3f7.0") == true || // RootCA         : C=UK, O=eScienceSLCSHierarchy, OU=Authority, CN=SLCS Top Level CA
 						true)
 				{
-					X509Certificate tr = PemX509Tools.readCertificateFromPEM(trustRootsLocation + "/" + file);
+					X509Certificate tr = PemX509Tools.readCertificateFromPEMFile(trustRootsLocation + "/" + file);
 					trust.add(tr);
 				}
 			}
 		}
-		X509Certificate clientCertificate = PemX509Tools.readCertificateFromPEM(clientCertLocation);
+		X509Certificate clientCertificate = PemX509Tools.readCertificateFromPEMFile(clientCertLocation);
 		trust.add(clientCertificate);                        // Client CA: DC=uk, DC=ac, DC=ceda, O=STFC RAL, CN=https://ceda.ac.uk/openid/C3Smagic.C3Smagic
 		CertificateVerifier.verifyCertificate(clientCertificate,trust);
 	}
@@ -492,7 +484,7 @@ public class PemX509Tools {
 		if(clientCertificate!=null){
 			/* Read the client auth certificates */
 			PrivateKey clientPrivateCred = readPrivateKeyFromPEM(clientCertificate);
-			X509Certificate clientCert = readCertificateFromPEM(clientCertificate);
+			X509Certificate clientCert = readCertificateFromPEMFile(clientCertificate);
 			certAndKey = new X509UserCertAndKey(clientCert,clientPrivateCred);
 
 		}
@@ -597,5 +589,12 @@ public class PemX509Tools {
 			e.printStackTrace();
 		}
 		Debug.println("/main");
+	}
+
+	public static X509Certificate readCertificateFromPEMString(String shortLivedCertFromOAuthServiceInPemFormat) throws CertificateException {
+		CertificateFactory cf = CertificateFactory.getInstance("X.509");
+		return (X509Certificate) cf.generateCertificate(new ByteArrayInputStream(
+				shortLivedCertFromOAuthServiceInPemFormat.getBytes(StandardCharsets.UTF_8)));
+
 	}
 }

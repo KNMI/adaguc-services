@@ -15,6 +15,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
+import org.mockito.Matchers;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -25,6 +26,8 @@ import org.springframework.web.context.WebApplicationContext;
 
 import nl.knmi.adaguc.security.PemX509Tools;
 import nl.knmi.adaguc.security.PemX509Tools.X509Info;
+import nl.knmi.adaguc.security.token.TokenManager;
+import nl.knmi.adaguc.services.tinyopendapserver.TinyDapServer;
 import nl.knmi.adaguc.tools.Debug;
 
 
@@ -52,6 +55,22 @@ public class AuthenticatorImplTest {
 	public final ExpectedException exception = ExpectedException.none();
 
 
+	@Test
+	public void TestGetTokenFromPath() throws Exception{
+		TokenManager tk = new TokenManager();
+		String token = tk.getTokenFromPath("/test/bla/a02b717b-02d6-4db9-bddf-a1d3774fee87/bla/bla.nc");
+		Debug.println(token);
+		assertThat(token,is("a02b717b-02d6-4db9-bddf-a1d3774fee87"));
+		String tokenNope = tk.getTokenFromPath("/test/bla/np-a02b717b-02d6-4db9-bddf-a1d3774fee87.test/bla/bla.nc");
+		Debug.println(tokenNope);
+		assertThat(tokenNope,org.hamcrest.Matchers.isEmptyOrNullString());
+	}
+	
+//	@Test
+//	public void TestDAPDDS() throws Exception{
+//	
+//		TinyDapServer.handleOpenDapReqeuests("/home/c3smagic/Downloads/test-metric.nc","/","/",null,null);
+//	}
 
 	@Test
 	public void TestThis() throws Exception{
@@ -70,13 +89,13 @@ public class AuthenticatorImplTest {
 
 		/* Get common name from certificate */
 		Debug.println("  Step 2 - Get CN from verified cert");
-		X509Info x509 = new PemX509Tools().getUserIdFromCertificate(PemX509Tools.readCertificateFromPEM(clientCertLocation));
+		X509Info x509 = new PemX509Tools().getUserIdFromCertificate(PemX509Tools.readCertificateFromPEMFile(clientCertLocation));
 		if(x509 != null){
 			Debug.println("  CN = ["+ x509.getCN()+"]");
 		}
 		assertThat(x509.getCN(),is(clientCN));
 		MvcResult result = mockMvc.perform(get("/user/getuserinfofromcert")
-				.sessionAttr("javax.servlet.request.X509Certificate", PemX509Tools.readCertificateFromPEM(clientCertLocation))
+				.sessionAttr("javax.servlet.request.X509Certificate", PemX509Tools.readCertificateFromPEMFile(clientCertLocation))
 				.contentType(MediaType.APPLICATION_JSON_UTF8).content("{}"))
 				//                .andExpect(status().isMethodNotAllowed())
 				.andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))

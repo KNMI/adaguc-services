@@ -25,7 +25,7 @@ public class TinyDapRequestMapper {
 	@ResponseBody
 	@RequestMapping("opendap/**")
 	public void runTinyDap(HttpServletResponse response, HttpServletRequest request) throws IOException{
-		// Debug.println("/opendap");
+		Debug.println("#### SERVLET /opendap ####");
 		/* Three ways of authentication are possible:
 		 * 1) - browser session based
 		 * 2) - X509, for command line

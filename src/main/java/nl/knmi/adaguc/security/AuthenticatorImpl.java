@@ -63,6 +63,12 @@ public class AuthenticatorImpl implements AuthenticatorInterface{
 
 		/* Get user from header (Set by SSL client cert verification in NGINX)*/
 		try {
+//			Enumeration headerNames = request.getHeaderNames();
+//			while(headerNames.hasMoreElements()) {
+//			  String headerName = (String)headerNames.nextElement();
+//			  Debug.println("" + headerName);
+//			  Debug.println("" + request.getHeader(headerName));
+//			}
 			String userHeader = SecurityConfigurator.getUserHeader();
 			if (userHeader != null) {
 				String userIdFromHeader = request.getHeader(userHeader);
