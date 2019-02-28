@@ -26,6 +26,7 @@ import nl.knmi.adaguc.tools.Debug;
 import nl.knmi.adaguc.tools.HTTPTools;
 import nl.knmi.adaguc.tools.JSONResponse;
 
+@SuppressWarnings("deprecation")
 @RestController
 @RequestMapping("basket")
 @CrossOrigin

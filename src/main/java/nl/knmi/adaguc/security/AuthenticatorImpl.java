@@ -1,34 +1,15 @@
 package nl.knmi.adaguc.security;
 
 import java.io.IOException;
-import java.security.InvalidKeyException;
-import java.security.KeyManagementException;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.SignatureException;
-import java.security.UnrecoverableKeyException;
-import java.security.cert.CertificateException;
-import java.util.Enumeration;
-import java.util.List;
-import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.util.EntityUtils;
-import org.ietf.jgss.GSSException;
 import org.springframework.security.core.AuthenticationException;
 
 import nl.knmi.adaguc.security.PemX509Tools.X509Info;
-import nl.knmi.adaguc.security.PemX509Tools.X509UserCertAndKey;
 import nl.knmi.adaguc.security.token.Token;
 import nl.knmi.adaguc.security.token.TokenManager;
-import nl.knmi.adaguc.security.user.User;
-import nl.knmi.adaguc.security.user.UserManager;
 import nl.knmi.adaguc.tools.Debug;
 import nl.knmi.adaguc.tools.ElementNotFoundException;
 import nl.knmi.adaguc.tools.HTTPTools;

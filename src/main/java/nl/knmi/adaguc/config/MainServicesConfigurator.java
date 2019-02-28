@@ -1,5 +1,7 @@
 package nl.knmi.adaguc.config;
 
+import org.springframework.beans.factory.annotation.Autowired;
+
 import nl.knmi.adaguc.tools.ElementNotFoundException;
 import nl.knmi.adaguc.tools.MyXMLParser.XMLElement;
 
@@ -16,7 +18,8 @@ public class MainServicesConfigurator implements ConfiguratorInterface{
 	private static String serverPort="443";
 	private static String baseDir="/tmp/";
 	
-	static ConfigurationReader configurationReader = new ConfigurationReader ();
+	@Autowired
+	static ConfigurationReader configurationReader;
 	
 	public static void doConfig(XMLElement configReader) throws ElementNotFoundException {
 		serverExternalURL = configReader.getNodeValueMustNotBeUndefined("adaguc-services.external-home-url");
@@ -26,23 +29,23 @@ public class MainServicesConfigurator implements ConfiguratorInterface{
 	}
 
 	public static String getServerExternalURL() throws ElementNotFoundException {
-		configurationReader.readConfig();
+		ConfigurationReader.readConfig();
 		return serverExternalURL;
 	}
 	
 	public static String getUserWorkspace() throws ElementNotFoundException{
-		configurationReader.readConfig();
+		ConfigurationReader.readConfig();
 		return userWorkspace;
 	}
 
 	public static String getServerPort() throws ElementNotFoundException {
-		configurationReader.readConfig();
+		ConfigurationReader.readConfig();
 		return serverPort;
 		
 	}
 
 	public static String getBaseDir() throws ElementNotFoundException {
-		configurationReader.readConfig();
+		ConfigurationReader.readConfig();
 		return baseDir;
 	}
 }

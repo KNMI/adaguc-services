@@ -18,6 +18,7 @@ import com.fasterxml.jackson.datatype.jsr310.JSR310Module;
 import lombok.Getter;
 import lombok.Setter;
 
+@SuppressWarnings("deprecation")
 @Setter
 @Getter
 public class DatasetDescription implements Serializable{

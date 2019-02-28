@@ -34,6 +34,7 @@ import nl.knmi.adaguc.tools.InvalidTokenException;
 import nl.knmi.adaguc.tools.JSONResponse;
 import nl.knmi.adaguc.tools.Tools;
 
+@SuppressWarnings("deprecation")
 @RestController
 @RequestMapping("joblist")
 @CrossOrigin

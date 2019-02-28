@@ -15,6 +15,7 @@ import nl.knmi.adaguc.services.basket.BasketConfigurator;
 import nl.knmi.adaguc.services.datasetcatalog.DatasetCatalogConfigurator;
 import nl.knmi.adaguc.services.esgfsearch.ESGFSearchConfigurator;
 import nl.knmi.adaguc.services.joblist.JobListConfigurator;
+import nl.knmi.adaguc.services.oauth2.OAuthConfigurator;
 import nl.knmi.adaguc.tools.Debug;
 import nl.knmi.adaguc.tools.ElementNotFoundException;
 import nl.knmi.adaguc.tools.MyXMLParser.XMLElement;
@@ -134,7 +135,9 @@ public class ConfigurationReader {
 		///}
 		
 		
+		Debug.println("Starting configuring");
 		SecurityConfigurator.doConfig(configReader);
+		OAuthConfigurator.doConfig(configReader);
 		MainServicesConfigurator.doConfig(configReader);
 		ADAGUCConfigurator.doConfig(configReader);
 		BasketConfigurator.doConfig(configReader);

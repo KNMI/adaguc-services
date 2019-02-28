@@ -27,7 +27,9 @@ RUN yum update -y && yum install -y \
     gdal-devel \
     tomcat \
     maven \
-    openssl
+    openssl \
+    netcdf4-python \
+    python-six
     
 RUN mkdir /adaguc
 

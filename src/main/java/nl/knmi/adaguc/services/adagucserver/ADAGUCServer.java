@@ -5,7 +5,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
-import java.util.Enumeration;
 import java.util.List;
 
 import javax.servlet.ServletException;
@@ -19,7 +18,6 @@ import nl.knmi.adaguc.security.AuthenticatorInterface;
 import nl.knmi.adaguc.security.user.UserManager;
 import nl.knmi.adaguc.tools.CGIRunner;
 import nl.knmi.adaguc.tools.Debug;
-import nl.knmi.adaguc.tools.HTTPTools;
 import nl.knmi.adaguc.tools.Tools;
 
 

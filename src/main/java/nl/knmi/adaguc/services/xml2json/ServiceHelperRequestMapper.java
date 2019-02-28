@@ -3,7 +3,6 @@ package nl.knmi.adaguc.services.xml2json;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.security.InvalidKeyException;
@@ -44,13 +43,12 @@ import nl.knmi.adaguc.services.adagucserver.ADAGUCServer;
 import nl.knmi.adaguc.services.basket.Basket;
 import nl.knmi.adaguc.services.joblist.JobListRequestMapper;
 import nl.knmi.adaguc.services.pywpsserver.PyWPSServer;
-import nl.knmi.adaguc.services.pywpsserver.PyWPSServer.WPSStatus;
 import nl.knmi.adaguc.tools.Debug;
 import nl.knmi.adaguc.tools.JSONResponse;
 import nl.knmi.adaguc.tools.MyXMLParser;
-import nl.knmi.adaguc.tools.Tools;
 import nl.knmi.adaguc.tools.MyXMLParser.Options;
 import nl.knmi.adaguc.tools.MyXMLParser.XMLElement;
+import nl.knmi.adaguc.tools.Tools;
 
 
 @RestController
@@ -176,23 +174,29 @@ public class ServiceHelperRequestMapper {
 						Debug.println("Identifying " + identifier + "/" + title);
 						String processFolder = test.getString("processid")+"_"+ test.getString("creationtime").replaceAll(":", "").replaceAll("-", "")+"_"+ wpsID;
 						try {
-							XMLElement refObj = processOutputs.get(j).get("wps:Reference");
-							String reference = refObj.getAttrValue("href");
-							Debug.println("Processfolder is " + processFolder);
-							String destLoc = user.getDataDir() + "/" + "/" + processFolder;
-							String basketLocalFilename = FilenameUtils.getBaseName(reference) + "." + FilenameUtils.getExtension(reference);
-							String fullPath = destLoc + "/" + basketLocalFilename;
-							if (new File(fullPath).exists() == false) {
-								Debug.println("Start copy " + reference);
-								// TODO: ADD SECURITY CHECKS
-								Tools.mksubdirs(destLoc);
-								Tools.writeFile(fullPath, makeRequest(reference, userCertificate, ts, tsPass));
-							} else {
-								Debug.println("Already copied " + reference);
+							XMLElement refObj = null;
+							try {
+								refObj = processOutputs.get(j).get("wps:Reference");
+							}catch(Exception e){
+								Debug.println("processOutput " + identifier + " has no wps:Reference");
 							}
-							String basketRemoteURL = Basket.GetRemotePrefix(user) + processFolder + "/" + basketLocalFilename;
+							if (refObj!=null) {
+								String reference = refObj.getAttrValue("href");
+								Debug.println("Processfolder is " + processFolder);
+								String destLoc = user.getDataDir() + "/" + "/" + processFolder;
+								String basketLocalFilename = FilenameUtils.getBaseName(reference) + "." + FilenameUtils.getExtension(reference);
+								String fullPath = destLoc + "/" + basketLocalFilename;
+								if (new File(fullPath).exists() == false) {
+									Debug.println("Start copy " + reference);
+									// TODO: ADD SECURITY CHECKS
+									Tools.mksubdirs(destLoc);
+									Tools.writeFile(fullPath, makeRequest(reference, userCertificate, ts, tsPass));
+								} else {
+									Debug.println("Already copied " + reference);
+								}
+								String basketRemoteURL = Basket.GetRemotePrefix(user) + processFolder + "/" + basketLocalFilename;
 							refObj.setAttr("href", basketRemoteURL);
-							
+							}
 						}catch(Exception e){
 							Debug.printStackTrace(e);
 						}

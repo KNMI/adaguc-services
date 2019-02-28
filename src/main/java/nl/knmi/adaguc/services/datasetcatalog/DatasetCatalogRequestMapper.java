@@ -25,6 +25,7 @@ import nl.knmi.adaguc.tools.ElementNotFoundException;
 import nl.knmi.adaguc.tools.JSONResponse;
 
 
+@SuppressWarnings("deprecation")
 @RestController
 @RequestMapping("catalog")
 @CrossOrigin
