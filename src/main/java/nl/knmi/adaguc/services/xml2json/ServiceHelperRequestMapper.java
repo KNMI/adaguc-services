@@ -81,8 +81,6 @@ public class ServiceHelperRequestMapper {
 			requestStr=URLDecoder.decode(request,"UTF-8");
 			MyXMLParser.XMLElement rootElement = new MyXMLParser.XMLElement();
 			//Remote XML2JSON request to external WMS service
-			System.err.println("Converting XML to JSON for "+requestStr);
-
 			boolean isLocal = false;
 			Debug.println("xml2json " + requestStr);
 			if(requestStr.startsWith(MainServicesConfigurator.getServerExternalURL()) && requestStr.toUpperCase().contains("SERVICE=WMS")){
@@ -128,7 +126,6 @@ public class ServiceHelperRequestMapper {
 						}
 					}
 					String result = new String(makeRequest(requestStr, userCertificate, ts, tsPass));
-
 					rootElement.parseString(result);
 				}else{
 					Debug.println("Running remote adaguc without truststore");
@@ -182,9 +179,23 @@ public class ServiceHelperRequestMapper {
 							}
 							if (refObj!=null) {
 								String reference = refObj.getAttrValue("href");
+								String mimeType= refObj.getAttrValue("mimeType");
 								Debug.println("Processfolder is " + processFolder);
 								String destLoc = user.getDataDir() + "/" + "/" + processFolder;
 								String basketLocalFilename = FilenameUtils.getBaseName(reference) + "." + FilenameUtils.getExtension(reference);
+								Debug.println("basketLocalFilename: " + basketLocalFilename);
+								if (basketLocalFilename.equals(".")) {
+									basketLocalFilename = identifier;
+									if (mimeType.equals("application/x-netcdf")) { basketLocalFilename += ".nc"; }
+									if (mimeType.equals("image/png")) { basketLocalFilename += ".png"; }
+									if (mimeType.equals("text/plain")) { basketLocalFilename += ".txt"; }
+									if (mimeType.equals("application/zip")) { basketLocalFilename += ".zip"; }
+									if (mimeType.equals("application/json")) { basketLocalFilename += ".json"; }
+									if (mimeType.equals("application/yml")) { basketLocalFilename += ".yml"; }
+									if (mimeType.equals("text/csv")) { basketLocalFilename += ".csv"; }
+									
+								}
+								Debug.println("basketLocalFilename: " + basketLocalFilename);
 								String fullPath = destLoc + "/" + basketLocalFilename;
 								if (new File(fullPath).exists() == false) {
 									Debug.println("Start copy " + reference);
@@ -192,7 +203,7 @@ public class ServiceHelperRequestMapper {
 									Tools.mksubdirs(destLoc);
 									Tools.writeFile(fullPath, makeRequest(reference, userCertificate, ts, tsPass));
 								} else {
-									Debug.println("Already copied " + reference);
+									Debug.println("Already copied " + reference + " with path [" + fullPath + ']');
 								}
 								String basketRemoteURL = Basket.GetRemotePrefix(user) + processFolder + "/" + basketLocalFilename;
 							refObj.setAttr("href", basketRemoteURL);
@@ -225,7 +236,6 @@ public class ServiceHelperRequestMapper {
 	private byte[] makeRequest(String requestStr, X509UserCertAndKey userCertificate, String ts, char[] tsPass) throws KeyManagementException, UnrecoverableKeyException, InvalidKeyException, NoSuchAlgorithmException, KeyStoreException, CertificateException, NoSuchProviderException, SignatureException, IOException, GSSException {
 		try {
 			/* First try without user certificate */
-			Debug.println("First try without user certificate");
 			CloseableHttpClient httpClient = (new PemX509Tools()).
 					getHTTPClientForPEMBasedClientAuth(ts, tsPass, null);
 			CloseableHttpResponse httpResponse = httpClient.execute(new HttpGet(requestStr));
@@ -233,7 +243,6 @@ public class ServiceHelperRequestMapper {
 		} catch (Exception e){
 			if (userCertificate!=null) {
 			/* Second, try with user certificate */
-				Debug.println("Second, try with user certificate");
 				CloseableHttpClient httpClient = (new PemX509Tools()).
 						getHTTPClientForPEMBasedClientAuth(ts, tsPass, userCertificate);
 				CloseableHttpResponse httpResponse = httpClient.execute(new HttpGet(requestStr));

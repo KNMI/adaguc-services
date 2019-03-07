@@ -46,6 +46,7 @@ public class SecurityConfigurator implements nl.knmi.adaguc.config.ConfiguratorI
 	private static String caCertificate = null;
 	private static String caPrivateKey = null;		
 	private static String enableSSL = null;
+	private static String user = null;
 	
 	public static class ComputeNode {
 		public String url = null;
@@ -73,6 +74,7 @@ public class SecurityConfigurator implements nl.knmi.adaguc.config.ConfiguratorI
 		keyAlias=configReader.getNodeValue("adaguc-services.security.keyalias");
 		userHeader=configReader.getNodeValue("adaguc-services.security.userheader");
 		enableSSL=configReader.getNodeValue("adaguc-services.security.enablessl");
+		user=configReader.getNodeValue("adaguc-services.security.user");
 		
 		if (configReader.getNodeValue("adaguc-services.security.tokenapi")!=null){
 			caCertificate=configReader.getNodeValue("adaguc-services.security.tokenapi.cacertificate");
@@ -159,6 +161,9 @@ public class SecurityConfigurator implements nl.knmi.adaguc.config.ConfiguratorI
 	public static String getEnableSSL() throws ElementNotFoundException {
 		ConfigurationReader.readConfig();
 		return enableSSL;
+	}
+	public static String getUser() throws ElementNotFoundException {
+		return user;
 	}
 }
 

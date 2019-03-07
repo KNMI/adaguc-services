@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import nl.knmi.adaguc.config.MainServicesConfigurator;
 import nl.knmi.adaguc.security.SecurityConfigurator;
 import nl.knmi.adaguc.security.SecurityConfigurator.ComputeNode;
+import nl.knmi.adaguc.tools.Debug;
 import nl.knmi.adaguc.tools.ElementNotFoundException;
 import nl.knmi.adaguc.tools.JSONResponse;
 
@@ -100,6 +101,19 @@ public class OAuth2RequestMapper {
 		)
 	public void getId(HttpServletResponse response, HttpServletRequest request) throws JSONException, IOException, ElementNotFoundException{
 		JSONResponse jsonResponse = new JSONResponse(request);
+		Debug.println("getid");
+		try{
+			String userName = SecurityConfigurator.getUser();
+			if (userName != null) {
+				Debug.println("Setting user to " + userName);
+				request.getSession().setAttribute("user_identifier",userName);
+				request.getSession().setAttribute("services_access_token",userName);
+				request.getSession().setAttribute("emailaddress",userName);
+			}
+		}catch(Exception e){
+			Debug.println("No user name");
+		}
+
 
 		String id = (String) request.getSession().getAttribute("user_identifier");
 		String servicesAccessToken = (String) request.getSession().getAttribute("services_access_token");

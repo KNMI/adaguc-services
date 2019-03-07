@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.net.URLDecoder;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Arrays;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -102,7 +103,7 @@ public class JobListRequestMapper {
 
 			//  		  Tools.mksubdirs(userDataDir+"/WPS_Settings/");
 			String statusLocation=data.getString("statuslocation");
-			String baseName = statusLocation.substring(statusLocation.lastIndexOf("/")).replace(".xml", ".wpssettings");
+			String baseName = statusLocation.substring(statusLocation.lastIndexOf("/")).replace(".xml", ".execute.json");
 			AuthenticatorInterface authenticator = AuthenticatorFactory.getAuthenticator(request);
 			String userDataDir = UserManager.getUser(authenticator).getDataDir();
 			String wpsSettingsFile = userDataDir+"/WPS_Settings/";
@@ -144,16 +145,29 @@ public class JobListRequestMapper {
 				for (String fn : filesIndir) {
 					File f = new File(dir + "/" + fn);
 					// Debug.println("fn:"+fn+" "+f.isFile()+" ;
+					String readyFile = fn.replace("execute.json", "ready.json");
+						
 					// "+fn.endsWith("settings"));
-					if (f.isFile() && fn.endsWith("settings")) {
+					if (f.isFile() && fn.endsWith("execute.json")) {
+						
+						// if status==Accepted
+						if (Arrays.asList(filesIndir).contains(readyFile)) {
+							String fileString = new String(Files.readAllBytes(Paths.get(new File(dir + "/" + readyFile).getAbsolutePath())));
+							// Debug.println("found: "+fn+" "+fileString.length());
+							JSONObject job = new JSONObject(fileString);
+							jobArray.put(job);
+							continue;
+						}
 						String fileString = new String(Files.readAllBytes(Paths.get(f.getAbsolutePath())));
 						// Debug.println("found: "+fn+" "+fileString.length());
 						JSONObject job = new JSONObject(fileString);
-						// if status==Accepted
-
 						String status = null;
+						JSONObject wpsPostData = null;
 						try {
+							/* Extract the status */
 							status = job.getString("wpsstatus");
+							/* Extract the orginal settings with which the process was started */
+							wpsPostData = job.getJSONObject("wpspostdata");
 						} catch (JSONException e) {
 						}
 						if (status != null) {
@@ -166,9 +180,13 @@ public class JobListRequestMapper {
 									URLDecoder.decode(job.getString("querystring"), "utf-8");
 								} catch (Exception e) {
 								}
+								
 								JSONObject newJobStatus = NewStatusLocation(queryString, statusLocation);
 								if(newJobStatus!=null && newJobStatus.length() !=0) {
-									
+									/* Put the wps post data (the input settings with which the wps was run) back into the new object */
+									if (wpsPostData!=null) {
+										newJobStatus.put("wpspostdata", wpsPostData);
+									}
 									// Debug.println("newJobStatus: " + newJobStatus.getString("percentage"));
 									String newWPSStatus = newJobStatus.getString("wpsstatus");
 //									Debug.println("st:" + newWPSStatus + "<===" + status);
@@ -179,7 +197,7 @@ public class JobListRequestMapper {
 											&& !status.equals(newJobStatus.getString("wpsstatus")))) {
 										// Tools.mksubdirs(userDataDir+"/WPS_Settings/");
 										String baseName = statusLocation.substring(statusLocation.lastIndexOf("/"))
-												.replace(".xml", ".wpssettings");
+												.replace(".xml", ".ready.json");
 										String wpsSettingsFile = userDataDir + "/WPS_Settings/";
 										Tools.mksubdirs(wpsSettingsFile);
 										wpsSettingsFile += baseName;

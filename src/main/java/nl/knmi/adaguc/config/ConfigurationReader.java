@@ -135,7 +135,6 @@ public class ConfigurationReader {
 		///}
 		
 		
-		Debug.println("Starting configuring");
 		SecurityConfigurator.doConfig(configReader);
 		OAuthConfigurator.doConfig(configReader);
 		MainServicesConfigurator.doConfig(configReader);

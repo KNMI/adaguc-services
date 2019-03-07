@@ -63,7 +63,6 @@ public class OAuthConfigurator implements nl.knmi.adaguc.config.ConfiguratorInte
 
 
 	public static void doConfig(XMLElement  configReader){
-		Debug.println("Configuring OAuthConfigurator");
 		synchronized(oauth2Providers){
 			oauth2Providers.clear();
 			try {

@@ -30,6 +30,17 @@ public class AuthenticatorImpl implements AuthenticatorInterface{
 		if (request == null ) {
 			return;
 		}
+		
+		try{
+			String userName = SecurityConfigurator.getUser();
+			if (userName != null) {
+				request.getSession().setAttribute("user_identifier",userName);
+				request.getSession().setAttribute("services_access_token",userName);
+				request.getSession().setAttribute("emailaddress",userName);
+			}
+		}catch(Exception e){
+		}
+		
 		/* Get user from session */
 		String sessionId = null;
 		HttpSession session = request.getSession();
@@ -38,7 +49,6 @@ public class AuthenticatorImpl implements AuthenticatorInterface{
 		}
 		if (sessionId!=null) {
 			x509 = new PemX509Tools().new X509Info(sessionId, sessionId);
-			Debug.println("Got userid from session");
 			return;
 		}
 
