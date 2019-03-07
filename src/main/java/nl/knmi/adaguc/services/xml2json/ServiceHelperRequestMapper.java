@@ -122,9 +122,13 @@ public class ServiceHelperRequestMapper {
 
 						}
 						if(user!=null){
+							
 							userCertificate = user.getCertificate();
+							Debug.println("using cert " + userCertificate);
 						}
 					}
+					Debug.println("userCertificate: " + userCertificate);
+					Debug.println("ts: " + ts);
 					String result = new String(makeRequest(requestStr, userCertificate, ts, tsPass));
 					rootElement.parseString(result);
 				}else{
@@ -268,10 +272,23 @@ public class ServiceHelperRequestMapper {
 			CloseableHttpClient httpClient = (new PemX509Tools()).
 					getHTTPClientForPEMBasedClientAuth(ts, tsPass, null);
 			CloseableHttpResponse httpResponse = httpClient.execute(new HttpGet(requestStr));
-			return EntityUtils.toByteArray(httpResponse.getEntity());
+			
+			byte[] a = EntityUtils.toByteArray(httpResponse.getEntity());
+			
+			Debug.println("Status: " + httpResponse.getStatusLine() + " Size: " + a.length);
+			/* Birdhouse WPS gives an exception when a certificate is needed, check it out */
+			if (a.length < 2048) {
+				String test = new String(a);
+				if (test.indexOf("A valid X.509 client certificate is needed")!=-1) {
+					Debug.println("Request needs certificate");
+					throw new IOException("Request needs certificate");
+				}
+			}
+			return a;
 		} catch (Exception e){
 			if (userCertificate!=null) {
 				/* Second, try with user certificate */
+				Debug.println("Trying with cert");
 				CloseableHttpClient httpClient = (new PemX509Tools()).
 						getHTTPClientForPEMBasedClientAuth(ts, tsPass, userCertificate);
 				CloseableHttpResponse httpResponse = httpClient.execute(new HttpGet(requestStr));

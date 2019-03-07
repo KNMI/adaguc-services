@@ -106,16 +106,16 @@ public class MyXMLParser {
 			this.xmlElements.add(el);
 		}
 
-		public void setAttr(String attr, String value) {
-			XMLAttribute at=new XMLAttribute();
-			at.name=attr;
-			at.value=value;
+		public void setAttr(String attrName, String attrValue) {
 			for (XMLAttribute itAttr : this.attributes) {
-				if (itAttr.name.equals(attr)) {
-					itAttr.value = value;
+				if (itAttr.name.equals(attrName)) {
+					itAttr.value = attrValue;
 					return;
 				}
 			}
+			XMLAttribute at=new XMLAttribute();
+			at.name=attrName;
+			at.value=attrValue;
 			this.attributes.add(at);
 		}
 
