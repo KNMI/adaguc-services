@@ -1,5 +1,6 @@
 package nl.knmi.adaguc.services.pywpsserver;
 
+import nl.knmi.adaguc.tools.Debug;
 import nl.knmi.adaguc.tools.ElementNotFoundException;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,7 +40,7 @@ public class PyWPSConfigurator implements ConfiguratorInterface {
 	};
 	@Autowired
 	static ConfigurationReader configurationReader;
-	public void doConfig(XMLElement  configReader) throws ElementNotFoundException {
+	public static void doConfig(XMLElement  configReader) throws ElementNotFoundException {
 		if(configReader.getNodeValue ("adaguc-services.pywps-server")==null){
 //			Debug.println("adaguc-services.pywps-server is not configured");
 			return;

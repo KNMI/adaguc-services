@@ -16,6 +16,7 @@ import nl.knmi.adaguc.services.datasetcatalog.DatasetCatalogConfigurator;
 import nl.knmi.adaguc.services.esgfsearch.ESGFSearchConfigurator;
 import nl.knmi.adaguc.services.joblist.JobListConfigurator;
 import nl.knmi.adaguc.services.oauth2.OAuthConfigurator;
+import nl.knmi.adaguc.services.pywpsserver.PyWPSConfigurator;
 import nl.knmi.adaguc.tools.Debug;
 import nl.knmi.adaguc.tools.ElementNotFoundException;
 import nl.knmi.adaguc.tools.MyXMLParser.XMLElement;
@@ -143,6 +144,7 @@ public class ConfigurationReader {
 		DatasetCatalogConfigurator.doConfig(configReader);
 		ESGFSearchConfigurator.doConfig(configReader);
 		JobListConfigurator.doConfig(configReader);
+		PyWPSConfigurator.doConfig(configReader);
 //        
 //		Set<Class<? extends ConfiguratorInterface>> allClasses = 
 //				reflections.getSubTypesOf(ConfiguratorInterface.class);
