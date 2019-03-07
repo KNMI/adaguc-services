@@ -55,9 +55,9 @@ public class User {
 			X509Certificate cert = PemX509Tools.readCertificateFromPEMFile( this.homeDir + "/cert.crt");
 			PrivateKey key = PemX509Tools.readPrivateKeyFromPEM(this.homeDir + "/cert.key");
 			this.userCert = (new PemX509Tools()).new X509UserCertAndKey(cert, key);
-		} catch (CertificateException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			Debug.println("### Loaded certificates from disk ### for " + this.userId);
+		} catch (Exception e) {
+			Debug.errprintln("### No certificates loaded found on disk for " + this.userId + " ###");
 		}
 	}
 
@@ -85,7 +85,7 @@ public class User {
 	}
 	public void setCertificate(X509UserCertAndKey userCert) throws IOException, ElementNotFoundException {
 		/* TODO could optinally write cert to user basket */
-
+		Debug.println("### setCertificate ### for " + this.userId);
 		
 		PemX509Tools.writeCertificateToPemFile(userCert.getUserSlCertificate(), this.homeDir + "/cert.crt");
 		PemX509Tools.writePrivateKeyToPemFile(userCert.getPrivateKey(), this.homeDir + "/cert.key");
