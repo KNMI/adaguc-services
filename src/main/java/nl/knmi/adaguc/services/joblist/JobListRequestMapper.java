@@ -3,9 +3,9 @@ package nl.knmi.adaguc.services.joblist;
 import java.io.File;
 import java.io.IOException;
 import java.net.URLDecoder;
-import java.net.URLEncoder;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Arrays;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -13,8 +13,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.springframework.context.annotation.Bean;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -25,33 +23,26 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JSR310Module;
 
-import nl.knmi.adaguc.tools.ElementNotFoundException;
 import nl.knmi.adaguc.security.AuthenticatorFactory;
 import nl.knmi.adaguc.security.AuthenticatorInterface;
 import nl.knmi.adaguc.security.user.UserManager;
-import nl.knmi.adaguc.services.basket.BasketConfigurator;
-import nl.knmi.adaguc.services.pywpsserver.PyWPSConfigurator;
 import nl.knmi.adaguc.services.pywpsserver.PyWPSServer;
+import nl.knmi.adaguc.services.xml2json.ServiceHelperRequestMapper;
 import nl.knmi.adaguc.tools.Debug;
+import nl.knmi.adaguc.tools.ElementNotFoundException;
 import nl.knmi.adaguc.tools.HTTPTools;
+import nl.knmi.adaguc.tools.HTTPTools.InvalidHTTPKeyValueTokensException;
+import nl.knmi.adaguc.tools.MyXMLParser.Options;
 import nl.knmi.adaguc.tools.InvalidTokenException;
 import nl.knmi.adaguc.tools.JSONResponse;
 import nl.knmi.adaguc.tools.MyXMLParser;
-import nl.knmi.adaguc.tools.MyXMLParser.Options;
 import nl.knmi.adaguc.tools.Tools;
-import nl.knmi.adaguc.tools.HTTPTools.InvalidHTTPKeyValueTokensException;
 
+@SuppressWarnings("deprecation")
 @RestController
 @RequestMapping("joblist")
 @CrossOrigin
 public class JobListRequestMapper {
-	@Bean
-	public MappingJackson2HttpMessageConverter mappingJackson2HttpMessageConverter() {
-		ObjectMapper mapper = new ObjectMapper();
-		mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, true);
-		MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter(mapper);
-		return converter;
-	}
 
 	private static JSONObject NewStatusLocation(String queryString, String statusLocation)
 			throws InvalidTokenException, ElementNotFoundException, InvalidHTTPKeyValueTokensException, IOException {
@@ -86,8 +77,11 @@ public class JobListRequestMapper {
 					AuthenticatorInterface authenticator = AuthenticatorFactory.getAuthenticator(request);
 					String userDataDir = UserManager.getUser(authenticator).getDataDir();
 					String cleanPath = Tools.makeCleanPath(job);
-					String wpsSettingsName = cleanPath.replace(".xml", ".wpssettings");
+					String wpsSettingsName = cleanPath.replace(".xml", ".ready.json");
 					File f = new File(userDataDir + "/WPS_Settings/" + wpsSettingsName);
+					f.delete();
+					wpsSettingsName = cleanPath.replace(".xml", ".execute.json");
+					f = new File(userDataDir + "/WPS_Settings/" + wpsSettingsName);
 					Debug.println("removing:" + f.getPath());
 					if (f.delete()) {
 						jsonResponse.setMessage(new JSONObject().put("message", "jobfile deleted"));
@@ -115,7 +109,7 @@ public class JobListRequestMapper {
 
 			//  		  Tools.mksubdirs(userDataDir+"/WPS_Settings/");
 			String statusLocation=data.getString("statuslocation");
-			String baseName = statusLocation.substring(statusLocation.lastIndexOf("/")).replace(".xml", ".wpssettings");
+			String baseName = statusLocation.substring(statusLocation.lastIndexOf("/")).replace(".xml", ".execute.json");
 			AuthenticatorInterface authenticator = AuthenticatorFactory.getAuthenticator(request);
 			String userDataDir = UserManager.getUser(authenticator).getDataDir();
 			String wpsSettingsFile = userDataDir+"/WPS_Settings/";
@@ -157,16 +151,29 @@ public class JobListRequestMapper {
 				for (String fn : filesIndir) {
 					File f = new File(dir + "/" + fn);
 					// Debug.println("fn:"+fn+" "+f.isFile()+" ;
+					String readyFile = fn.replace("execute.json", "ready.json");
+						
 					// "+fn.endsWith("settings"));
-					if (f.isFile() && fn.endsWith("settings")) {
+					if (f.isFile() && fn.endsWith("execute.json")) {
+						
+						// if status==Accepted
+						if (Arrays.asList(filesIndir).contains(readyFile)) {
+							String fileString = new String(Files.readAllBytes(Paths.get(new File(dir + "/" + readyFile).getAbsolutePath())));
+							// Debug.println("found: "+fn+" "+fileString.length());
+							JSONObject job = new JSONObject(fileString);
+							jobArray.put(job);
+							continue;
+						}
 						String fileString = new String(Files.readAllBytes(Paths.get(f.getAbsolutePath())));
 						// Debug.println("found: "+fn+" "+fileString.length());
 						JSONObject job = new JSONObject(fileString);
-						// if status==Accepted
-
 						String status = null;
+						JSONObject wpsPostData = null;
 						try {
+							/* Extract the status */
 							status = job.getString("wpsstatus");
+							/* Extract the orginal settings with which the process was started */
+							wpsPostData = job.getJSONObject("wpspostdata");
 						} catch (JSONException e) {
 						}
 						if (status != null) {
@@ -179,25 +186,40 @@ public class JobListRequestMapper {
 									URLDecoder.decode(job.getString("querystring"), "utf-8");
 								} catch (Exception e) {
 								}
+								Debug.println("Querying " + statusLocation);
 								JSONObject newJobStatus = NewStatusLocation(queryString, statusLocation);
 								if(newJobStatus!=null && newJobStatus.length() !=0) {
-									
-									// Debug.println("newJobStatus: " + newJobStatus.getString("percentage"));
-									String newWPSStatus = newJobStatus.getString("wpsstatus");
-//									Debug.println("st:" + newWPSStatus + "<===" + status);
-									if (newWPSStatus!=null && status!=null && !newWPSStatus.equals(status) && newWPSStatus.equals("PROCESSSUCCEEDED")) {
-										Debug.println("Do something");
+									/* Put the wps post data (the input settings with which the wps was run) back into the new object */
+									if (wpsPostData!=null) {
+										newJobStatus.put("wpspostdata", wpsPostData);
 									}
-									if (status.equalsIgnoreCase("PROCESSSTARTED") || ((newJobStatus != null)
-											&& !status.equals(newJobStatus.getString("wpsstatus")))) {
-										// Tools.mksubdirs(userDataDir+"/WPS_Settings/");
+									try {
+										Debug.println("Joblist - started copyStatusLocationElements");
+										JSONObject output = ServiceHelperRequestMapper.copyStatusLocationElements(request, HTTPTools.makeHTTPGetRequest(statusLocation)).toJSONObject(null);
+										if (output!=null) {
+											newJobStatus.put("output", output);
+											Debug.println("Joblist - finished copyStatusLocationElements");
+											Debug.println(output.toString());
+										} else {
+											Debug.errprintln("Unable to copyStatusLocationElements");
+										}
+									}catch(Exception e) {
+										Debug.printStackTrace(e);
+									}
+									String newWPSStatus = newJobStatus.getString("wpsstatus");
+									/* Save the new ready.json file */
+									if (newWPSStatus!=null && status!=null && !newWPSStatus.equals(status) && newWPSStatus.equals("PROCESSSUCCEEDED")) {
 										String baseName = statusLocation.substring(statusLocation.lastIndexOf("/"))
-												.replace(".xml", ".wpssettings");
+												.replace(".xml", ".ready.json");
 										String wpsSettingsFile = userDataDir + "/WPS_Settings/";
 										Tools.mksubdirs(wpsSettingsFile);
 										wpsSettingsFile += baseName;
 										Tools.writeFile(wpsSettingsFile, newJobStatus.toString());
-										Debug.println("re-written " + wpsSettingsFile);
+										Debug.println("Written " + wpsSettingsFile);
+									}
+									/* Update the job information with info retrieved from the statusLocation */
+									if (status.equalsIgnoreCase("PROCESSSTARTED") || ((newJobStatus != null)
+											&& !status.equals(newJobStatus.getString("wpsstatus")))) {
 										job = newJobStatus;
 									}
 								}

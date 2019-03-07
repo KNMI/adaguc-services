@@ -5,7 +5,7 @@
 
 	<groupId>nl.knmi.adagucservices</groupId>
 	<artifactId>adaguc-services</artifactId>
-	<version>1.0.14</version>
+	<version>1.1.0</version>
 	<packaging>war</packaging>
 
 	<name>adaguc-services</name>
@@ -14,11 +14,9 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>1.5.2.BUILD-SNAPSHOT</version>
+		<version>2.1.2.RELEASE</version>
 		<relativePath /> <!-- lookup parent from repository -->
-
 	</parent>
-
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -52,14 +50,10 @@
 			<artifactId>spring-boot-devtools</artifactId>
 			<optional>true</optional>
 		</dependency>
-		<dependency>
-			<groupId>org.json</groupId>
-			<artifactId>json</artifactId>
-		</dependency>
+
 		<dependency>
 			<groupId>com.fasterxml.jackson.datatype</groupId>
 			<artifactId>jackson-datatype-jsr310</artifactId>
-			<version>2.4.0</version>
 		</dependency>
 		<dependency>
 			<groupId>de.grundid.opendatalab</groupId>
@@ -84,15 +78,10 @@
 		</dependency>
 
 
-		<dependency>
-			<groupId>org.reflections</groupId>
-			<artifactId>reflections</artifactId>
-			<version>0.9.11</version>
-		</dependency>
+		
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-lang3</artifactId>
-			<version>3.5</version>
 		</dependency>
 
 
@@ -113,12 +102,7 @@
 		<dependency>
 			<groupId>org.apache.httpcomponents</groupId>
 			<artifactId>httpclient</artifactId>
-			<version>4.5.2</version>
 		</dependency>
-
-		<!-- https://mvnrepository.com/artifact/log4j/log4j -->
-		<!-- <dependency> <groupId>log4j</groupId> <artifactId>log4j</artifactId> 
-			<version>1.2.17</version> </dependency> -->
 
 		<!-- https://mvnrepository.com/artifact/edu.ucar/opendap -->
 		<dependency>
@@ -151,28 +135,6 @@
 		<dependency>
 			<groupId>org.springframework.security</groupId>
 			<artifactId>spring-security-core</artifactId>
-			<version>4.2.4.RELEASE</version>
-		</dependency>
-
-		<dependency>
-			<!-- <groupId>nl.knmi.adaguc.tools</groupId> 
-			<artifactId>adaguc-services-tools</artifactId> -->
-			<groupId>com.github.maartenplieger</groupId>
-			<artifactId>nl.knmi.adaguc.tools</artifactId>
-			<version>1.0.16</version>
-		</dependency>
-		<dependency>
-			<groupId>com.github.maartenplieger</groupId>
-			<artifactId>nl.knmi.adaguc.config</artifactId>
-			<!-- <groupId>nl.knmi.adaguc.config</groupId> 
-			<artifactId>adaguc-services-config</artifactId> -->
-			<version>1.0.13</version>
-<!-- 			<exclusions>
-				<exclusion>
-					<groupId>com.github.maartenplieger</groupId>
-					<artifactId>nl.knmi.adaguc.tools</artifactId>
-				</exclusion>
-			</exclusions>-->
 		</dependency>
 
 		<dependency>
@@ -201,13 +163,6 @@
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
 			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-surefire-plugin</artifactId>
-				<configuration>
-					<useSystemClassLoader>false</useSystemClassLoader>
-				</configuration>
-			</plugin>
 		</plugins>
 	</build>
 
@@ -228,10 +183,6 @@
 				<enabled>false</enabled>
 			</snapshots>
 		</repository>
-		<repository>
-			<id>jitpack.io</id>
-			<url>https://jitpack.io</url>
-		</repository>
 
 		<repository>
 			<id>artifacts.unidata.ucar.edu</id>
@@ -240,7 +191,6 @@
 
 
 	</repositories>
-	
 	<pluginRepositories>
 		<pluginRepository>
 			<id>spring-snapshots</id>

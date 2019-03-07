@@ -9,35 +9,23 @@ import javax.servlet.http.HttpServletResponse;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.springframework.context.annotation.Bean;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-
 import nl.knmi.adaguc.config.MainServicesConfigurator;
 import nl.knmi.adaguc.security.SecurityConfigurator;
 import nl.knmi.adaguc.security.SecurityConfigurator.ComputeNode;
+import nl.knmi.adaguc.tools.Debug;
 import nl.knmi.adaguc.tools.ElementNotFoundException;
 import nl.knmi.adaguc.tools.JSONResponse;
 
 
 @RestController
 public class OAuth2RequestMapper {
-	@Bean
-	public MappingJackson2HttpMessageConverter mappingJackson2HttpMessageConverter() {
-		ObjectMapper mapper = new ObjectMapper();
-		mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, true);
-		MappingJackson2HttpMessageConverter converter = 
-				new MappingJackson2HttpMessageConverter(mapper);
-		return converter;
-	}
-	
+
 	@CrossOrigin
 	@ResponseBody
 	@RequestMapping(
@@ -113,6 +101,19 @@ public class OAuth2RequestMapper {
 		)
 	public void getId(HttpServletResponse response, HttpServletRequest request) throws JSONException, IOException, ElementNotFoundException{
 		JSONResponse jsonResponse = new JSONResponse(request);
+		Debug.println("getid");
+		try{
+			String userName = SecurityConfigurator.getUser();
+			if (userName != null) {
+				Debug.println("Setting user to " + userName);
+				request.getSession().setAttribute("user_identifier",userName);
+				request.getSession().setAttribute("services_access_token",userName);
+				request.getSession().setAttribute("emailaddress",userName);
+			}
+		}catch(Exception e){
+			Debug.println("No user name");
+		}
+
 
 		String id = (String) request.getSession().getAttribute("user_identifier");
 		String servicesAccessToken = (String) request.getSession().getAttribute("services_access_token");

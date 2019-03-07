@@ -9,8 +9,6 @@ import java.util.UUID;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.springframework.context.annotation.Bean;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -20,25 +18,18 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JSR310Module;
 
-import nl.knmi.adaguc.tools.ElementNotFoundException;
 import nl.knmi.adaguc.services.datasetcatalog.DatasetDescription.DataOrganisation;
 import nl.knmi.adaguc.services.datasetcatalog.DatasetDescription.DataSource;
 import nl.knmi.adaguc.tools.Debug;
+import nl.knmi.adaguc.tools.ElementNotFoundException;
 import nl.knmi.adaguc.tools.JSONResponse;
 
 
+@SuppressWarnings("deprecation")
 @RestController
 @RequestMapping("catalog")
 @CrossOrigin
 public class DatasetCatalogRequestMapper {
-	@Bean
-	public MappingJackson2HttpMessageConverter mappingJackson2HttpMessageConverter() {
-		ObjectMapper mapper = new ObjectMapper();
-		mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, true);
-		MappingJackson2HttpMessageConverter converter = 
-				new MappingJackson2HttpMessageConverter(mapper);
-		return converter;
-	}
 
 	@ResponseBody
 	@RequestMapping("/list")

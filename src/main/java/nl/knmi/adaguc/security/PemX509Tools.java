@@ -515,29 +515,35 @@ public class PemX509Tools {
 			) throws KeyManagementException, UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException, CertificateException, IOException, InvalidKeyException, NoSuchProviderException, SignatureException, GSSException{
 		KeyStore trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
 
-		/* Load the server JKS truststore */
-		FileInputStream trustStoreStream = new FileInputStream(new File(trustStoreLocation));
-		try {
-			trustStore.load(trustStoreStream, trustStorePassword);
-		} finally {
+		if (trustStoreLocation!= null && trustStorePassword != null) {
+			/* Load the server JKS truststore */
+			FileInputStream trustStoreStream = new FileInputStream(new File(trustStoreLocation));
 			try {
-				trustStoreStream.close();
-			} catch (Exception ignore) {
+				trustStore.load(trustStoreStream, trustStorePassword);
+			} finally {
+				try {
+					trustStoreStream.close();
+				} catch (Exception ignore) {
+				}
 			}
-		}
-		trustStoreStream.close();
-		if(certAndKey!=null){
-			trustStore.setKeyEntry("privateKeyAlias", certAndKey.getPrivateKey(),
-					trustStorePassword, new Certificate[] { certAndKey.getUserSlCertificate()});
+			trustStoreStream.close();
+			if(certAndKey!=null){
+				trustStore.setKeyEntry("privateKeyAlias", certAndKey.getPrivateKey(),
+						trustStorePassword, new Certificate[] { certAndKey.getUserSlCertificate()});
+			}
+	
+			SSLContext sslContext =
+					new SSLContextBuilder()
+					.loadTrustMaterial(trustStore, new TrustSelfSignedStrategy())
+					.loadKeyMaterial(trustStore, trustStorePassword)
+					.build();
+			return HttpClients.custom().setSSLContext(sslContext).setHostnameVerifier(AllowAllHostnameVerifier.INSTANCE).build();
+		} else {
+			Debug.errprintln("Warning, truststore is null");
+			return HttpClients.custom().setHostnameVerifier(AllowAllHostnameVerifier.INSTANCE).build();
 		}
 
-		SSLContext sslContext =
-				new SSLContextBuilder()
-				.loadTrustMaterial(trustStore, new TrustSelfSignedStrategy())
-				.loadKeyMaterial(trustStore, trustStorePassword)
-				.build();
-
-		return HttpClients.custom().setSSLContext(sslContext).setHostnameVerifier(AllowAllHostnameVerifier.INSTANCE).build();
+		
 	}
 
 

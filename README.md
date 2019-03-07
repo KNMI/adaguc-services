@@ -26,5 +26,7 @@ For creating a new package:
 4) You can for example start this with java -jar demo-${VERSION}-SNAPSHOT.jar
 
 
+# Versions
 
+1.1.0 - Uses spring boot 2.0
 

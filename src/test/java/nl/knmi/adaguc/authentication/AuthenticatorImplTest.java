@@ -15,7 +15,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
-import org.mockito.Matchers;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -27,7 +26,6 @@ import org.springframework.web.context.WebApplicationContext;
 import nl.knmi.adaguc.security.PemX509Tools;
 import nl.knmi.adaguc.security.PemX509Tools.X509Info;
 import nl.knmi.adaguc.security.token.TokenManager;
-import nl.knmi.adaguc.services.tinyopendapserver.TinyDapServer;
 import nl.knmi.adaguc.tools.Debug;
 
 

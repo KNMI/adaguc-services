@@ -2,28 +2,11 @@ package nl.knmi.adaguc.services.basket;
 
 import java.io.File;
 import java.io.IOException;
-import java.security.InvalidKeyException;
-import java.security.KeyManagementException;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.SignatureException;
-import java.security.UnrecoverableKeyException;
-import java.security.cert.CertificateException;
-import java.util.Vector;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.util.EntityUtils;
-import org.ietf.jgss.GSSException;
 import org.json.JSONObject;
-import org.springframework.context.annotation.Bean;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -38,31 +21,16 @@ import com.fasterxml.jackson.datatype.jsr310.JSR310Module;
 
 import nl.knmi.adaguc.security.AuthenticatorFactory;
 import nl.knmi.adaguc.security.AuthenticatorInterface;
-import nl.knmi.adaguc.security.PemX509Tools;
-import nl.knmi.adaguc.security.SecurityConfigurator;
-import nl.knmi.adaguc.security.PemX509Tools.X509UserCertAndKey;
-import nl.knmi.adaguc.security.SecurityConfigurator.ComputeNode;
-import nl.knmi.adaguc.security.user.User;
 import nl.knmi.adaguc.security.user.UserManager;
 import nl.knmi.adaguc.tools.Debug;
-import nl.knmi.adaguc.tools.ElementNotFoundException;
 import nl.knmi.adaguc.tools.HTTPTools;
 import nl.knmi.adaguc.tools.JSONResponse;
 
+@SuppressWarnings("deprecation")
 @RestController
 @RequestMapping("basket")
 @CrossOrigin
 public class BasketRequestMapper {
-	@Bean
-	public MappingJackson2HttpMessageConverter mappingJackson2HttpMessageConverter() {
-		ObjectMapper mapper = new ObjectMapper();
-		mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, true);
-		MappingJackson2HttpMessageConverter converter = 
-				new MappingJackson2HttpMessageConverter(mapper);
-		return converter;
-	}
-
-	
 	@ResponseBody
 	@RequestMapping("/list")
 	public void listBasket(HttpServletResponse response, HttpServletRequest request) throws IOException{

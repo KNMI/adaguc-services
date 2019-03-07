@@ -42,7 +42,7 @@ public class Basket {
 	}
 	
 	public static String GetRemotePrefix(User user) throws ElementNotFoundException {
-		return MainServicesConfigurator.getServerExternalURL() + "/opendap/"+user.makePosixUserId(user.getUserId()) + "/";
+		return MainServicesConfigurator.getServerExternalURL() + "/opendap/"+User.makePosixUserId(user.getUserId()) + "/";
 	}
 	
 	
