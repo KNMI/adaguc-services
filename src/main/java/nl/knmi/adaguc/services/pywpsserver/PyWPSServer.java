@@ -244,10 +244,10 @@ public class PyWPSServer extends HttpServlet{
 				String dataInputs=HTTPTools.getKVPItem(queryString, "DataInputs");
 				String responseForm=HTTPTools.getKVPItem(queryString, "ResponseForm");
 				if (dataInputs!=null) {
-					dataInputs=dataInputs.substring(1,dataInputs.length()-1);
+					dataInputs=dataInputs.substring(0,dataInputs.length());
 				}
 				if (responseForm!=null) {
-					responseForm=responseForm.substring(1,responseForm.length()-1);
+					responseForm=responseForm.substring(0,responseForm.length());
 				}
 				Debug.println("DataInputs: "+dataInputs+" , ResponseForm:"+responseForm);
 				XMLElement wpsElement=new XMLElement();
