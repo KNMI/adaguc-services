@@ -27,12 +27,15 @@ import nl.knmi.adaguc.security.AuthenticatorFactory;
 import nl.knmi.adaguc.security.AuthenticatorInterface;
 import nl.knmi.adaguc.security.user.UserManager;
 import nl.knmi.adaguc.services.pywpsserver.PyWPSServer;
+import nl.knmi.adaguc.services.xml2json.ServiceHelperRequestMapper;
 import nl.knmi.adaguc.tools.Debug;
 import nl.knmi.adaguc.tools.ElementNotFoundException;
 import nl.knmi.adaguc.tools.HTTPTools;
 import nl.knmi.adaguc.tools.HTTPTools.InvalidHTTPKeyValueTokensException;
+import nl.knmi.adaguc.tools.MyXMLParser.Options;
 import nl.knmi.adaguc.tools.InvalidTokenException;
 import nl.knmi.adaguc.tools.JSONResponse;
+import nl.knmi.adaguc.tools.MyXMLParser;
 import nl.knmi.adaguc.tools.Tools;
 
 @SuppressWarnings("deprecation")
@@ -74,8 +77,11 @@ public class JobListRequestMapper {
 					AuthenticatorInterface authenticator = AuthenticatorFactory.getAuthenticator(request);
 					String userDataDir = UserManager.getUser(authenticator).getDataDir();
 					String cleanPath = Tools.makeCleanPath(job);
-					String wpsSettingsName = cleanPath.replace(".xml", ".wpssettings");
+					String wpsSettingsName = cleanPath.replace(".xml", ".ready.json");
 					File f = new File(userDataDir + "/WPS_Settings/" + wpsSettingsName);
+					f.delete();
+					wpsSettingsName = cleanPath.replace(".xml", ".execute.json");
+					f = new File(userDataDir + "/WPS_Settings/" + wpsSettingsName);
 					Debug.println("removing:" + f.getPath());
 					if (f.delete()) {
 						jsonResponse.setMessage(new JSONObject().put("message", "jobfile deleted"));
@@ -180,29 +186,40 @@ public class JobListRequestMapper {
 									URLDecoder.decode(job.getString("querystring"), "utf-8");
 								} catch (Exception e) {
 								}
-								
+								Debug.println("Querying " + statusLocation);
 								JSONObject newJobStatus = NewStatusLocation(queryString, statusLocation);
 								if(newJobStatus!=null && newJobStatus.length() !=0) {
 									/* Put the wps post data (the input settings with which the wps was run) back into the new object */
 									if (wpsPostData!=null) {
 										newJobStatus.put("wpspostdata", wpsPostData);
 									}
-									// Debug.println("newJobStatus: " + newJobStatus.getString("percentage"));
-									String newWPSStatus = newJobStatus.getString("wpsstatus");
-//									Debug.println("st:" + newWPSStatus + "<===" + status);
-									if (newWPSStatus!=null && status!=null && !newWPSStatus.equals(status) && newWPSStatus.equals("PROCESSSUCCEEDED")) {
-										Debug.println("Do something");
+									try {
+										Debug.println("Joblist - started copyStatusLocationElements");
+										JSONObject output = ServiceHelperRequestMapper.copyStatusLocationElements(request, HTTPTools.makeHTTPGetRequest(statusLocation)).toJSONObject(null);
+										if (output!=null) {
+											newJobStatus.put("output", output);
+											Debug.println("Joblist - finished copyStatusLocationElements");
+											Debug.println(output.toString());
+										} else {
+											Debug.errprintln("Unable to copyStatusLocationElements");
+										}
+									}catch(Exception e) {
+										Debug.printStackTrace(e);
 									}
-									if (status.equalsIgnoreCase("PROCESSSTARTED") || ((newJobStatus != null)
-											&& !status.equals(newJobStatus.getString("wpsstatus")))) {
-										// Tools.mksubdirs(userDataDir+"/WPS_Settings/");
+									String newWPSStatus = newJobStatus.getString("wpsstatus");
+									/* Save the new ready.json file */
+									if (newWPSStatus!=null && status!=null && !newWPSStatus.equals(status) && newWPSStatus.equals("PROCESSSUCCEEDED")) {
 										String baseName = statusLocation.substring(statusLocation.lastIndexOf("/"))
 												.replace(".xml", ".ready.json");
 										String wpsSettingsFile = userDataDir + "/WPS_Settings/";
 										Tools.mksubdirs(wpsSettingsFile);
 										wpsSettingsFile += baseName;
 										Tools.writeFile(wpsSettingsFile, newJobStatus.toString());
-										Debug.println("re-written " + wpsSettingsFile);
+										Debug.println("Written " + wpsSettingsFile);
+									}
+									/* Update the job information with info retrieved from the statusLocation */
+									if (status.equalsIgnoreCase("PROCESSSTARTED") || ((newJobStatus != null)
+											&& !status.equals(newJobStatus.getString("wpsstatus")))) {
 										job = newJobStatus;
 									}
 								}

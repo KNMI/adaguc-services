@@ -33,7 +33,6 @@ import org.xml.sax.SAXException;
 
 @SuppressWarnings("deprecation")
 public class MyXMLParser {
-	public static PrintStream Debug=System.err;
 
 	public enum Options {NONE,STRIPNAMESPACES};
 	/**
@@ -111,6 +110,12 @@ public class MyXMLParser {
 			XMLAttribute at=new XMLAttribute();
 			at.name=attr;
 			at.value=value;
+			for (XMLAttribute itAttr : this.attributes) {
+				if (itAttr.name.equals(attr)) {
+					itAttr.value = value;
+					return;
+				}
+			}
 			this.attributes.add(at);
 		}
 
@@ -145,15 +150,15 @@ public class MyXMLParser {
 				inputStream.close();
 			} catch (SAXException e) {
 				String msg="SAXException: "+e.getMessage();
-				Debug./*err*/println(msg);
+				Debug.errprintln(msg);
 				throw new SAXException(msg);
 			} catch (IOException e) {
 				String msg="IOException:: "+e.getMessage();
-				//Debug./*err*/println(msg);
+				//Debug.errprintln(msg);
 				throw new IOException(msg);
 			}catch(Exception e){
 				String msg="Exception: "+e.getMessage();
-				Debug./*err*/println(msg);
+				Debug.errprintln(msg);
 				throw new Exception(msg);
 			}
 
@@ -176,15 +181,15 @@ public class MyXMLParser {
 				inputStream.close();
 			} catch (SAXException e) {
 				String msg="SAXException: "+e.getMessage()+":\n\"";//+string+"\"";
-				Debug./*err*/println(msg);
+				Debug.errprintln(msg);
 				throw new SAXException(msg);
 			} catch (IOException e) {
 				String msg="IOException: "+e.getMessage();
-				Debug./*err*/println(msg);
+				Debug.errprintln(msg);
 				throw new IOException(msg);
 			}catch(Exception e){
 				String msg="Exception: "+e.getMessage();
-				Debug./*err*/println(msg);
+				Debug.errprintln(msg);
 				throw new Exception(msg);
 			}
 
@@ -226,18 +231,18 @@ public class MyXMLParser {
 				if(statusCode>300){
 					throw new WebRequestBadStatusException(statusCode);
 				}
-				Debug./*err*/println("Status code: "+ connection.getResponseCode());
-				Debug./*err*/println(msg);
+				Debug.errprintln("Status code: "+ connection.getResponseCode());
+				Debug.errprintln(msg);
 				throw new IOException(msg);
 			}catch (SAXException e) {
 				//      Debug.printStackTrace(e);
-				e.printStackTrace(Debug);
+				Debug.printStackTrace(e);
 				String msg="SAXException: "+e.getMessage()+" for URL "+url.toString();
-				Debug./*err*/println(msg);
+				Debug.errprintln(msg);
 				throw new SAXException(msg);
 			} catch(Exception e){
 				String msg="Exception: "+e.getMessage()+" for URL "+url.toString();;
-				Debug./*err*/println(msg);
+				Debug.errprintln(msg);
 				throw new Exception(msg);
 			}
 		}
@@ -267,15 +272,15 @@ public class MyXMLParser {
 
 			} catch (SAXException e) {
 				String msg="SAXException: "+e.getMessage();
-				Debug./*err*/println(msg);
+				Debug.errprintln(msg);
 				throw new SAXException(msg);
 			} catch (IOException e) {
 				String msg="IOException: "+e.getMessage();
-				Debug./*err*/println(msg);
+				Debug.errprintln(msg);
 				throw new IOException(msg);
 			}catch(Exception e){
 				String msg="Exception: "+e.getMessage();
-				Debug./*err*/println(msg);
+				Debug.errprintln(msg);
 				throw new Exception(msg);
 			}
 			Debug.println("Ready");
@@ -608,7 +613,8 @@ public class MyXMLParser {
 			try {
 				jsonObject = (JSONObject) new JSONTokener(jsonString).nextValue();
 			} catch (JSONException e) {
-				Debug./*err*/println("Unable to tokenize JSON string to JSONObject \n"+jsonString);
+				Debug.printStackTrace(e);
+				Debug.errprintln("Unable to tokenize JSON string to JSONObject \n"+jsonString);
 				return null;
 			}
 			return jsonObject;
