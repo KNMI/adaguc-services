@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 
 import nl.knmi.adaguc.security.SecurityConfigurator;
 import nl.knmi.adaguc.services.adagucserver.ADAGUCConfigurator;
+import nl.knmi.adaguc.services.autowms.AutoWMSConfigurator;
 import nl.knmi.adaguc.services.basket.BasketConfigurator;
 import nl.knmi.adaguc.services.datasetcatalog.DatasetCatalogConfigurator;
 import nl.knmi.adaguc.services.esgfsearch.ESGFSearchConfigurator;
@@ -145,6 +146,7 @@ public class ConfigurationReader {
 		ESGFSearchConfigurator.doConfig(configReader);
 		JobListConfigurator.doConfig(configReader);
 		PyWPSConfigurator.doConfig(configReader);
+		AutoWMSConfigurator.doConfig(configReader);
 //        
 //		Set<Class<? extends ConfiguratorInterface>> allClasses = 
 //				reflections.getSubTypesOf(ConfiguratorInterface.class);
