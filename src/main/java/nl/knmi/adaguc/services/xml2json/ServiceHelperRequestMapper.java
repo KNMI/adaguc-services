@@ -36,6 +36,7 @@ import nl.knmi.adaguc.config.MainServicesConfigurator;
 import nl.knmi.adaguc.security.AuthenticatorFactory;
 import nl.knmi.adaguc.security.AuthenticatorInterface;
 import nl.knmi.adaguc.security.PemX509Tools;
+import nl.knmi.adaguc.security.PemX509Tools.X509Info;
 import nl.knmi.adaguc.security.PemX509Tools.X509UserCertAndKey;
 import nl.knmi.adaguc.security.SecurityConfigurator;
 import nl.knmi.adaguc.security.user.User;
@@ -125,7 +126,6 @@ public class ServiceHelperRequestMapper {
 						if(user!=null){
 							
 							userCertificate = user.getCertificate();
-							Debug.println("using cert " + userCertificate);
 						}
 					}
 					Debug.println("userCertificate: " + userCertificate);
@@ -167,7 +167,7 @@ public class ServiceHelperRequestMapper {
 			}
 			jsonResponse.setMessage(rootElement.toJSON(null));
 		} catch (Exception e) {
-			e.printStackTrace();
+			Debug.errprintln(e.getMessage());
 			jsonResponse.setException(e.getMessage(),e);
 		}
 
@@ -295,10 +295,20 @@ public class ServiceHelperRequestMapper {
 		} catch (Exception e){
 			if (userCertificate!=null) {
 				/* Second, try with user certificate */
-				Debug.println("Trying with cert");
+				Debug.println("Trying with cert and header");
 				CloseableHttpClient httpClient = (new PemX509Tools()).
 						getHTTPClientForPEMBasedClientAuth(ts, tsPass, userCertificate);
-				CloseableHttpResponse httpResponse = httpClient.execute(new HttpGet(requestStr));
+				HttpGet request = new HttpGet(requestStr);
+				
+				try{
+					X509Info info = (new PemX509Tools()).getUserIdFromCertificate(userCertificate.getUserSlCertificate()) ;
+					Debug.println("Adding header CN=" + info.getCN());
+					request.addHeader("x-ssl_client_s_dn", "CN=" + info.getCN());
+				}catch(Exception e2) {
+					Debug.errprintln("Unable to add header: " + e2.getMessage());
+				}
+				CloseableHttpResponse httpResponse = httpClient.execute(request);
+				Debug.println("StatusCode with certificate: " + httpResponse.getStatusLine().getStatusCode());
 				return EntityUtils.toByteArray(httpResponse.getEntity());
 
 			} else{
