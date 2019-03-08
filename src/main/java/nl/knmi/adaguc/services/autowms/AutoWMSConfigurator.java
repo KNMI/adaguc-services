@@ -21,7 +21,7 @@ public class AutoWMSConfigurator implements nl.knmi.adaguc.config.ConfiguratorIn
 	private static String adagucDataset = null;
 	@Autowired
 	static ConfigurationReader configurationReader;
-	public void doConfig(XMLElement  configReader){
+	public static void doConfig(XMLElement  configReader){
 		if(configReader.getNodeValue("adaguc-services.autowms") == null){
 			return;
 		}
