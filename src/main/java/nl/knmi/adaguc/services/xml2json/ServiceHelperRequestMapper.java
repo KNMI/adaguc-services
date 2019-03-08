@@ -19,6 +19,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.io.FilenameUtils;
+import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -258,7 +259,7 @@ public class ServiceHelperRequestMapper {
 					}
 				}
 			}catch(Exception e){
-				Debug.printStackTrace(e);
+				Debug.errprintln(e.getMessage());
 			}
 
 
@@ -275,7 +276,13 @@ public class ServiceHelperRequestMapper {
 			
 			byte[] a = EntityUtils.toByteArray(httpResponse.getEntity());
 			
-			Debug.println("Status: " + httpResponse.getStatusLine() + " Size: " + a.length);
+			Debug.println("Status: " + httpResponse.getStatusLine().getStatusCode() + " Size: " + a.length);
+			
+			if (httpResponse.getStatusLine().getStatusCode() != HttpStatus.SC_OK) {
+				Debug.println("Status code not ok, attempting cert");
+				throw new IOException("Request needs certificate");
+			}
+			
 			/* Birdhouse WPS gives an exception when a certificate is needed, check it out */
 			if (a.length < 2048) {
 				String test = new String(a);
