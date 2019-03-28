@@ -18,6 +18,7 @@ import nl.knmi.adaguc.services.esgfsearch.ESGFSearchConfigurator;
 import nl.knmi.adaguc.services.joblist.JobListConfigurator;
 import nl.knmi.adaguc.services.oauth2.OAuthConfigurator;
 import nl.knmi.adaguc.services.pywpsserver.PyWPSConfigurator;
+import nl.knmi.adaguc.services.servicehealth.ServiceHealthConfigurator;
 import nl.knmi.adaguc.tools.Debug;
 import nl.knmi.adaguc.tools.ElementNotFoundException;
 import nl.knmi.adaguc.tools.MyXMLParser.XMLElement;
@@ -147,6 +148,7 @@ public class ConfigurationReader {
 		JobListConfigurator.doConfig(configReader);
 		PyWPSConfigurator.doConfig(configReader);
 		AutoWMSConfigurator.doConfig(configReader);
+		ServiceHealthConfigurator.doConfig(configReader);
 //        
 //		Set<Class<? extends ConfiguratorInterface>> allClasses = 
 //				reflections.getSubTypesOf(ConfiguratorInterface.class);

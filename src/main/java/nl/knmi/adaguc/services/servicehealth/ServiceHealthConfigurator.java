@@ -21,7 +21,7 @@ public class ServiceHealthConfigurator implements nl.knmi.adaguc.config.Configur
 	private static String serviceHealthDirectory = null;
 	@Autowired
 	static ConfigurationReader configurationReader;
-	public void doConfig(XMLElement  configReader){
+	public static void doConfig(XMLElement  configReader){
 		if(configReader.getNodeValue("adaguc-services.servicehealth") == null){
 			return;
 		}
