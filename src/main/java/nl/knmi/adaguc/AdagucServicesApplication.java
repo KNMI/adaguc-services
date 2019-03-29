@@ -76,13 +76,20 @@ public class AdagucServicesApplication extends SpringBootServletInitializer{
 		}
 		Properties props = new Properties();
 
-		if(MainServicesConfigurator.getServerPort()!=null)props.put("server.port", MainServicesConfigurator.getServerPort());
+		
 		if(SecurityConfigurator.getKeyStore()!=null)props.put("server.ssl.key-store", SecurityConfigurator.getKeyStore());
 		if(SecurityConfigurator.getEnableSSL()!=null && SecurityConfigurator.getEnableSSL().equals("true")) {
 			props.put("server.ssl.enabled", true);
+			if(MainServicesConfigurator.getServerPort()!=null)props.put("server.http.port", MainServicesConfigurator.getServerPort());
+			if(MainServicesConfigurator.getServerPortHTTPS()!=null)props.put("server.port", MainServicesConfigurator.getServerPortHTTPS()); else
+				if(MainServicesConfigurator.getServerPort()!=null)props.put("server.port", MainServicesConfigurator.getServerPort());
 		} else {
 			props.put("server.ssl.enabled", false);
+			if(MainServicesConfigurator.getServerPort()!=null)props.put("server.port", MainServicesConfigurator.getServerPort());
+			if(MainServicesConfigurator.getServerPort()!=null)props.put("server.http.port", MainServicesConfigurator.getServerPort());
 		}
+		
+		if(MainServicesConfigurator.getContextPath()!=null)props.put("server.servlet.context-path", MainServicesConfigurator.getContextPath());
 		if(SecurityConfigurator.getKeyStorePassword()!=null)props.put("server.ssl.key-store-password", SecurityConfigurator.getKeyStorePassword());
 		if(SecurityConfigurator.getKeyStoreType()!=null)props.put("server.ssl.keyStoreType",SecurityConfigurator.getKeyStoreType());
 		if(SecurityConfigurator.getKeyAlias()!=null)props.put("server.ssl.keyAlias", SecurityConfigurator.getKeyAlias());

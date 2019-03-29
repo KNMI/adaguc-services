@@ -17,8 +17,10 @@ import nl.knmi.adaguc.tools.MyXMLParser.XMLElement;
 public class MainServicesConfigurator implements ConfiguratorInterface{
 	private static String serverExternalURL="";
 	private static String userWorkspace="/tmp";
-	private static String serverPort="443";
+	private static String serverPort="8080";
+	private static String serverPortHTTPS="443";
 	private static String baseDir="/tmp/";
+	private static String contextPath="/";
 	
 	@Autowired
 	static ConfigurationReader configurationReader;
@@ -27,7 +29,9 @@ public class MainServicesConfigurator implements ConfiguratorInterface{
 		serverExternalURL = configReader.getNodeValueMustNotBeUndefined("adaguc-services.external-home-url");
 		userWorkspace = configReader.getNodeValueMustNotBeUndefined("adaguc-services.userworkspace");
 		serverPort = configReader.getNodeValue("adaguc-services.server.port");
+		serverPortHTTPS = configReader.getNodeValue("adaguc-services.server.porthttps");		
 		baseDir = configReader.getNodeValueMustNotBeUndefined("adaguc-services.basedir");
+		contextPath = configReader.getNodeValue("adaguc-services.server.contextpath");
 	}
 
 	public static String getServerExternalURL() throws ElementNotFoundException, IOException {
@@ -49,5 +53,15 @@ public class MainServicesConfigurator implements ConfiguratorInterface{
 	public static String getBaseDir() throws ElementNotFoundException, IOException {
 		ConfigurationReader.readConfig();
 		return baseDir;
+	}
+	
+	public static String getContextPath() throws ElementNotFoundException, IOException {
+		ConfigurationReader.readConfig();
+		return contextPath;
+	}
+
+	public static Object getServerPortHTTPS() throws ElementNotFoundException, IOException {
+		ConfigurationReader.readConfig();
+		return serverPortHTTPS;
 	}
 }

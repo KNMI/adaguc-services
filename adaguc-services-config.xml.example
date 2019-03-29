@@ -9,6 +9,7 @@
 
   <server>
     <port>8090</port>
+    <contextpath>adaguc-services</contextpath>
   </server>
 
   <security>
