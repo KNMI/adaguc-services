@@ -218,7 +218,7 @@ public class OAuth2Handler {
 	 * @param response
 	 * @throws ElementNotFoundException
 	 */
-	public static void doGet(HttpServletRequest request, HttpServletResponse response) throws ElementNotFoundException {
+	public static void doGet(HttpServletRequest request, HttpServletResponse response) throws ElementNotFoundException, IOException {
 
 		// Check if we are dealing with getting JSON request for building up the
 		// login form
@@ -814,7 +814,7 @@ public class OAuth2Handler {
 	 * @return
 	 * @throws ElementNotFoundException
 	 */
-	private static UserInfo getIdentifierFromJWTPayload(String JWT) throws ElementNotFoundException {
+	private static UserInfo getIdentifierFromJWTPayload(String JWT) throws ElementNotFoundException, IOException{
 		JSONObject id_token_json = null;
 		try {
 			id_token_json = (JSONObject) new JSONTokener(JWT).nextValue();
@@ -889,7 +889,7 @@ public class OAuth2Handler {
 	 * @throws ElementNotFoundException
 	 */
 	private static void makeForm(HttpServletRequest request, HttpServletResponse response)
-			throws ElementNotFoundException {
+			throws ElementNotFoundException, IOException {
 		JSONResponse jsonResponse = new JSONResponse(request);
 
 		JSONObject form = new JSONObject();

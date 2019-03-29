@@ -1,6 +1,7 @@
 package nl.knmi.adaguc.services.basket;
 
 import java.io.File;
+import java.io.IOException;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -33,21 +34,24 @@ public class Basket {
 		} catch (ElementNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 	}
 
-	private BasketNode listFiles() throws ElementNotFoundException{
+	private BasketNode listFiles() throws ElementNotFoundException, IOException{
 		BasketNode rootBn=new BasketNode(this.name, "root", null, null, null);
 		return this.listFiles(rootBn, userDir);	
 	}
 	
-	public static String GetRemotePrefix(User user) throws ElementNotFoundException {
+	public static String GetRemotePrefix(User user) throws ElementNotFoundException, IOException {
 		return MainServicesConfigurator.getServerExternalURL() + "/opendap/"+User.makePosixUserId(user.getUserId()) + "/";
 	}
 	
 	
 	
-	private BasketNode listFiles(BasketNode bn, String dir) throws ElementNotFoundException {
+	private BasketNode listFiles(BasketNode bn, String dir) throws ElementNotFoundException, IOException {
 		String externalURL=MainServicesConfigurator.getServerExternalURL();
 		File d=new File(dir);
 		if (d.isDirectory()) {

@@ -25,6 +25,9 @@ public class AdagucServicesApplication extends SpringBootServletInitializer{
 		} catch (ElementNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 		Debug.println("Error");
 		return null;
@@ -43,6 +46,8 @@ public class AdagucServicesApplication extends SpringBootServletInitializer{
 		} catch (ElementNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		} catch (IOException e) {
+			Debug.errprintln(e.getMessage());
 		}
 	}
 
@@ -52,15 +57,21 @@ public class AdagucServicesApplication extends SpringBootServletInitializer{
 		} catch (ElementNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 		return null;
 	}
 
-	static Properties getProperties() throws ElementNotFoundException {
+	static Properties getProperties() throws ElementNotFoundException, IOException {
 		Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
 		try {
 			PyWPSInitializer.ConfigurePyWPS3();
-		} catch (IOException e) {
+		}catch (IOException e1) {
+			Debug.errprintln(e1.getMessage());
+			System.exit(1);
+		} catch (ElementNotFoundException e) {
 			throw new ElementNotFoundException("Unable to create config file for PyWPS");
 		}
 		Properties props = new Properties();

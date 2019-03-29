@@ -48,6 +48,8 @@ public class ConfigurationReader {
 		} catch (ElementNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		} catch (IOException e) {
+			Debug.errprintln(e.getMessage());
 		}
 	}
 	
@@ -80,9 +82,10 @@ public class ConfigurationReader {
 	 * 2) When read, the doConfig method for all classes which implement ConfiguratorInterface is called
 	 * @throws ConfigurationItemNotFoundException 
 	 * @throws ElementNotFoundException 
+	 * @throws IOException 
 	 * @throws Exception 
 	 */
-	static public synchronized void readConfig() throws  ElementNotFoundException{
+	static public synchronized void readConfig() throws  ElementNotFoundException, IOException{
 		if (refreshConfig == false && readConfigDone == true)return;
 		/* Re-read the configuration file every 10 seconds. */
 		if(readConfigPolInterval != 0){
@@ -97,9 +100,7 @@ public class ConfigurationReader {
 			try {
 				configFile = Tools.readFile(_getConfigFile());
 			} catch (IOException e2) {
-				// TODO Auto-generated catch block
-				e2.printStackTrace();
-				throw new ElementNotFoundException("Unable to read configuration file " + _getConfigFile());
+				throw new IOException("Unable to read configuration file " + _getConfigFile() + ". Specify env ADAGUC_SERVICES_CONFIG or place configuration file at expected place.");
 			}
 			
 			/* Replace ${ENV.} with environment variable */

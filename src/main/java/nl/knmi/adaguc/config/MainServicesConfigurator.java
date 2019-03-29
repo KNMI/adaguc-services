@@ -1,5 +1,7 @@
 package nl.knmi.adaguc.config;
 
+import java.io.IOException;
+
 import org.springframework.beans.factory.annotation.Autowired;
 
 import nl.knmi.adaguc.tools.ElementNotFoundException;
@@ -28,23 +30,23 @@ public class MainServicesConfigurator implements ConfiguratorInterface{
 		baseDir = configReader.getNodeValueMustNotBeUndefined("adaguc-services.basedir");
 	}
 
-	public static String getServerExternalURL() throws ElementNotFoundException {
+	public static String getServerExternalURL() throws ElementNotFoundException, IOException {
 		ConfigurationReader.readConfig();
 		return serverExternalURL;
 	}
 	
-	public static String getUserWorkspace() throws ElementNotFoundException{
+	public static String getUserWorkspace() throws ElementNotFoundException, IOException{
 		ConfigurationReader.readConfig();
 		return userWorkspace;
 	}
 
-	public static String getServerPort() throws ElementNotFoundException {
+	public static String getServerPort() throws ElementNotFoundException, IOException {
 		ConfigurationReader.readConfig();
 		return serverPort;
 		
 	}
 
-	public static String getBaseDir() throws ElementNotFoundException {
+	public static String getBaseDir() throws ElementNotFoundException, IOException {
 		ConfigurationReader.readConfig();
 		return baseDir;
 	}

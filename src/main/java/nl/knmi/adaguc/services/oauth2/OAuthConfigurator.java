@@ -1,5 +1,6 @@
 package nl.knmi.adaguc.services.oauth2;
 
+import java.io.IOException;
 import java.util.Vector;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -109,12 +110,12 @@ public class OAuthConfigurator implements nl.knmi.adaguc.config.ConfiguratorInte
 		}
 	}
 
-	public static Oauth2Settings getOAuthSettings(String id) throws ElementNotFoundException {
+	public static Oauth2Settings getOAuthSettings(String id) throws ElementNotFoundException, IOException {
 		ConfigurationReader.readConfig();
 		return _getOauthSetting(id);
 	}
 
-	public static Vector<String> getProviders() throws ElementNotFoundException {
+	public static Vector<String> getProviders() throws ElementNotFoundException, IOException {
 		ConfigurationReader.readConfig();
 
 		return _getProviders();
