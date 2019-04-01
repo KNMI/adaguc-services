@@ -14,9 +14,11 @@ import nl.knmi.adaguc.tools.Debug;
 @Component
 public class HttpServer {
 	@Bean
-	public ServletWebServerFactory servletContainer(@Value("${server.http.port}") int httpPort, @Value("${server.port}") int port) {
+	public ServletWebServerFactory servletContainer(@Value("${server.http.port:0}") int httpPort, @Value("${server.port}") int port) {
+		
 		TomcatServletWebServerFactory tomcat = new TomcatServletWebServerFactory();
 		if (httpPort != 0 && (port!=httpPort)) {
+			Debug.println("configuring extra connector at port " + httpPort);
 			List<Connector> tomcatConnectors = tomcat.getAdditionalTomcatConnectors();
 			boolean portAlreadyUsed = false;
 			for(Connector tomcatConnector : tomcatConnectors) {

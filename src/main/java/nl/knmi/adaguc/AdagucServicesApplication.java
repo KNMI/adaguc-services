@@ -72,18 +72,27 @@ public class AdagucServicesApplication extends SpringBootServletInitializer{
 			Debug.errprintln(e1.getMessage());
 			System.exit(1);
 		} catch (ElementNotFoundException e) {
-			throw new ElementNotFoundException("Unable to create config file for PyWPS");
+			Debug.println("[INFO] Unable to create config file for PyWPS");
 		}
 		Properties props = new Properties();
 
 		
 		if(SecurityConfigurator.getKeyStore()!=null)props.put("server.ssl.key-store", SecurityConfigurator.getKeyStore());
+		/*
+		 * server.port is the default spring tomcat connector, it can be both used for http and https
+		 * server.http.port is the adaguc-services added connector, it is meant for http only.
+		 * For backwards compatibility with previous releases, http.port is used for https and server.http.port is used for http *
+		 */
+//		Debug.println("MainServicesConfigurator.getServerPort()" + MainServicesConfigurator.getServerPort());
+//		Debug.println("MainServicesConfigurator.getServerPortHTTPS()" + MainServicesConfigurator.getServerPortHTTPS());
 		if(SecurityConfigurator.getEnableSSL()!=null && SecurityConfigurator.getEnableSSL().equals("true")) {
+			/* If SSL (HTTPS support) is enabled, configure http.port for https and optionaly server.http.port for http */
 			props.put("server.ssl.enabled", true);
 			if(MainServicesConfigurator.getServerPort()!=null)props.put("server.http.port", MainServicesConfigurator.getServerPort());
 			if(MainServicesConfigurator.getServerPortHTTPS()!=null)props.put("server.port", MainServicesConfigurator.getServerPortHTTPS()); else
 				if(MainServicesConfigurator.getServerPort()!=null)props.put("server.port", MainServicesConfigurator.getServerPort());
 		} else {
+			/* If SSL (HTTPS support) is not enabled, configure as normal */
 			props.put("server.ssl.enabled", false);
 			if(MainServicesConfigurator.getServerPort()!=null)props.put("server.port", MainServicesConfigurator.getServerPort());
 			if(MainServicesConfigurator.getServerPort()!=null)props.put("server.http.port", MainServicesConfigurator.getServerPort());

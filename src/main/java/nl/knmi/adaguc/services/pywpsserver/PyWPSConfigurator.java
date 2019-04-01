@@ -1,14 +1,12 @@
 package nl.knmi.adaguc.services.pywpsserver;
 
-import nl.knmi.adaguc.tools.Debug;
-import nl.knmi.adaguc.tools.ElementNotFoundException;
-
 import java.io.IOException;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
 import nl.knmi.adaguc.config.ConfigurationReader;
 import nl.knmi.adaguc.config.ConfiguratorInterface;
+import nl.knmi.adaguc.tools.ElementNotFoundException;
 import nl.knmi.adaguc.tools.MyXMLParser.XMLElement;
 
 /**
