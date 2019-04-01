@@ -5,7 +5,22 @@
   <basedir>/adaguc/basedir</basedir>
   <server>
     <port>8080</port>
+    <porthttps>8443</porthttps>
+    <contextpath>/adaguc-services</contextpath>
   </server>
+  <security>
+    <enablessl>true</enablessl>
+    
+    <truststore>/adaguc/security/truststore.ts</truststore>
+    <trustrootscadirectory>/root/.globus/certificates/</trustrootscadirectory>
+    <truststorepassword>changeit</truststorepassword>
+
+    <keystore>/adaguc/security/keystore.jks</keystore>
+    <keystorepassword>password</keystorepassword>
+    <keystoretype>JKS</keystoretype>
+    <keyalias>tomcat</keyalias>
+    
+  </security>
   <adaguc-server>
     <adagucexecutable>/adaguc/adaguc-server-master/bin/adagucserver</adagucexecutable>
     <export>ADAGUC_PATH=/adaguc/adaguc-server-master/</export>

@@ -6,7 +6,6 @@
 	<groupId>nl.knmi.adagucservices</groupId>
 	<artifactId>adaguc-services</artifactId>
 	<version>1.1.4</version>
-	<packaging>war</packaging>
 
 	<name>adaguc-services</name>
 	<description>Backend for adaguc-server and adaguc-viewer</description>
@@ -194,7 +193,7 @@
 
 		<repository>
 			<id>artifacts.unidata.ucar.edu</id>
-			<url>https://artifacts.unidata.ucar.edu/content/repositories/unidata-releases/</url>
+			<url>https://repo.boundlessgeo.com/main/</url>
 		</repository>
 
 

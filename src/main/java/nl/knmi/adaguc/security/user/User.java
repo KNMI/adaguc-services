@@ -2,16 +2,15 @@ package nl.knmi.adaguc.security.user;
 
 import java.io.IOException;
 import java.security.PrivateKey;
-import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 
 import lombok.Getter;
-import nl.knmi.adaguc.tools.ElementNotFoundException;
 import nl.knmi.adaguc.config.MainServicesConfigurator;
 import nl.knmi.adaguc.security.PemX509Tools;
 import nl.knmi.adaguc.security.PemX509Tools.X509UserCertAndKey;
 import nl.knmi.adaguc.security.SecurityConfigurator;
 import nl.knmi.adaguc.tools.Debug;
+import nl.knmi.adaguc.tools.ElementNotFoundException;
 import nl.knmi.adaguc.tools.Tools;
 
 public class User {
