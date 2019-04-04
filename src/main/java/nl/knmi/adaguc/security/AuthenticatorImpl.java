@@ -1,34 +1,15 @@
 package nl.knmi.adaguc.security;
 
 import java.io.IOException;
-import java.security.InvalidKeyException;
-import java.security.KeyManagementException;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.SignatureException;
-import java.security.UnrecoverableKeyException;
-import java.security.cert.CertificateException;
-import java.util.Enumeration;
-import java.util.List;
-import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.util.EntityUtils;
-import org.ietf.jgss.GSSException;
 import org.springframework.security.core.AuthenticationException;
 
 import nl.knmi.adaguc.security.PemX509Tools.X509Info;
-import nl.knmi.adaguc.security.PemX509Tools.X509UserCertAndKey;
 import nl.knmi.adaguc.security.token.Token;
 import nl.knmi.adaguc.security.token.TokenManager;
-import nl.knmi.adaguc.security.user.User;
-import nl.knmi.adaguc.security.user.UserManager;
 import nl.knmi.adaguc.tools.Debug;
 import nl.knmi.adaguc.tools.ElementNotFoundException;
 import nl.knmi.adaguc.tools.HTTPTools;
@@ -49,6 +30,17 @@ public class AuthenticatorImpl implements AuthenticatorInterface{
 		if (request == null ) {
 			return;
 		}
+		
+		try{
+			String userName = SecurityConfigurator.getUser();
+			if (userName != null) {
+				request.getSession().setAttribute("user_identifier",userName);
+				request.getSession().setAttribute("services_access_token",userName);
+				request.getSession().setAttribute("emailaddress",userName);
+			}
+		}catch(Exception e){
+		}
+		
 		/* Get user from session */
 		String sessionId = null;
 		HttpSession session = request.getSession();
@@ -57,12 +49,17 @@ public class AuthenticatorImpl implements AuthenticatorInterface{
 		}
 		if (sessionId!=null) {
 			x509 = new PemX509Tools().new X509Info(sessionId, sessionId);
-			Debug.println("Got userid from session");
 			return;
 		}
 
 		/* Get user from header (Set by SSL client cert verification in NGINX)*/
 		try {
+//			Enumeration headerNames = request.getHeaderNames();
+//			while(headerNames.hasMoreElements()) {
+//			  String headerName = (String)headerNames.nextElement();
+//			  Debug.println("" + headerName);
+//			  Debug.println("" + request.getHeader(headerName));
+//			}
 			String userHeader = SecurityConfigurator.getUserHeader();
 			if (userHeader != null) {
 				String userIdFromHeader = request.getHeader(userHeader);
@@ -74,6 +71,7 @@ public class AuthenticatorImpl implements AuthenticatorInterface{
 				}
 			}
 		} catch (ElementNotFoundException e) {
+		} catch (IOException e) {
 		}
 
 		x509 = new PemX509Tools().getUserIdFromCertificate(request);

@@ -1,6 +1,11 @@
 package nl.knmi.adaguc.services.servicehealth;
 
 import nl.knmi.adaguc.tools.ElementNotFoundException;
+
+import java.io.IOException;
+
+import org.springframework.beans.factory.annotation.Autowired;
+
 import nl.knmi.adaguc.config.ConfigurationReader;
 import nl.knmi.adaguc.tools.MyXMLParser.XMLElement;
 
@@ -16,8 +21,9 @@ public class ServiceHealthConfigurator implements nl.knmi.adaguc.config.Configur
 	private static boolean enabled=false;
 	// The directory that contains a file per service with the return code of updatedb
 	private static String serviceHealthDirectory = null;
-	static ConfigurationReader configurationReader = new ConfigurationReader ();
-	public void doConfig(XMLElement  configReader){
+	@Autowired
+	static ConfigurationReader configurationReader;
+	public static void doConfig(XMLElement  configReader){
 		if(configReader.getNodeValue("adaguc-services.servicehealth") == null){
 			return;
 		}
@@ -33,13 +39,13 @@ public class ServiceHealthConfigurator implements nl.knmi.adaguc.config.Configur
 	}
 
 
-	public static String getServiceHealthDirectory() throws ElementNotFoundException {
-		configurationReader.readConfig();
+	public static String getServiceHealthDirectory() throws ElementNotFoundException, IOException {
+		ConfigurationReader.readConfig();
 		return serviceHealthDirectory;
 	}
 
-	public static boolean getEnabled() throws ElementNotFoundException {
-		configurationReader.readConfig();
+	public static boolean getEnabled() throws ElementNotFoundException, IOException {
+		ConfigurationReader.readConfig();
 		return enabled;
 	}
 }

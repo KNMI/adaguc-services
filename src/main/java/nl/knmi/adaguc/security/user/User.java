@@ -1,15 +1,16 @@
 package nl.knmi.adaguc.security.user;
 
 import java.io.IOException;
-
+import java.security.PrivateKey;
+import java.security.cert.X509Certificate;
 
 import lombok.Getter;
-import nl.knmi.adaguc.tools.ElementNotFoundException;
 import nl.knmi.adaguc.config.MainServicesConfigurator;
 import nl.knmi.adaguc.security.PemX509Tools;
 import nl.knmi.adaguc.security.PemX509Tools.X509UserCertAndKey;
 import nl.knmi.adaguc.security.SecurityConfigurator;
 import nl.knmi.adaguc.tools.Debug;
+import nl.knmi.adaguc.tools.ElementNotFoundException;
 import nl.knmi.adaguc.tools.Tools;
 
 public class User {
@@ -49,6 +50,14 @@ public class User {
 		Tools.mksubdirs(homeDir);
 		Tools.mksubdirs(dataDir);
 		Debug.println("User Home Dir: "+homeDir);
+		try {
+			X509Certificate cert = PemX509Tools.readCertificateFromPEMFile( this.homeDir + "/cert.crt");
+			PrivateKey key = PemX509Tools.readPrivateKeyFromPEM(this.homeDir + "/cert.key");
+			this.userCert = (new PemX509Tools()).new X509UserCertAndKey(cert, key);
+			Debug.println("### Loaded certificates from disk ### for " + this.userId);
+		} catch (Exception e) {
+			Debug.errprintln("### No certificates loaded found on disk for " + this.userId + " ###");
+		}
 	}
 
 	/**
@@ -75,7 +84,7 @@ public class User {
 	}
 	public void setCertificate(X509UserCertAndKey userCert) throws IOException, ElementNotFoundException {
 		/* TODO could optinally write cert to user basket */
-
+		Debug.println("### setCertificate ### for " + this.userId);
 		
 		PemX509Tools.writeCertificateToPemFile(userCert.getUserSlCertificate(), this.homeDir + "/cert.crt");
 		PemX509Tools.writePrivateKeyToPemFile(userCert.getPrivateKey(), this.homeDir + "/cert.key");

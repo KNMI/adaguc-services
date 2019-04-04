@@ -9,15 +9,10 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.json.JSONObject;
 import org.springframework.beans.factory.DisposableBean;
-import org.springframework.context.annotation.Bean;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 
 import nl.knmi.adaguc.config.MainServicesConfigurator;
 import nl.knmi.adaguc.tools.Debug;
@@ -41,17 +36,6 @@ public class ESGFSearchRequestMapper implements DisposableBean {
 		Debug.println("Shutting down");
 		threadPool.shutdown();
 		esgfSearch = null;
-	}
-
-
-
-	@Bean
-	public MappingJackson2HttpMessageConverter mappingJackson2HttpMessageConverter() {
-		ObjectMapper mapper = new ObjectMapper();
-		mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, true);
-		MappingJackson2HttpMessageConverter converter = 
-				new MappingJackson2HttpMessageConverter(mapper);
-		return converter;
 	}
 
 
@@ -119,7 +103,7 @@ public class ESGFSearchRequestMapper implements DisposableBean {
 	
 
 
-	public static synchronized Search getESGFSearchInstance() throws ElementNotFoundException {
+	public static synchronized Search getESGFSearchInstance() throws ElementNotFoundException, IOException {
 		if(esgfSearch!=null)return esgfSearch;
 
 		Debug.println("Creating new ESGF search instance with endpoint "+ESGFSearchConfigurator.getEsgfSearchURL());

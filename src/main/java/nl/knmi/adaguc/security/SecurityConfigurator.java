@@ -1,10 +1,12 @@
 package nl.knmi.adaguc.security;
 
+import java.io.IOException;
 import java.util.Vector;
+
+import org.springframework.beans.factory.annotation.Autowired;
 
 import lombok.Synchronized;
 import nl.knmi.adaguc.config.ConfigurationReader;
-import nl.knmi.adaguc.services.oauth2.OAuthConfigurator.Oauth2Settings;
 import nl.knmi.adaguc.tools.Debug;
 import nl.knmi.adaguc.tools.ElementNotFoundException;
 import nl.knmi.adaguc.tools.MyXMLParser.XMLElement;
@@ -25,7 +27,8 @@ import nl.knmi.adaguc.tools.MyXMLParser.XMLElement;
 
 
 public class SecurityConfigurator implements nl.knmi.adaguc.config.ConfiguratorInterface {
-
+	@Autowired
+	static ConfigurationReader configurationReader;
 	//	private static boolean configDone = false;
 	//	
 	//	@Override 
@@ -43,19 +46,20 @@ public class SecurityConfigurator implements nl.knmi.adaguc.config.ConfiguratorI
 	private static String userHeader=null;	
 	private static String caCertificate = null;
 	private static String caPrivateKey = null;		
-
+	private static String enableSSL = null;
+	private static String user = null;
+	
 	public static class ComputeNode {
 		public String url = null;
 		public String name = null;
 	};
 
 	static Vector<ComputeNode> computeNodes = new Vector<ComputeNode>();
+	
 
-	static ConfigurationReader configurationReader = new ConfigurationReader ();
 
 	@Synchronized
-	@Override
-	public void doConfig(XMLElement  configReader){
+	public static void doConfig(XMLElement  configReader){
 		
 		if(configReader.getNodeValue ("adaguc-services.security")==null){
 			Debug.println("adaguc-services.security is not configured");
@@ -70,6 +74,8 @@ public class SecurityConfigurator implements nl.knmi.adaguc.config.ConfiguratorI
 		computeNodes.clear();
 		keyAlias=configReader.getNodeValue("adaguc-services.security.keyalias");
 		userHeader=configReader.getNodeValue("adaguc-services.security.userheader");
+		enableSSL=configReader.getNodeValue("adaguc-services.security.enablessl");
+		user=configReader.getNodeValue("adaguc-services.security.user");
 		
 		if (configReader.getNodeValue("adaguc-services.security.tokenapi")!=null){
 			caCertificate=configReader.getNodeValue("adaguc-services.security.tokenapi.cacertificate");
@@ -98,62 +104,67 @@ public class SecurityConfigurator implements nl.knmi.adaguc.config.ConfiguratorI
 				Debug.println("No remote instances configured");
 			}
 
-		} else {
-			Debug.println("tokenapi is not enabled");
-		}
+		} 
 
 	}
 
-	public static Vector<ComputeNode> getComputeNodes() throws ElementNotFoundException {
-		configurationReader.readConfig();
+	public static Vector<ComputeNode> getComputeNodes() throws ElementNotFoundException, IOException {
+		ConfigurationReader.readConfig();
 		return computeNodes;
 	}
-	public static String getCACertificate() throws ElementNotFoundException {
+	public static String getCACertificate() throws ElementNotFoundException, IOException {
 		Debug.println("getCACertificate");
-		configurationReader.readConfig();
+		ConfigurationReader.readConfig();
 		Debug.println("getCACertificate="+caCertificate);
 		return caCertificate;
 	}
-	public static String getCAPrivateKey() throws ElementNotFoundException {
-		configurationReader.readConfig();
+	public static String getCAPrivateKey() throws ElementNotFoundException, IOException {
+		ConfigurationReader.readConfig();
 		return caPrivateKey;
 	}
-	public static String getTrustStorePassword() throws ElementNotFoundException {
-		configurationReader.readConfig();
+	public static String getTrustStorePassword() throws ElementNotFoundException, IOException {
+		ConfigurationReader.readConfig();
 		return trustStorePassword;
 	}
-	public static String getTrustStore() throws ElementNotFoundException {
-		configurationReader.readConfig();
+	public static String getTrustStore() throws ElementNotFoundException, IOException {
+		ConfigurationReader.readConfig();
 		return trustStore;
 	}
-	public static String getTrustRootsCADirectory() throws ElementNotFoundException {
-		configurationReader.readConfig();
+	public static String getTrustRootsCADirectory() throws ElementNotFoundException, IOException {
+		ConfigurationReader.readConfig();
 		return trustRootsCADirectory;
 	}
 
-	public static Object getKeyStore() throws ElementNotFoundException {
-		configurationReader.readConfig();
+	public static Object getKeyStore() throws ElementNotFoundException, IOException {
+		ConfigurationReader.readConfig();
 		return keyStore;
 	}
 
-	public static Object getKeyStorePassword() throws ElementNotFoundException {
-		configurationReader.readConfig();
+	public static Object getKeyStorePassword() throws ElementNotFoundException, IOException {
+		ConfigurationReader.readConfig();
 		return keyStorePassword;
 	}
 
-	public static Object getKeyStoreType() throws ElementNotFoundException {
-		configurationReader.readConfig();
+	public static Object getKeyStoreType() throws ElementNotFoundException, IOException {
+		ConfigurationReader.readConfig();
 		return keyStoreType;
 	}
 
-	public static Object getKeyAlias() throws ElementNotFoundException {
-		configurationReader.readConfig();
+	public static Object getKeyAlias() throws ElementNotFoundException, IOException {
+		ConfigurationReader.readConfig();
 		return keyAlias;
 	}
 
-	public static String getUserHeader() throws ElementNotFoundException {
-		configurationReader.readConfig();
+	public static String getUserHeader() throws ElementNotFoundException, IOException {
+		ConfigurationReader.readConfig();
 		return userHeader;
+	}
+	public static String getEnableSSL() throws ElementNotFoundException, IOException {
+		ConfigurationReader.readConfig();
+		return enableSSL;
+	}
+	public static String getUser() throws ElementNotFoundException, IOException {
+		return user;
 	}
 }
 

@@ -1,6 +1,11 @@
 package nl.knmi.adaguc.services.adagucserver;
 
 import nl.knmi.adaguc.tools.ElementNotFoundException;
+
+import java.io.IOException;
+
+import org.springframework.beans.factory.annotation.Autowired;
+
 import nl.knmi.adaguc.config.ConfigurationReader;
 import nl.knmi.adaguc.tools.MyXMLParser.XMLElement;
 
@@ -27,23 +32,26 @@ import nl.knmi.adaguc.tools.MyXMLParser.XMLElement;
 
 public class ADAGUCConfigurator implements nl.knmi.adaguc.config.ConfiguratorInterface {
 	private static String ADAGUCExecutable="/usr/bin/adagucserver";
-	static ConfigurationReader configurationReader = new ConfigurationReader ();
+	
+	@Autowired
+	static ConfigurationReader configurationReader;
+	
 	private static String[] environmentVariables = {
 	};
 
-	public void doConfig(XMLElement  configReader){
+	public static void doConfig(XMLElement  configReader){
 		ADAGUCExecutable=configReader.getNodeValue("adaguc-services.adaguc-server.adagucexecutable");
 		environmentVariables = configReader.getNodeValues("adaguc-services.adaguc-server.export");
 	}
 
-	public static String getADAGUCExecutable() throws ElementNotFoundException {
-		configurationReader.readConfig();
+	public static String getADAGUCExecutable() throws ElementNotFoundException, IOException {
+		ConfigurationReader.readConfig();
 		return ADAGUCExecutable;
 	}
 
-	public static String[] getADAGUCEnvironment() throws ElementNotFoundException {
+	public static String[] getADAGUCEnvironment() throws ElementNotFoundException, IOException {
 		
-		configurationReader.readConfig();
+		ConfigurationReader.readConfig();
 		return environmentVariables;
 	}	
 }

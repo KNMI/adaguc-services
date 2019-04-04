@@ -25,6 +25,7 @@ import org.springframework.web.context.WebApplicationContext;
 
 import nl.knmi.adaguc.security.PemX509Tools;
 import nl.knmi.adaguc.security.PemX509Tools.X509Info;
+import nl.knmi.adaguc.security.token.TokenManager;
 import nl.knmi.adaguc.tools.Debug;
 
 
@@ -52,6 +53,22 @@ public class AuthenticatorImplTest {
 	public final ExpectedException exception = ExpectedException.none();
 
 
+	@Test
+	public void TestGetTokenFromPath() throws Exception{
+		TokenManager tk = new TokenManager();
+		String token = tk.getTokenFromPath("/test/bla/a02b717b-02d6-4db9-bddf-a1d3774fee87/bla/bla.nc");
+		Debug.println(token);
+		assertThat(token,is("a02b717b-02d6-4db9-bddf-a1d3774fee87"));
+		String tokenNope = tk.getTokenFromPath("/test/bla/np-a02b717b-02d6-4db9-bddf-a1d3774fee87.test/bla/bla.nc");
+		Debug.println(tokenNope);
+		assertThat(tokenNope,org.hamcrest.Matchers.isEmptyOrNullString());
+	}
+	
+//	@Test
+//	public void TestDAPDDS() throws Exception{
+//	
+//		TinyDapServer.handleOpenDapReqeuests("/home/c3smagic/Downloads/test-metric.nc","/","/",null,null);
+//	}
 
 	@Test
 	public void TestThis() throws Exception{

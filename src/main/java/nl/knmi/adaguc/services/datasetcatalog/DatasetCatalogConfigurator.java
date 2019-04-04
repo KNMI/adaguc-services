@@ -1,15 +1,20 @@
 package nl.knmi.adaguc.services.datasetcatalog;
 
 import nl.knmi.adaguc.tools.ElementNotFoundException;
+
+import java.io.IOException;
+
+import org.springframework.beans.factory.annotation.Autowired;
+
 import nl.knmi.adaguc.config.ConfigurationReader;
 import nl.knmi.adaguc.tools.MyXMLParser.XMLElement;
 
 public class DatasetCatalogConfigurator implements nl.knmi.adaguc.config.ConfiguratorInterface{
 	private static boolean enabled=false;
 	private static String catalogPath=null;
-	static ConfigurationReader configurationReader = new ConfigurationReader ();
-	@Override
-	public void doConfig(XMLElement configReader) throws ElementNotFoundException {
+	@Autowired
+	static ConfigurationReader configurationReader;
+	public static void doConfig(XMLElement configReader) throws ElementNotFoundException {
 		if(configReader.getNodeValue("adaguc-services.basket") == null){
 			return;
 		}
@@ -26,13 +31,13 @@ public class DatasetCatalogConfigurator implements nl.knmi.adaguc.config.Configu
 		}
 	}
 	
-	public static boolean getEnabled() throws ElementNotFoundException {
-		configurationReader.readConfig();
+	public static boolean getEnabled() throws ElementNotFoundException , IOException{
+		ConfigurationReader.readConfig();
 		return enabled;
 	}
 	
-	public static String getCatalogPath() throws ElementNotFoundException {
-		configurationReader.readConfig();
+	public static String getCatalogPath() throws ElementNotFoundException, IOException {
+		ConfigurationReader.readConfig();
 		return catalogPath;
 	}
 }

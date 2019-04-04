@@ -61,7 +61,7 @@ public class UserManager {
 		return getUser(authenticator.getClientId());
 	}
 	
-	public static String makeGetRequestWithUserFromServletRequest (HttpServletRequest servletRequest, String requestStr) throws ElementNotFoundException, AuthenticationException, IOException, KeyManagementException, UnrecoverableKeyException, InvalidKeyException, NoSuchAlgorithmException, KeyStoreException, CertificateException, NoSuchProviderException, SignatureException, GSSException {
+	public static String _makeGetRequestWithUserFromServletRequest (HttpServletRequest servletRequest, String requestStr) throws ElementNotFoundException, AuthenticationException, IOException, KeyManagementException, UnrecoverableKeyException, InvalidKeyException, NoSuchAlgorithmException, KeyStoreException, CertificateException, NoSuchProviderException, SignatureException, GSSException {
 		String ts = SecurityConfigurator.getTrustStore();
 
 		char [] tsPass = SecurityConfigurator.getTrustStorePassword().toCharArray();

@@ -1,6 +1,11 @@
 package nl.knmi.adaguc.services.autowms;
 
 import nl.knmi.adaguc.tools.ElementNotFoundException;
+
+import java.io.IOException;
+
+import org.springframework.beans.factory.annotation.Autowired;
+
 import nl.knmi.adaguc.config.ConfigurationReader;
 import nl.knmi.adaguc.tools.MyXMLParser.XMLElement;
 
@@ -16,8 +21,9 @@ public class AutoWMSConfigurator implements nl.knmi.adaguc.config.ConfiguratorIn
 	private static boolean enabled=false;
 	private static String adagucAutoWMS = null;
 	private static String adagucDataset = null;
-	static ConfigurationReader configurationReader = new ConfigurationReader ();
-	public void doConfig(XMLElement  configReader){
+	@Autowired
+	static ConfigurationReader configurationReader;
+	public static void doConfig(XMLElement  configReader){
 		if(configReader.getNodeValue("adaguc-services.autowms") == null){
 			return;
 		}
@@ -34,17 +40,17 @@ public class AutoWMSConfigurator implements nl.knmi.adaguc.config.ConfiguratorIn
 	}
 
 
-	public static String getAdagucDataset() throws ElementNotFoundException {
-		configurationReader.readConfig();
+	public static String getAdagucDataset() throws ElementNotFoundException, IOException {
+		ConfigurationReader.readConfig();
 		return adagucDataset;
 	}
-	public static String getAdagucAutoWMS() throws ElementNotFoundException {
-		configurationReader.readConfig();
+	public static String getAdagucAutoWMS() throws ElementNotFoundException, IOException {
+		ConfigurationReader.readConfig();
 		return adagucAutoWMS;
 	}
 
-	public static boolean getEnabled() throws ElementNotFoundException {
-		configurationReader.readConfig();
+	public static boolean getEnabled() throws ElementNotFoundException, IOException {
+		ConfigurationReader.readConfig();
 		return enabled;
 	}
 }

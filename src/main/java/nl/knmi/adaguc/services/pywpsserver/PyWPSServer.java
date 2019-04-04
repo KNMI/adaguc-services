@@ -192,32 +192,33 @@ public class PyWPSServer extends HttpServlet{
 			try {
 				status=rootElement.get("wps:ExecuteResponse").get("wps:Status").get("wps:ProcessAccepted").getValue();
 				wpsStatus=WPSStatus.PROCESSACCEPTED;
-			} catch (Exception e) {Debug.println("Not ACCEPTED");};
+			} catch (Exception e) {};
 			if (wpsStatus==null) {
 				try {
 					status=rootElement.get("wps:ExecuteResponse").get("wps:Status").get("wps:ProcessStarted").getValue();
 					wpsStatus=WPSStatus.PROCESSSTARTED;
-				} catch (Exception e) {Debug.println("Not STARTED");} 
+				} catch (Exception e) {} 
 			}
 			if (wpsStatus==null) {
 				try {
 					status=rootElement.get("wps:ExecuteResponse").get("wps:Status").get("wps:ProcessFailed").getValue();
 					wpsStatus=WPSStatus.PROCESSFAILED;
-				} catch (Exception e) {Debug.println("Not FAILED");} 
+				} catch (Exception e) {} 
 			}
 			if (wpsStatus==null) {
 				try {
 					status=rootElement.get("wps:ExecuteResponse").get("wps:Status").get("wps:ProcessPaused").getValue();
 					wpsStatus=WPSStatus.PROCESSPAUSED;
-				} catch (Exception e) {Debug.println("Not PAUSED");} 
+				} catch (Exception e) {} 
 			}
 			if (wpsStatus==null) {
 				try {
 					status=rootElement.get("wps:ExecuteResponse").get("wps:Status").get("wps:ProcessSucceeded").getValue();
 					wpsStatus=WPSStatus.PROCESSSUCCEEDED;
 
-				} catch (Exception e) {Debug.println("Not SUCCEEDED");} 
+				} catch (Exception e) {} 
 			}
+			Debug.println("wpsStatus:" + wpsStatus);
 
 			creationTime = rootElement.get("wps:ExecuteResponse").get("wps:Status").getAttrValue("creationTime");
 			String procId = rootElement.get("wps:ExecuteResponse").get("wps:Process").get("ows:Identifier").getValue();
@@ -243,10 +244,10 @@ public class PyWPSServer extends HttpServlet{
 				String dataInputs=HTTPTools.getKVPItem(queryString, "DataInputs");
 				String responseForm=HTTPTools.getKVPItem(queryString, "ResponseForm");
 				if (dataInputs!=null) {
-					dataInputs=dataInputs.substring(1,dataInputs.length()-1);
+					dataInputs=dataInputs.substring(0,dataInputs.length());
 				}
 				if (responseForm!=null) {
-					responseForm=responseForm.substring(1,responseForm.length()-1);
+					responseForm=responseForm.substring(0,responseForm.length());
 				}
 				Debug.println("DataInputs: "+dataInputs+" , ResponseForm:"+responseForm);
 				XMLElement wpsElement=new XMLElement();
@@ -293,7 +294,7 @@ public class PyWPSServer extends HttpServlet{
 
 			//  		  Tools.mksubdirs(userDataDir+"/WPS_Settings/");
 			String statusLocation=data.getString("statuslocation");
-			String baseName = statusLocation.substring(statusLocation.lastIndexOf("/")).replace(".xml", ".wpssettings");
+			String baseName = statusLocation.substring(statusLocation.lastIndexOf("/")).replace(".xml", ".execute.json");
 			String wpsSettingsFile = userDataDir+"/WPS_Settings/";
 			Tools.mksubdirs(wpsSettingsFile);
 			wpsSettingsFile+=baseName;
