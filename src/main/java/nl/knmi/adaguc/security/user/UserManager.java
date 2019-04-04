@@ -77,7 +77,7 @@ public class UserManager {
 				userCertificate = user.getCertificate();
 				if (userCertificate == null) {
 					try {
-						OAuth2Handler._makeUserCertificate(user.userId);
+						OAuth2Handler.makeUserCertificate(user.userId);
 					} catch (OperatorCreationException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();

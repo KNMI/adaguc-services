@@ -496,7 +496,7 @@ public class OAuth2Handler {
 						setSessionInfo(request, userInfo);
 
 						try {
-							_makeUserCertificate(User.makePosixUserId(userInfo.user_identifier));
+							makeUserCertificate(User.makePosixUserId(userInfo.user_identifier));
 							Token token = TokenManager.registerToken(UserManager.getUser(userInfo.user_identifier));
 							ObjectMapper om = new ObjectMapper();
 							String result = om.writeValueAsString(token);
@@ -631,7 +631,7 @@ public class OAuth2Handler {
 
 	};
 
-	public static int _makeUserCertificate(String clientId) throws CertificateException, IOException,
+	public static int makeUserCertificate(String clientId) throws CertificateException, IOException,
 	InvalidKeyException, NoSuchAlgorithmException, OperatorCreationException, KeyManagementException,
 	UnrecoverableKeyException, KeyStoreException, NoSuchProviderException, SignatureException, GSSException,
 	ElementNotFoundException, CertificateVerificationException, JSONException {
