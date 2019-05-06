@@ -29,6 +29,8 @@ public class HttpServer {
 			if (portAlreadyUsed == false) {
 				Connector connector = new Connector(TomcatServletWebServerFactory.DEFAULT_PROTOCOL);
 				connector.setPort(httpPort);
+				connector.setAttribute("relaxedPathChars", "<>[\\]^`{|}");
+		        connector.setAttribute("relaxedQueryChars", "<>[\\]^`{|}");
 				tomcat.addAdditionalTomcatConnectors(connector);
 			}
 		}
