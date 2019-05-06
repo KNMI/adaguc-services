@@ -2,6 +2,8 @@ package nl.knmi.adaguc.services.adagucserver;
 
 import nl.knmi.adaguc.tools.ElementNotFoundException;
 
+import java.io.IOException;
+
 import org.springframework.beans.factory.annotation.Autowired;
 
 import nl.knmi.adaguc.config.ConfigurationReader;
@@ -42,12 +44,12 @@ public class ADAGUCConfigurator implements nl.knmi.adaguc.config.ConfiguratorInt
 		environmentVariables = configReader.getNodeValues("adaguc-services.adaguc-server.export");
 	}
 
-	public static String getADAGUCExecutable() throws ElementNotFoundException {
+	public static String getADAGUCExecutable() throws ElementNotFoundException, IOException {
 		ConfigurationReader.readConfig();
 		return ADAGUCExecutable;
 	}
 
-	public static String[] getADAGUCEnvironment() throws ElementNotFoundException {
+	public static String[] getADAGUCEnvironment() throws ElementNotFoundException, IOException {
 		
 		ConfigurationReader.readConfig();
 		return environmentVariables;

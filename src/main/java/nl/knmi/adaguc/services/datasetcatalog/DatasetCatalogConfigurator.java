@@ -2,6 +2,8 @@ package nl.knmi.adaguc.services.datasetcatalog;
 
 import nl.knmi.adaguc.tools.ElementNotFoundException;
 
+import java.io.IOException;
+
 import org.springframework.beans.factory.annotation.Autowired;
 
 import nl.knmi.adaguc.config.ConfigurationReader;
@@ -29,12 +31,12 @@ public class DatasetCatalogConfigurator implements nl.knmi.adaguc.config.Configu
 		}
 	}
 	
-	public static boolean getEnabled() throws ElementNotFoundException {
+	public static boolean getEnabled() throws ElementNotFoundException , IOException{
 		ConfigurationReader.readConfig();
 		return enabled;
 	}
 	
-	public static String getCatalogPath() throws ElementNotFoundException {
+	public static String getCatalogPath() throws ElementNotFoundException, IOException {
 		ConfigurationReader.readConfig();
 		return catalogPath;
 	}

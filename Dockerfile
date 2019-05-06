@@ -27,9 +27,12 @@ RUN yum update -y && yum install -y \
     gdal-devel \
     tomcat \
     maven \
-    openssl \
-    netcdf4-python \
-    python-six
+    openssl
+    
+# Install newer numpy
+RUN curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
+RUN python get-pip.py
+RUN pip install numpy netcdf4 six lxml    
     
 RUN mkdir /adaguc
 
@@ -38,7 +41,7 @@ WORKDIR /adaguc/adaguc-services
 COPY /src/ /adaguc/adaguc-services/src/
 COPY pom.xml /adaguc/adaguc-services/pom.xml
 RUN mvn package
-RUN cp /adaguc/adaguc-services/target/adaguc-services-*.war /adaguc/adaguc-services.war
+RUN cp /adaguc/adaguc-services/target/adaguc-services-*.jar /adaguc/adaguc-services.jar
 
 # Install adaguc-server from github
 WORKDIR /adaguc
@@ -70,7 +73,6 @@ COPY ./Docker/start.sh /adaguc/
 COPY ./Docker/adaguc-server-logrotate /etc/logrotate.d/adaguc
 COPY ./Docker/adaguc-server-*.sh /adaguc/
 COPY ./Docker/baselayers.xml /data/adaguc-datasets-internal/baselayers.xml
-COPY ./Docker/tomcat-server.xml /etc/tomcat/server.xml
 RUN  chmod +x /adaguc/adaguc-server-*.sh && chmod +x /adaguc/start.sh
 
 # Set adaguc-services configuration file

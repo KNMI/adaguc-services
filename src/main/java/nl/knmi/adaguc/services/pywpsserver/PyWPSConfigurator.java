@@ -1,12 +1,12 @@
 package nl.knmi.adaguc.services.pywpsserver;
 
-import nl.knmi.adaguc.tools.Debug;
-import nl.knmi.adaguc.tools.ElementNotFoundException;
+import java.io.IOException;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
 import nl.knmi.adaguc.config.ConfigurationReader;
 import nl.knmi.adaguc.config.ConfiguratorInterface;
+import nl.knmi.adaguc.tools.ElementNotFoundException;
 import nl.knmi.adaguc.tools.MyXMLParser.XMLElement;
 
 /**
@@ -53,37 +53,37 @@ public class PyWPSConfigurator implements ConfiguratorInterface {
 		environmentVariables = configReader.getNodeValues("adaguc-services.pywps-server.export");
 	}
 
-	public static String getPyWPSExecutable() throws ElementNotFoundException  {
+	public static String getPyWPSExecutable() throws ElementNotFoundException, IOException  {
 		ConfigurationReader.readConfig();
 		return PyWPSExecutable;
 	}
 	
-	public static String getTempDir() throws ElementNotFoundException  {
+	public static String getTempDir() throws ElementNotFoundException, IOException  {
 		ConfigurationReader.readConfig();
 		return TempDir;
 	}
 	
-	public static String getPyWPSConfigTemplate() throws ElementNotFoundException {
+	public static String getPyWPSConfigTemplate() throws ElementNotFoundException, IOException {
 		ConfigurationReader.readConfig();
 		return PyWPSConfigTemplate;
 	}
 
-	public static String[] getPyWPSEnvironment() throws ElementNotFoundException {
+	public static String[] getPyWPSEnvironment() throws ElementNotFoundException, IOException {
 		ConfigurationReader.readConfig();
 		return environmentVariables;
 	}
 
-	public static String getPyWPSOutputDir() throws ElementNotFoundException {
+	public static String getPyWPSOutputDir() throws ElementNotFoundException, IOException {
 		ConfigurationReader.readConfig();
 		return PyWPSOutputDir;
 	}
 
-	public static String getPyWPSProcessesDir() throws ElementNotFoundException {
+	public static String getPyWPSProcessesDir() throws ElementNotFoundException, IOException {
 		ConfigurationReader.readConfig();
 		return PyWPSProcessesDir;
 	}
 
-	public static String getPyWPSConfig() throws ElementNotFoundException {
+	public static String getPyWPSConfig() throws ElementNotFoundException, IOException {
 		String pyWPSConfigTemplate = PyWPSConfigurator.getPyWPSConfigTemplate();
 		return pyWPSConfigTemplate + "adaguc-services-pywps-config.cfg";
 	}	

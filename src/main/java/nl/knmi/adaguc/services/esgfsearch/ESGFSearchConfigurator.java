@@ -1,5 +1,7 @@
 package nl.knmi.adaguc.services.esgfsearch;
 
+import java.io.IOException;
+
 import org.springframework.beans.factory.annotation.Autowired;
 
 import lombok.Synchronized;
@@ -38,15 +40,15 @@ public class ESGFSearchConfigurator implements nl.knmi.adaguc.config.Configurato
 		enabled="true".equals(configReader.getNodeValue("adaguc-services.esgfsearch.enabled"));
 		cacheLocation=configReader.getNodeValue("adaguc-services.esgfsearch.cachelocation");
 	}
-	public static String getEsgfSearchURL() throws ElementNotFoundException {
+	public static String getEsgfSearchURL() throws ElementNotFoundException, IOException {
 		ConfigurationReader.readConfig();
 		return esgfSearchURL;
 	}
-	public static boolean getEnabled() throws ElementNotFoundException {
+	public static boolean getEnabled() throws ElementNotFoundException, IOException {
 		ConfigurationReader.readConfig();
 		return enabled;
 	}
-	public static String getCacheLocation() throws ElementNotFoundException {
+	public static String getCacheLocation() throws ElementNotFoundException, IOException {
 		ConfigurationReader.readConfig();
 		return cacheLocation;
 	}

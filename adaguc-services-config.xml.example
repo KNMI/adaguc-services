@@ -9,6 +9,7 @@
 
   <server>
     <port>8090</port>
+    <contextpath>/adaguc-services</contextpath>
   </server>
 
   <security>
@@ -49,9 +50,28 @@
     <export>USE_FONTCONFIG=False</export>
   </pywps-server>
 
+  <oauth2>
+    <provider name="google">    
+      <!-- New application can be created at https://congetEnabledsole.developers.google.com/apis/credentials -->
+      <authloc>https://accounts.google.com/o/oauth2/auth</authloc>                                                                                                                                                                                         
+      <tokenloc>https://accounts.google.com/o/oauth2/token</tokenloc>                                                                                                                                                                                      
+      <clientid>***</clientid>                                                                                                                                                        
+      <clientsecret>***</clientsecret>                                                                                                                                                                                                
+      <scope>email</scope>                                                                                                                                                                                                                                 
+      <logo>images/google.png</logo>                                                                                                                                                                                                         
+      <description>Sign in with Google</description>    
+    </provider>                                                                                                                                                                                                                                            
+  </oauth2> 
+  
   <basket>
     <enabled>true</enabled>
   </basket>
+  
+  <autowms>
+    <enabled>true</enabled>
+    <autowmspath>/data/adaguc-autowms/</autowmspath>
+    <datasetpath>/data/adaguc-datasets/</datasetpath>
+  </autowms>
   
   <joblist>
     <enabled>true</enabled>
@@ -62,5 +82,15 @@
     <catalogpath>{ENV.ADAGUCSERVICES}/data/adaguc-services-base/catalog</catalogpath>
   </datasetcatalog>
   
+  <servicehealth>
+    <enabled>true</enabled>
+    <servicehealthpath>/data/adaguc-servicehealth/</servicehealthpath>
+  </servicehealth>
+  
+  <esgfsearch>
+    <enabled>true</enabled>
+    <cachelocation>/tmp/esgfsearch</cachelocation>
+    <searchurl>https://esg-dn1.nsc.liu.se/esg-search/search?</searchurl>
+  </esgfsearch>
   
 </adaguc-services>

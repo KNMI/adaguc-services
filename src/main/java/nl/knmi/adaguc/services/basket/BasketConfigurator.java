@@ -2,6 +2,8 @@ package nl.knmi.adaguc.services.basket;
 
 import nl.knmi.adaguc.tools.ElementNotFoundException;
 
+import java.io.IOException;
+
 import org.springframework.beans.factory.annotation.Autowired;
 
 import nl.knmi.adaguc.config.ConfigurationReader;
@@ -24,7 +26,7 @@ public class BasketConfigurator implements nl.knmi.adaguc.config.ConfiguratorInt
 		}
 	}
 	
-	public static boolean getEnabled() throws ElementNotFoundException {
+	public static boolean getEnabled() throws ElementNotFoundException, IOException {
 		ConfigurationReader.readConfig();
 		return enabled;
 	}

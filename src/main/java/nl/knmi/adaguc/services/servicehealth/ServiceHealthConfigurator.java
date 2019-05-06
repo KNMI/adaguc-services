@@ -2,6 +2,8 @@ package nl.knmi.adaguc.services.servicehealth;
 
 import nl.knmi.adaguc.tools.ElementNotFoundException;
 
+import java.io.IOException;
+
 import org.springframework.beans.factory.annotation.Autowired;
 
 import nl.knmi.adaguc.config.ConfigurationReader;
@@ -21,7 +23,7 @@ public class ServiceHealthConfigurator implements nl.knmi.adaguc.config.Configur
 	private static String serviceHealthDirectory = null;
 	@Autowired
 	static ConfigurationReader configurationReader;
-	public void doConfig(XMLElement  configReader){
+	public static void doConfig(XMLElement  configReader){
 		if(configReader.getNodeValue("adaguc-services.servicehealth") == null){
 			return;
 		}
@@ -37,12 +39,12 @@ public class ServiceHealthConfigurator implements nl.knmi.adaguc.config.Configur
 	}
 
 
-	public static String getServiceHealthDirectory() throws ElementNotFoundException {
+	public static String getServiceHealthDirectory() throws ElementNotFoundException, IOException {
 		ConfigurationReader.readConfig();
 		return serviceHealthDirectory;
 	}
 
-	public static boolean getEnabled() throws ElementNotFoundException {
+	public static boolean getEnabled() throws ElementNotFoundException, IOException {
 		ConfigurationReader.readConfig();
 		return enabled;
 	}

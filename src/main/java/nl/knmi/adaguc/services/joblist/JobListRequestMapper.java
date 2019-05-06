@@ -32,10 +32,8 @@ import nl.knmi.adaguc.tools.Debug;
 import nl.knmi.adaguc.tools.ElementNotFoundException;
 import nl.knmi.adaguc.tools.HTTPTools;
 import nl.knmi.adaguc.tools.HTTPTools.InvalidHTTPKeyValueTokensException;
-import nl.knmi.adaguc.tools.MyXMLParser.Options;
 import nl.knmi.adaguc.tools.InvalidTokenException;
 import nl.knmi.adaguc.tools.JSONResponse;
-import nl.knmi.adaguc.tools.MyXMLParser;
 import nl.knmi.adaguc.tools.Tools;
 
 @SuppressWarnings("deprecation")

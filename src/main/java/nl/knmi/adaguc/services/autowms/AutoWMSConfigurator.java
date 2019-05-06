@@ -2,6 +2,8 @@ package nl.knmi.adaguc.services.autowms;
 
 import nl.knmi.adaguc.tools.ElementNotFoundException;
 
+import java.io.IOException;
+
 import org.springframework.beans.factory.annotation.Autowired;
 
 import nl.knmi.adaguc.config.ConfigurationReader;
@@ -38,16 +40,16 @@ public class AutoWMSConfigurator implements nl.knmi.adaguc.config.ConfiguratorIn
 	}
 
 
-	public static String getAdagucDataset() throws ElementNotFoundException {
+	public static String getAdagucDataset() throws ElementNotFoundException, IOException {
 		ConfigurationReader.readConfig();
 		return adagucDataset;
 	}
-	public static String getAdagucAutoWMS() throws ElementNotFoundException {
+	public static String getAdagucAutoWMS() throws ElementNotFoundException, IOException {
 		ConfigurationReader.readConfig();
 		return adagucAutoWMS;
 	}
 
-	public static boolean getEnabled() throws ElementNotFoundException {
+	public static boolean getEnabled() throws ElementNotFoundException, IOException {
 		ConfigurationReader.readConfig();
 		return enabled;
 	}

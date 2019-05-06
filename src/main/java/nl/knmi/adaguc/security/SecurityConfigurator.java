@@ -1,5 +1,6 @@
 package nl.knmi.adaguc.security;
 
+import java.io.IOException;
 import java.util.Vector;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -107,62 +108,62 @@ public class SecurityConfigurator implements nl.knmi.adaguc.config.ConfiguratorI
 
 	}
 
-	public static Vector<ComputeNode> getComputeNodes() throws ElementNotFoundException {
+	public static Vector<ComputeNode> getComputeNodes() throws ElementNotFoundException, IOException {
 		ConfigurationReader.readConfig();
 		return computeNodes;
 	}
-	public static String getCACertificate() throws ElementNotFoundException {
+	public static String getCACertificate() throws ElementNotFoundException, IOException {
 		Debug.println("getCACertificate");
 		ConfigurationReader.readConfig();
 		Debug.println("getCACertificate="+caCertificate);
 		return caCertificate;
 	}
-	public static String getCAPrivateKey() throws ElementNotFoundException {
+	public static String getCAPrivateKey() throws ElementNotFoundException, IOException {
 		ConfigurationReader.readConfig();
 		return caPrivateKey;
 	}
-	public static String getTrustStorePassword() throws ElementNotFoundException {
+	public static String getTrustStorePassword() throws ElementNotFoundException, IOException {
 		ConfigurationReader.readConfig();
 		return trustStorePassword;
 	}
-	public static String getTrustStore() throws ElementNotFoundException {
+	public static String getTrustStore() throws ElementNotFoundException, IOException {
 		ConfigurationReader.readConfig();
 		return trustStore;
 	}
-	public static String getTrustRootsCADirectory() throws ElementNotFoundException {
+	public static String getTrustRootsCADirectory() throws ElementNotFoundException, IOException {
 		ConfigurationReader.readConfig();
 		return trustRootsCADirectory;
 	}
 
-	public static Object getKeyStore() throws ElementNotFoundException {
+	public static Object getKeyStore() throws ElementNotFoundException, IOException {
 		ConfigurationReader.readConfig();
 		return keyStore;
 	}
 
-	public static Object getKeyStorePassword() throws ElementNotFoundException {
+	public static Object getKeyStorePassword() throws ElementNotFoundException, IOException {
 		ConfigurationReader.readConfig();
 		return keyStorePassword;
 	}
 
-	public static Object getKeyStoreType() throws ElementNotFoundException {
+	public static Object getKeyStoreType() throws ElementNotFoundException, IOException {
 		ConfigurationReader.readConfig();
 		return keyStoreType;
 	}
 
-	public static Object getKeyAlias() throws ElementNotFoundException {
+	public static Object getKeyAlias() throws ElementNotFoundException, IOException {
 		ConfigurationReader.readConfig();
 		return keyAlias;
 	}
 
-	public static String getUserHeader() throws ElementNotFoundException {
+	public static String getUserHeader() throws ElementNotFoundException, IOException {
 		ConfigurationReader.readConfig();
 		return userHeader;
 	}
-	public static String getEnableSSL() throws ElementNotFoundException {
+	public static String getEnableSSL() throws ElementNotFoundException, IOException {
 		ConfigurationReader.readConfig();
 		return enableSSL;
 	}
-	public static String getUser() throws ElementNotFoundException {
+	public static String getUser() throws ElementNotFoundException, IOException {
 		return user;
 	}
 }

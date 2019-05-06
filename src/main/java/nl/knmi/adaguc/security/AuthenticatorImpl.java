@@ -71,6 +71,7 @@ public class AuthenticatorImpl implements AuthenticatorInterface{
 				}
 			}
 		} catch (ElementNotFoundException e) {
+		} catch (IOException e) {
 		}
 
 		x509 = new PemX509Tools().getUserIdFromCertificate(request);

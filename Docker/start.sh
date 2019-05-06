@@ -172,4 +172,4 @@ then
 fi  
 
 echo "Starting TOMCAT Server" && \
-java -jar /adaguc/adaguc-services.war
+java -jar /adaguc/adaguc-services.jar

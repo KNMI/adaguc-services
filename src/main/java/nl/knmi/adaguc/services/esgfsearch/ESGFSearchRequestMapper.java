@@ -103,7 +103,7 @@ public class ESGFSearchRequestMapper implements DisposableBean {
 	
 
 
-	public static synchronized Search getESGFSearchInstance() throws ElementNotFoundException {
+	public static synchronized Search getESGFSearchInstance() throws ElementNotFoundException, IOException {
 		if(esgfSearch!=null)return esgfSearch;
 
 		Debug.println("Creating new ESGF search instance with endpoint "+ESGFSearchConfigurator.getEsgfSearchURL());
