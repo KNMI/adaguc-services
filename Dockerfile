@@ -73,7 +73,6 @@ COPY ./Docker/start.sh /adaguc/
 COPY ./Docker/adaguc-server-logrotate /etc/logrotate.d/adaguc
 COPY ./Docker/adaguc-server-*.sh /adaguc/
 COPY ./Docker/baselayers.xml /data/adaguc-datasets-internal/baselayers.xml
-COPY ./Docker/tomcat-server.xml /etc/tomcat/server.xml
 RUN  chmod +x /adaguc/adaguc-server-*.sh && chmod +x /adaguc/start.sh
 
 # Set adaguc-services configuration file
