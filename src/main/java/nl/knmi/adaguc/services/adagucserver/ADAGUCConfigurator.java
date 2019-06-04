@@ -16,15 +16,14 @@ import nl.knmi.adaguc.tools.MyXMLParser.XMLElement;
 <?xml version="1.0" encoding="UTF-8"?>
 <adaguc-services>
   <adaguc-server>
+  	<timeout>1000</timeout>
+  	<maxinstances>4</maxinstances>
+  	<queuesize>4</queuesize>
     <adagucexecutable>/home/c3smagic/code/maartenplieger/adaguc-server/bin/adagucserver</adagucexecutable>
     <export>ADAGUC_PATH=/home/c3smagic/code/maartenplieger/adaguc-server/</export>
-    <export>ADAGUC_TMP=/tmp</export>
     <export>ADAGUC_CONFIG=/home/c3smagic/code/maartenplieger/adaguc-server/data/config/adaguc.autoresource.xml</export>
     <export>ADAGUC_DATARESTRICTION="FALSE"</export>
-    <export>ADAGUC_LOGFILE=/tmp/adaguc.autoresource.log</export>
-    <export>ADAGUC_ERRORFILE=/tmp/adaguc.autoresource.errlog</export>
     <export>ADAGUC_FONT=/home/c3smagic/code/maartenplieger/adaguc-server/data/fonts/FreeSans.ttf</export>
-    <export>ADAGUC_ONLINERESOURCE=http://adaguc-services/adagucserver?</export>
   </adaguc-server>
 </adaguc-services>
 */
@@ -38,10 +37,20 @@ public class ADAGUCConfigurator implements nl.knmi.adaguc.config.ConfiguratorInt
 	
 	private static String[] environmentVariables = {
 	};
+	
+	/* How long adaguc-server is allowed to run in milliseconds, -1 is unlimted */
+	private static long timeOut = -1;
+	/* Number of maximum simultaneaous instances before instances are queued, -1 is unlimited */
+	private static int maxInstances = -1;
+	/* Maximum queuesize, -1 is unlimited */
+	private static int maxInstancesInQueue = -1;
 
 	public static void doConfig(XMLElement  configReader){
 		ADAGUCExecutable=configReader.getNodeValue("adaguc-services.adaguc-server.adagucexecutable");
 		environmentVariables = configReader.getNodeValues("adaguc-services.adaguc-server.export");
+		try { timeOut = Long.parseLong(configReader.getNodeValue("adaguc-services.adaguc-server.timeout"));} catch (Exception e) {}
+		try { maxInstances = Integer.parseInt(configReader.getNodeValue("adaguc-services.adaguc-server.maxinstances"));} catch (Exception e) {}
+		try { maxInstancesInQueue = Integer.parseInt(configReader.getNodeValue("adaguc-services.adaguc-server.queuesize"));} catch (Exception e) {}
 	}
 
 	public static String getADAGUCExecutable() throws ElementNotFoundException, IOException {
@@ -53,5 +62,20 @@ public class ADAGUCConfigurator implements nl.knmi.adaguc.config.ConfiguratorInt
 		
 		ConfigurationReader.readConfig();
 		return environmentVariables;
+	}
+
+	public static long getTimeOut() throws ElementNotFoundException, IOException {
+		ConfigurationReader.readConfig();
+		return timeOut;
+	}	
+	
+	public static int getMaxInstances () throws ElementNotFoundException, IOException {
+		ConfigurationReader.readConfig();
+		return maxInstances;
+	}	
+	
+	public static int getMaxInstancesInQueue () throws ElementNotFoundException, IOException {
+		ConfigurationReader.readConfig();
+		return maxInstancesInQueue;
 	}	
 }

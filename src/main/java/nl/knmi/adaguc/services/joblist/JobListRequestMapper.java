@@ -104,16 +104,18 @@ public class JobListRequestMapper {
 		
 		JSONObject data=PyWPSServer.statusLocationDataAsXMLToWPSStatusObject(queryString, executeResponse);
 		if (data!=null) {
-
-			//  		  Tools.mksubdirs(userDataDir+"/WPS_Settings/");
 			String statusLocation=data.getString("statuslocation");
-			String baseName = statusLocation.substring(statusLocation.lastIndexOf("/")).replace(".xml", ".execute.json");
-			AuthenticatorInterface authenticator = AuthenticatorFactory.getAuthenticator(request);
-			String userDataDir = UserManager.getUser(authenticator).getDataDir();
-			String wpsSettingsFile = userDataDir+"/WPS_Settings/";
-			Tools.mksubdirs(wpsSettingsFile);
-			wpsSettingsFile+=baseName;
-			Tools.writeFile(wpsSettingsFile, data.toString());
+			if (statusLocation != null && statusLocation.length() > 0) {
+				String baseName = statusLocation.substring(statusLocation.lastIndexOf("/")).replace(".xml", ".execute.json");
+				AuthenticatorInterface authenticator = AuthenticatorFactory.getAuthenticator(request);
+				String userDataDir = UserManager.getUser(authenticator).getDataDir();
+				String wpsSettingsFile = userDataDir+"/WPS_Settings/";
+				Tools.mksubdirs(wpsSettingsFile);
+				wpsSettingsFile+=baseName;
+				Tools.writeFile(wpsSettingsFile, data.toString());
+			} else {
+				Debug.println("Synchronous execution");
+			}
 		} else {
 			Debug.println("Synchronous execution");
 		}

@@ -16,11 +16,12 @@ public class CGIRunner {
 	 * @param response Can be null, when given the content-type for the response will be set.
 	 * @param outputStream A standard byte output stream in which the data of stdout is captured. Can for example be response.getOutputStream().
 	 * @param postData The data to post.
+	 * @return 
 	 * @throws IOException 
 	 * @throws InterruptedException 
 	 * @throws Exception
 	 */
-	public static void runCGIProgram(String[] commands,String[] environmentVariables,String directory,final HttpServletResponse response,OutputStream outputStream,String postData) throws InterruptedException, IOException {
+	public static int runCGIProgram(String[] commands,String[] environmentVariables,String directory,final HttpServletResponse response,OutputStream outputStream,String postData, long timeOutMs) throws InterruptedException, IOException {
 		Debug.println("Working Directory: "+directory);
 
 		class StderrPrinter implements ProcessRunner.StatusPrinterInterface{
@@ -144,8 +145,8 @@ public class CGIRunner {
 		//    for(int j=0;j<commands.length;j++){
 		//      Debug.println(commands[j]);
 		//    }
-
-		ProcessRunner processRunner = new ProcessRunner (stdoutPrinter,stderrPrinter,environmentVariables,directory);
+		
+		ProcessRunner processRunner = new ProcessRunner (stdoutPrinter,stderrPrinter,environmentVariables,directory, timeOutMs);
 
 
 
@@ -154,7 +155,7 @@ public class CGIRunner {
 
 		processRunner.runProcess(commands,postData);
 
-
+		long stopTimeInMillis = Calendar.getInstance().getTimeInMillis();
 		if(processRunner.exitValue()!=0){
 			Debug.errprintln("Warning: exit code: "+processRunner.exitValue());
 		}
@@ -164,7 +165,10 @@ public class CGIRunner {
 		if(response!=null){
 			if(processRunner.exitValue()!=0&&processRunner.exitValue()!=1){
 				response.setStatus(500);
-				String msg="Internal server error: CGI returned code "+processRunner.exitValue();
+				String msg="Internal server error: CGI returned code " + processRunner.exitValue();
+				if (processRunner.exitValue() == 143) {
+					msg += " (Timeout set to " + timeOutMs + " ms, process took "+((stopTimeInMillis-startTimeInMillis))+" ms)";
+				}
 				Debug.errprintln(msg);
 				outputStream.write(msg.getBytes());
 			}
@@ -189,7 +193,7 @@ public class CGIRunner {
 			}
 		}
 
-		long stopTimeInMillis = Calendar.getInstance().getTimeInMillis();
+		
 		Debug.println("Finished CGI with code "+processRunner.exitValue()+": "+" ("+(stopTimeInMillis-startTimeInMillis)+" ms)");
 		try{
 			outputStream.flush();
@@ -197,5 +201,6 @@ public class CGIRunner {
 			Debug.println("Stream already closed");
 
 		}
+		return processRunner.exitValue();
 	}
 }

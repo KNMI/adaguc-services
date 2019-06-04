@@ -5,12 +5,18 @@ import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.UUID;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import org.json.JSONObject;
 
 import nl.knmi.adaguc.config.MainServicesConfigurator;
 import nl.knmi.adaguc.security.AuthenticatorFactory;
@@ -65,8 +71,58 @@ public class ADAGUCServer extends HttpServlet{
 	enum ADAGUCServiceType{
 		WMS, WCS, OPENDAP
 	}
+	
+	private static int numInstancesRunning = 0;
+	private static int numInstancesInQue = 0;
 	public static void runADAGUC(HttpServletRequest request,HttpServletResponse response,String queryString,OutputStream outputStream, ADAGUCServiceType serviceType) throws Exception{
-		Debug.println("runADAGUCWMS");
+		Debug.println("runADAGUC");
+		int maxInstances = ADAGUCConfigurator.getMaxInstances();
+		int maxInstancesInQueue = ADAGUCConfigurator.getMaxInstancesInQueue();
+		Exception exception = null;
+		String instanceId = UUID.randomUUID().toString();
+		
+		if (maxInstancesInQueue > 0 && numInstancesInQue > maxInstancesInQueue) {
+			
+			String msg = "[ADAGUC-Server] Queue limit [" + maxInstancesInQueue + "]  exceeded";
+			Debug.errprintln(msg);
+			response.setStatus(500);
+			OutputStream o = response.getOutputStream();
+			o.write(msg.getBytes());
+			return;
+		}
+		
+		try {
+			if (maxInstances > 0 && maxInstancesInQueue > 0) {
+				if (numInstancesRunning >= maxInstances) {
+					Debug.println("[ADAGUC-Server] Too many instances running, Queued: [" + numInstancesInQue + "], Running: [" + numInstancesRunning + "]");
+				}
+				if (maxInstancesInQueue > 0)numInstancesInQue++;
+				try {
+					while (numInstancesRunning >= maxInstances) {
+						Thread.sleep(100);
+					}
+				}catch (Exception e){
+					exception = e;
+				}
+				if (maxInstancesInQueue > 0)numInstancesInQue--;
+			}
+		}catch (Exception e) {
+			exception = e;
+		}
+		if (exception == null) {
+			numInstancesRunning++;
+			try {
+				_runADAGUC(request, response, queryString, outputStream, serviceType, instanceId);
+			}catch (Exception e) {
+				exception = e;
+			}
+			numInstancesRunning--;
+		}
+		
+		if (exception != null) throw exception;
+	}
+	
+	private static void _runADAGUC(HttpServletRequest request,HttpServletResponse response,String queryString,OutputStream outputStream, ADAGUCServiceType serviceType, String instanceId) throws Exception{
 		
 //		Debug.println("Headers:");
 //		Enumeration<String> headerNames = request.getHeaderNames();
@@ -76,7 +132,7 @@ public class ADAGUCServer extends HttpServlet{
 //			Debug.println(headerName + ":" + headerValue);
 //		}
 //			
-		List<String> environmentVariables = new ArrayList<String>();
+		
 		String userHomeDir="/tmp/";
 
 		AuthenticatorInterface authenticator = AuthenticatorFactory.getAuthenticator(request);
@@ -88,10 +144,10 @@ public class ADAGUCServer extends HttpServlet{
 			}
 
 		} 
-		Debug.println("Using home " + userHomeDir);
+		//Debug.println("Using home " + userHomeDir);
 		String homeURL=MainServicesConfigurator.getServerExternalURL();
 		String adagucExecutableLocation = ADAGUCConfigurator.getADAGUCExecutable();
-		Debug.println("adagucExecutableLocation: "+adagucExecutableLocation);
+		//Debug.println("adagucExecutableLocation: "+adagucExecutableLocation);
 
 		if(adagucExecutableLocation == null){
 			Debug.errprintln("Adagucserver executable not configured");
@@ -121,10 +177,16 @@ public class ADAGUCServer extends HttpServlet{
 		if(queryString == null){
 			queryString = request.getQueryString();
 		}
-		Debug.println("[ADAGUC-Server]" + queryString);
+		Debug.println("[ADAGUC-Server] queryString [" + queryString + "]");
 		
 		
-
+		List<String> environmentVariables = new ArrayList<String>();
+		String tmpDir = userHomeDir+"/adaguctmp/";
+		Tools.mksubdirs(tmpDir);
+		environmentVariables.add("ADAGUC_TMP="+tmpDir);
+		String tmpLogFile = tmpDir + "adaguc-server-log" + instanceId;
+		Debug.println("Logging to " + tmpLogFile);
+		environmentVariables.add("ADAGUC_LOGFILE=" + tmpLogFile);
 		environmentVariables.add("HOME="+userHomeDir);
 		environmentVariables.add("QUERY_STRING="+queryString);
 		environmentVariables.add("CONTENT_TYPE="+request.getHeader("Content-Type"));
@@ -137,30 +199,43 @@ public class ADAGUCServer extends HttpServlet{
 		
 		if(serviceType == ADAGUCServiceType.OPENDAP){
 			
-		    /*  localenv['SCRIPT_NAME']="/myscriptname";
-		      SCRIPT_NAME [/cgi-bin/autoresource.cgi], 
-		      REQUEST_URI [/cgi-bin/autoresource.cgi/opendap/clipc/combinetest/wcs_nc2.nc.das]
-		      localenv['REQUEST_URI']="/myscriptname/" + path*/
 			environmentVariables.add("ADAGUC_ONLINERESOURCE="+homeURL+"/adagucopendap?");
 			environmentVariables.add("REQUEST_URI="+request.getRequestURI());
 			environmentVariables.add("SCRIPT_NAME=");
 			Debug.println(request.getRequestURI());
 		}
 
-		Tools.mksubdirs(userHomeDir+"/adaguctmp/");
-		environmentVariables.add("ADAGUC_TMP="+userHomeDir+"/adaguctmp/");
+		
 
 		String[] configEnv = ADAGUCConfigurator.getADAGUCEnvironment();
 		if(configEnv == null){
 			Debug.println("ADAGUC environment is not configured");
 		}else{
-			for(int j=0;j<configEnv.length;j++)environmentVariables.add(configEnv[j]);    
+			for(int j=0;j<configEnv.length;j++){
+				if (!configEnv[j].startsWith("ADAGUC_LOGFILE") && !configEnv[j].startsWith("ADAGUC_TMP") && !configEnv[j].startsWith("ADAGUC_ONLINERESOURCE")) {
+					environmentVariables.add(configEnv[j]);    
+				} else {
+					Debug.errprintln("[WARNING]: Environment " + configEnv[j] + " is controlled by adaguc-services.");
+				}
+			}
 		}
 		String commands[] = {adagucExecutableLocation};
 
 		String[] environmentVariablesAsArray = new String[ environmentVariables.size() ];
 		environmentVariables.toArray( environmentVariablesAsArray );
-		CGIRunner.runCGIProgram(commands,environmentVariablesAsArray,userHomeDir,response,outputStream,null);
+		long timeOutMs = ADAGUCConfigurator.getTimeOut();
+		
+		int statusCode = CGIRunner.runCGIProgram(commands,environmentVariablesAsArray,userHomeDir,response,outputStream,null, timeOutMs);
+		if (statusCode != 143) {
+			try {
+				Debug.println("\n" + Tools.readFile(tmpLogFile));
+				Tools.rmfile(tmpLogFile);
+			} catch (Exception e) {
+				Debug.println("[ADAGUC-Server]: No logfile");
+			}
+		} else {
+			Debug.println("[ADAGUC-Server]: Timeout");
+		}
 	}
 
 	/**
@@ -196,6 +271,12 @@ public class ADAGUCServer extends HttpServlet{
 	}
 	public static void runADAGUCOpenDAP(HttpServletRequest request,HttpServletResponse response,String queryString,OutputStream outputStream) throws Exception  {
 		runADAGUC(request,response, queryString, outputStream, ADAGUCServiceType.OPENDAP);
+	}
+	public static int getNumInstancesInQueue() {
+		return numInstancesInQue;
+	}
+	public static int getNumInstancesRunning() {
+		return numInstancesRunning;
 	}
 
 

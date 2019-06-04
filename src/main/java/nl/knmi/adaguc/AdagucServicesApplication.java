@@ -7,7 +7,11 @@ import java.util.Properties;
 import org.springframework.boot.Banner;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
+import org.springframework.boot.web.embedded.tomcat.TomcatConnectorCustomizer;
+import org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactory;
+import org.springframework.boot.web.server.WebServerFactoryCustomizer;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
+import org.springframework.context.annotation.Bean;
 
 import nl.knmi.adaguc.config.MainServicesConfigurator;
 import nl.knmi.adaguc.security.SecurityConfigurator;
@@ -134,6 +138,23 @@ public class AdagucServicesApplication extends SpringBootServletInitializer{
 		return props;
 	}
 
+	
+	@Bean
+	public WebServerFactoryCustomizer<TomcatServletWebServerFactory> 
+	    containerCustomizer(){
+	    return new EmbeddedTomcatCustomizer();
+	}
+
+	private static class EmbeddedTomcatCustomizer implements WebServerFactoryCustomizer<TomcatServletWebServerFactory> {
+
+	    @Override
+	    public void customize(TomcatServletWebServerFactory factory) {
+	        factory.addConnectorCustomizers((TomcatConnectorCustomizer) connector -> {
+	            connector.setAttribute("relaxedPathChars", "<>[\\]^`{|}");
+	            connector.setAttribute("relaxedQueryChars", "<>[\\]^`{|}");
+	        });
+	    }
+	}
 	
 	
 	

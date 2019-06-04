@@ -152,7 +152,7 @@ public class PyWPSServer extends HttpServlet{
 			String wpsRequest=HTTPTools.getHTTPParam(request, "request");
 			if (wpsRequest.equalsIgnoreCase("execute")) {
 				ByteArrayOutputStream baos=new ByteArrayOutputStream(0);
-				CGIRunner.runCGIProgram(commands,environmentVariablesAsArray,userHomeDir,response,baos,null);
+				CGIRunner.runCGIProgram(commands,environmentVariablesAsArray,userHomeDir,response,baos,null, -1);
 
 				Writer w = new OutputStreamWriter(outputStream, "UTF-8");
 				w.write(baos.toString());
@@ -160,7 +160,7 @@ public class PyWPSServer extends HttpServlet{
 				getUserJobInfo(queryString, userDataDir, baos.toString());
 
 			} else {
-				CGIRunner.runCGIProgram(commands,environmentVariablesAsArray,userHomeDir,response,outputStream,null);
+				CGIRunner.runCGIProgram(commands,environmentVariablesAsArray,userHomeDir,response,outputStream,null, -1);
 
 			}
 		} catch (Exception e) {

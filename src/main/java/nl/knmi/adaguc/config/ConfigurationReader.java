@@ -124,9 +124,10 @@ public class ConfigurationReader {
 				String envKey = key.substring(5,key.length()-1);
 				String envValue = System.getenv(envKey);
 				if(envValue == null){
-					throw new ElementNotFoundException("Environment variable ["+envKey+"] not set");
+					Debug.errprintln("[WARNING]: Environment variable ["+envKey+"] not set");
+				} else {
+					configFile = configFile.replace(key,envValue);
 				}
-				configFile = configFile.replace(key,envValue);
 			}
 			// Debug.println("configfile=" + configFile);
 	

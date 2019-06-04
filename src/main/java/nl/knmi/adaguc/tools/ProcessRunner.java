@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.util.concurrent.TimeUnit;
 
 public class ProcessRunner{
 	Process child = null;
@@ -52,11 +53,13 @@ public class ProcessRunner{
 	public StatusPrinterInterface stderrPrinter = null;
 	private String[] environmentVars = null;
 	private String workingDirectory = null;
-	public ProcessRunner(StatusPrinterInterface _stdoutPrinter,StatusPrinterInterface _stderrPrinter, String[] _environmentVars, String _workingDirectory){
+	private long timeOutMs = -1;
+	public ProcessRunner(StatusPrinterInterface _stdoutPrinter,StatusPrinterInterface _stderrPrinter, String[] _environmentVars, String _workingDirectory, long _timeOutMs){
 		stdoutPrinter=_stdoutPrinter;
 		stderrPrinter=_stderrPrinter;
 		environmentVars=_environmentVars;
 		workingDirectory = _workingDirectory;
+		timeOutMs = _timeOutMs;
 	}
 
 	public int runProcess(String[] commands,String dataToPost) throws InterruptedException, IOException {
@@ -72,7 +75,7 @@ public class ProcessRunner{
 		for(int j=0;j<commands.length;j++){
 			cmd+=commands[j]+" ";
 		}
-		Debug.println("Commands: "+cmd);
+		// Debug.println("Commands: "+cmd);
 		if(dataToPost!=null){
 			if(dataToPost.length()>0){
 				environmentVars = Tools.appendString(environmentVars, "CONTENT_LENGTH="+dataToPost.length());
@@ -121,12 +124,16 @@ public class ProcessRunner{
 		stdoutThread.start();
 		stderrThread.start();
 
-
-
-
 		//Wait for the process to complete
-		child.waitFor();
-
+		if (timeOutMs <= 0) {
+			child.waitFor();
+		} else {
+			if(!child.waitFor(timeOutMs, TimeUnit.MILLISECONDS)) {
+				Debug.errprintln("[ADAGUC-Server] TimeOut");
+				child.destroy(); // consider using destroyForcibly instead
+			}
+		}
+		
 		//Wait for the output monitoring threads to complete
 		stdoutThread.join();
 		stderrThread.join();

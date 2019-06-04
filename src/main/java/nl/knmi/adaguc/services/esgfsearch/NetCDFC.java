@@ -42,7 +42,7 @@ public class NetCDFC {
       }catch(Exception e){
       }
       String[] environmentVariables = {"HOME="+userHome};
-      ProcessRunner processRunner = new ProcessRunner (stdoutPrinter,stderrPrinter,environmentVariables,userHome);
+      ProcessRunner processRunner = new ProcessRunner (stdoutPrinter,stderrPrinter,environmentVariables,userHome, -1);
       try{
         String commands[]={"ncdump","-h","-x",url};
         Debug.println("starting ncdump for "+url);

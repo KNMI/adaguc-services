@@ -142,7 +142,7 @@ public class ServiceHelperRequestMapper {
 			/* Hookup WPS request calls */
 			if (requestStr.toUpperCase().contains("SERVICE=WPS")) {
 				Debug.println("This is a WPS call");
-				if (requestStr.toUpperCase().contains("REQUEST=EXECUTE")) {
+				if (requestStr.toUpperCase().contains("REQUEST=EXECUTE") && requestStr.toUpperCase().contains("STOREEXECUTERESPONSE=TRUE")) {
 					Debug.println("This is a WPS Execute call, store in jobs!");
 					JobListRequestMapper.saveExecuteResponseToJob(requestStr, rootElement.toString(), servletRequest);
 				}
@@ -278,7 +278,7 @@ public class ServiceHelperRequestMapper {
 			
 			Debug.println("Status: " + httpResponse.getStatusLine().getStatusCode() + " Size: " + a.length);
 			
-			if (httpResponse.getStatusLine().getStatusCode() != HttpStatus.SC_OK) {
+			if (httpResponse.getStatusLine().getStatusCode() == HttpStatus.SC_FORBIDDEN || httpResponse.getStatusLine().getStatusCode() == HttpStatus.SC_UNAUTHORIZED) {
 				Debug.println("Status code not ok, attempting cert");
 				throw new IOException("Request needs certificate");
 			}
