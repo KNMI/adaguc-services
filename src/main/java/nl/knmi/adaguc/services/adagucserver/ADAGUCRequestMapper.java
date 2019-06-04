@@ -3,6 +3,7 @@ package nl.knmi.adaguc.services.adagucserver;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.json.JSONObject;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -11,9 +12,14 @@ import org.springframework.web.bind.annotation.RestController;
 import nl.knmi.adaguc.tools.Debug;
 import nl.knmi.adaguc.tools.JSONResponse;
 
+import java.lang.management.ManagementFactory;
+import java.lang.management.OperatingSystemMXBean;
+
+
+
 @RestController
 public class ADAGUCRequestMapper {
-	
+
 	@ResponseBody
 	@CrossOrigin
 	@RequestMapping("wms")
@@ -22,8 +28,9 @@ public class ADAGUCRequestMapper {
 		try {
 			ADAGUCServer.runADAGUCWMS(request,response,null,null);
 		} catch (Exception e) {
+			Debug.printStackTrace(e);
 			JSONResponse jsonResponse = new JSONResponse(request);
-			jsonResponse.setException("ADAGUCServer WMS request failed",e);
+			jsonResponse.setException("[ADAGUC-Server] WMS request failed",e);
 			try {
 				jsonResponse.print(response);
 			} catch (Exception e1) {
@@ -34,6 +41,32 @@ public class ADAGUCRequestMapper {
 	}
 	@ResponseBody
 	@CrossOrigin
+	@RequestMapping("adagucload")
+	public void adagucLoad(HttpServletResponse response, HttpServletRequest request){
+		JSONResponse jsonResponse = new JSONResponse(request);
+		try {
+			OperatingSystemMXBean operatingSystemMXBean = ManagementFactory.getOperatingSystemMXBean();
+
+			jsonResponse.setMessage(new JSONObject().put("adagucServer", 
+					new JSONObject().put("instancesInQueue", ADAGUCServer.getNumInstancesInQueue())
+					.put("instancesRunning", ADAGUCServer.getNumInstancesRunning())
+					.put("maxQueueSize" ,ADAGUCConfigurator.getMaxInstancesInQueue())
+					.put("maxInstances", ADAGUCConfigurator.getMaxInstances())
+					.put("instanceTimeout", ADAGUCConfigurator.getTimeOut())
+					.put("getSystemLoadAverage", operatingSystemMXBean.getSystemLoadAverage())
+					.put("getAvailableProcessors", operatingSystemMXBean.getAvailableProcessors())
+					));
+		} catch (Exception e) {
+			jsonResponse.setException("ADAGUCServer ADAGUC Load request failed",e);
+		}
+		try {
+			jsonResponse.print(response);
+		} catch (Exception e1) {
+
+		}
+	}
+	@ResponseBody
+	@CrossOrigin
 	@RequestMapping("adagucserver")
 	public void ADAGUCSERVER(HttpServletResponse response, HttpServletRequest request){
 		Debug.println("/adagucserver");
@@ -41,7 +74,7 @@ public class ADAGUCRequestMapper {
 			ADAGUCServer.runADAGUCWMS(request,response,null,null);
 		} catch (Exception e) {
 			JSONResponse jsonResponse = new JSONResponse(request);
-			jsonResponse.setException("ADAGUCServer WMS request failed",e);
+			jsonResponse.setException("[ADAGUC-Server] WMS request failed",e);
 			try {
 				jsonResponse.print(response);
 			} catch (Exception e1) {
