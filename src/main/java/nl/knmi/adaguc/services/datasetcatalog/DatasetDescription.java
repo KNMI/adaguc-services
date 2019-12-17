@@ -68,13 +68,13 @@ public class DatasetDescription implements Serializable{
 		try {
 			descr = om.readValue(new File(fn), DatasetDescription.class);
 		} catch (JsonParseException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		} catch (JsonMappingException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		}
         return descr;
@@ -111,13 +111,13 @@ public class DatasetDescription implements Serializable{
     	try {
 			om.writeValue(f, this);
 		} catch (JsonGenerationException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		} catch (JsonMappingException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		}
     }

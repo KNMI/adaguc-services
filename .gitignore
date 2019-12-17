@@ -1,1 +1,6 @@
 /target/
+.classpath
+.factorypath
+.settings/org.eclipse.jdt.apt.core.prefs
+.vscode/
+config/

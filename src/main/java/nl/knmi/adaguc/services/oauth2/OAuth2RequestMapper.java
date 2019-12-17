@@ -33,56 +33,6 @@ public class OAuth2RequestMapper {
 			method = RequestMethod.GET 
 		)
 	public void doOauth(HttpServletResponse response, HttpServletRequest request) throws JSONException, IOException, ElementNotFoundException{
-//		boolean useDev = false; // TODO
-//		if (useDev) {
-//			request.getSession().setAttribute("user_identifier","maarten");
-//			Vector<ComputeNode> computeNodes = SecurityConfigurator.getComputeNodes();
-//		    request.getSession().setAttribute("domain",computeNodes.get(0).url.replace("https://", ""));
-//		    try {
-//				OAuth2Handler.makeUserCertificate("maarten");// TODO
-//			} catch (InvalidKeyException e1) {
-//				// TODO Auto-generated catch block
-//				e1.printStackTrace();
-//			} catch (KeyManagementException e1) {
-//				// TODO Auto-generated catch block
-//				e1.printStackTrace();
-//			} catch (UnrecoverableKeyException e1) {
-//				// TODO Auto-generated catch block
-//				e1.printStackTrace();
-//			} catch (CertificateException e1) {
-//				// TODO Auto-generated catch block
-//				e1.printStackTrace();
-//			} catch (NoSuchAlgorithmException e1) {
-//				// TODO Auto-generated catch block
-//				e1.printStackTrace();
-//			} catch (OperatorCreationException e1) {
-//				// TODO Auto-generated catch block
-//				e1.printStackTrace();
-//			} catch (KeyStoreException e1) {
-//				// TODO Auto-generated catch block
-//				e1.printStackTrace();
-//			} catch (NoSuchProviderException e1) {
-//				// TODO Auto-generated catch block
-//				e1.printStackTrace();
-//			} catch (SignatureException e1) {
-//				// TODO Auto-generated catch block
-//				e1.printStackTrace();
-//			} catch (GSSException e1) {
-//				// TODO Auto-generated catch block
-//				e1.printStackTrace();
-//			} catch (CertificateVerificationException e1) {
-//				// TODO Auto-generated catch block
-//				e1.printStackTrace();
-//			}
-//;			try {
-//				response.sendRedirect(HTTPTools.getHTTPParam(request, "returnurl"));
-//			} catch (Exception e) {
-//				e.printStackTrace();
-//				response.sendRedirect(MainServicesConfigurator.getServerExternalURL());
-//			}
-//			return;
-//		} 
-//	
 		OAuth2Handler.doGet(request, response);
 	}
 	/**

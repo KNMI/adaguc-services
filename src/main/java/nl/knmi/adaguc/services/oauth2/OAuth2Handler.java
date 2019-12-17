@@ -311,7 +311,7 @@ public class OAuth2Handler {
 			state.put("provider", provider);
 			state.put("state_id", stateID);
 		} catch (JSONException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		}
 
@@ -435,7 +435,7 @@ public class OAuth2Handler {
 				Debug.errprintln("Error in OAuth2 service");
 				response.sendRedirect("/impactportal/exception.jsp");
 			} catch (IOException e1) {
-				// TODO Auto-generated catch block
+				
 				e1.printStackTrace();
 			}
 			e.printStackTrace();

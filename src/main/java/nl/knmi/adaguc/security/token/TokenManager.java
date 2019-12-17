@@ -87,7 +87,7 @@ public class TokenManager {
 			Tools.mksubdirs(MainServicesConfigurator.getBaseDir()+"/tokenstore/");
 			tokenStoreStr = Tools.readFile(MainServicesConfigurator.getBaseDir()+"/tokenstore/tokenstore.json");
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 			return;
 		}
@@ -97,13 +97,13 @@ public class TokenManager {
 		try {
 			accesstokens = om.readValue(tokenStoreStr, type );
 		} catch (JsonParseException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		} catch (JsonMappingException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		}
 		Debug.println("Loaded tokenstore: there are " + accesstokens.size() +" tokens.");		

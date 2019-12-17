@@ -17,7 +17,6 @@ public class NetCDFC {
         public String getError() {return ncdumpError;}
 		@Override
 		public boolean hasData() {
-			// TODO Auto-generated method stub
 			return false;
 		}
       }
@@ -28,7 +27,6 @@ public class NetCDFC {
         public String getError() {return ncdumpResult;}
 		@Override
 		public boolean hasData() {
-			// TODO Auto-generated method stub
 			return false;
 		}
       }

@@ -70,12 +70,6 @@ public class ProcessRunner{
 			throw new RuntimeException("ProcesRunner is already running");
 		}
 
-
-		String cmd = "";
-		for(int j=0;j<commands.length;j++){
-			cmd+=commands[j]+" ";
-		}
-		// Debug.println("Commands: "+cmd);
 		if(dataToPost!=null){
 			if(dataToPost.length()>0){
 				environmentVars = Tools.appendString(environmentVars, "CONTENT_LENGTH="+dataToPost.length());

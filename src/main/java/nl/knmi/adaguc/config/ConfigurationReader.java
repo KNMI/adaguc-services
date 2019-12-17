@@ -1,6 +1,5 @@
 package nl.knmi.adaguc.config;
 
-
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
@@ -46,7 +45,6 @@ public class ConfigurationReader {
 	    try {
 			readConfig();
 		} catch (ElementNotFoundException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IOException e) {
 			Debug.errprintln(e.getMessage());
@@ -78,19 +76,24 @@ public class ConfigurationReader {
 	}
 
 	/**
-	 * 1) Reads the configuration file periodically, re-reads the configuration file every readConfigPolIntervalDuration ms
-	 * 2) When read, the doConfig method for all classes which implement ConfiguratorInterface is called
-	 * @throws ConfigurationItemNotFoundException 
-	 * @throws ElementNotFoundException 
-	 * @throws IOException 
-	 * @throws Exception 
+	 * 1) Reads the configuration file periodically, re-reads the configuration file
+	 * every readConfigPolIntervalDuration ms 2) When read, the doConfig method for
+	 * all classes which implement ConfiguratorInterface is called
+	 * 
+	 * @throws ConfigurationItemNotFoundException
+	 * @throws ElementNotFoundException
+	 * @throws IOException
+	 * @throws Exception
 	 */
-	static public synchronized void readConfig() throws  ElementNotFoundException, IOException{
-		if (refreshConfig == false && readConfigDone == true)return;
+	static public synchronized void readConfig() throws ElementNotFoundException, IOException {
+		if (refreshConfig == false && readConfigDone == true)
+			return;
 		/* Re-read the configuration file every 10 seconds. */
-		if(readConfigPolInterval != 0){
-			if(System.currentTimeMillis()<readConfigPolInterval+readConfigPolIntervalDuration )return;
+		if (readConfigPolInterval != 0) {
+			if (System.currentTimeMillis() < readConfigPolInterval + readConfigPolIntervalDuration)
+				return;
 		}
+
 		readConfigDone = true;
 		readConfigPolInterval=System.currentTimeMillis(); 
 		Debug.println("Reading configfile "+_getConfigFile());
@@ -134,7 +137,6 @@ public class ConfigurationReader {
 			try {
 				configReader.parseString(configFile);
 			} catch (Exception e1) {
-				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
 		///}

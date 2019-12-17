@@ -98,9 +98,7 @@ public class TinyDapServer {
 
 		} catch (IOException ioe) {
 			Debug.errprintln("Error opening: " + localNetCDFFileLocation);
-			//Debug.printStackTrace(ioe);
 			response.getOutputStream().print("Error opening: " + localNetCDFFileLocation);
-			//TODO more then 404,
 			Debug.println("404 set.");
 			response.setStatus(404);
 		} finally { 
@@ -131,10 +129,10 @@ public class TinyDapServer {
 				NetcdfFile.registerIOProvider(GeoJSONReaderIOSP.class);
 			}
 		} catch (IllegalAccessException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		} catch (InstantiationException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		}
 

@@ -22,7 +22,6 @@ public class AuthenticatorImpl implements AuthenticatorInterface{
 	}
 
 	public AuthenticatorImpl() {
-		// TODO Auto-generated constructor stub
 	}
 
 	@Override
@@ -93,11 +92,8 @@ public class AuthenticatorImpl implements AuthenticatorInterface{
 				Token token = null;
 				try {
 					token = TokenManager.getToken(tokenStr);
-					//					Debug.println("Found token "+token);
 					x509 = new PemX509Tools().new X509Info(token.getUserId(), token.getToken());
-					//					Debug.println("Found user "+x509.getCN());
 				} catch (AuthenticationException | IOException | ElementNotFoundException e1) {
-					// TODO Auto-generated catch block
 					Debug.printStackTrace(e1);
 				}
 

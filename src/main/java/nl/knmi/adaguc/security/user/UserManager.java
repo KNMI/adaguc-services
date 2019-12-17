@@ -79,13 +79,13 @@ public class UserManager {
 					try {
 						OAuth2Handler.makeUserCertificate(user.userId);
 					} catch (OperatorCreationException e) {
-						// TODO Auto-generated catch block
+						
 						e.printStackTrace();
 					} catch (CertificateVerificationException e) {
-						// TODO Auto-generated catch block
+						
 						e.printStackTrace();
 					} catch (JSONException e) {
-						// TODO Auto-generated catch block
+						
 						e.printStackTrace();
 					}
 				}

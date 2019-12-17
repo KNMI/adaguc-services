@@ -103,10 +103,10 @@ public class PyWPSServer extends HttpServlet{
 		try {
 			if(checkStatusLocation(queryString,response ) == true)return;
 		} catch (InvalidTokenException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		} catch (InvalidHTTPKeyValueTokensException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		}
 
@@ -164,7 +164,7 @@ public class PyWPSServer extends HttpServlet{
 
 			}
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		}
 

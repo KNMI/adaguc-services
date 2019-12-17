@@ -97,7 +97,7 @@ public class SecurityConfigurator implements nl.knmi.adaguc.config.ConfiguratorI
 						}
 					}
 				} catch (Exception e) {
-					// TODO Auto-generated catch block
+					
 					e.printStackTrace();
 				}
 			} else {

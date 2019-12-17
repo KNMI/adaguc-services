@@ -128,7 +128,7 @@ public class Search {
              try {
               esgfQuery += "query="+URLEncoder.encode(freeTextValue,"UTF-8")+"&";
             } catch (UnsupportedEncodingException e) {
-              // TODO Auto-generated catch block
+              
               e.printStackTrace();
             }
            }
@@ -379,7 +379,7 @@ public class Search {
         response = getCatalogExecutor.submit(new ASyncGetCatalogRequest(query,request));
         creationDate = DateFunctions.getCurrentDateInMillis();
       } catch (Exception e) {
-        // TODO Auto-generated catch block
+        
         e.printStackTrace();
       }
     }
@@ -475,26 +475,7 @@ public class Search {
     boolean ISOK = false;
     String errorMessage = "";
     try {
-//      User user = null; // TODO
-//      if(user!=null){
-//        
-//        Debug.println("Data URL = "+ user.getDataURL());
-//        if(catalogURL.indexOf(user.getDataURL())==0){
-//          String fileName = catalogURL.substring(user.getDataURL().length());
-//          Debug.println("Filename = "+fileName);
-//          Debug.println("Filelocation = "+user.getDataDir()+"/"+fileName);
-//          fileName = HTTPToolsC4I.validateInputTokens(fileName);
-//          if(fileName.indexOf("..")!=-1){
-//            throw new Exception("Unable to GET catalog "+catalogURL);
-//          }
-//          
-//          return Tools.readFile(user.getDataDir()+"/"+fileName);
-//          
-//            
-//          
-//        }
-//      }
- 
+
       int hashTagLoc = catalogURL.indexOf("#");
       if(hashTagLoc != -1){
         catalogURL = catalogURL.split("#")[0];

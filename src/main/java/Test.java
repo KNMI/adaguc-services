@@ -6,7 +6,6 @@ import ucar.nc2.dataset.NetcdfDataset;
 public class Test {
 
 	public static void main(String[] args) throws IOException {
-		// TODO Auto-generated method stub
 		Debug.println("Hi");
 		//Standaard FEWS OpenDAP geeft Exception in thread "main" java.io.IOException: Server does not support Content-Length:
 		

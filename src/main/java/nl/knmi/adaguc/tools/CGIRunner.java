@@ -36,7 +36,6 @@ public class CGIRunner {
 			}
 			@Override
 			public boolean hasData() {
-				// TODO Auto-generated method stub
 				return false;
 			}
 		}

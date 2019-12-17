@@ -27,10 +27,8 @@ public class AdagucServicesApplication extends SpringBootServletInitializer{
 		try {
 			return application.sources(AdagucServicesApplication.class).properties(getProperties());
 		} catch (ElementNotFoundException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		Debug.println("Error");
@@ -39,16 +37,10 @@ public class AdagucServicesApplication extends SpringBootServletInitializer{
 
 
 	public static void main(String[] args) {
-//		try{
-//			ConfigurationReader.readConfig(false);
-//		} catch (Exception e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
+		// This task is scheduled to run every 10 seconds
 		try {
 			configureApplication(new SpringApplicationBuilder()).properties(getProperties()).run(args);
 		} catch (ElementNotFoundException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IOException e) {
 			Debug.errprintln(e.getMessage());
@@ -59,10 +51,8 @@ public class AdagucServicesApplication extends SpringBootServletInitializer{
 		try {
 			return builder.sources(AdagucServicesApplication.class).properties(getProperties()).bannerMode(Banner.Mode.OFF);
 		} catch (ElementNotFoundException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return null;
@@ -87,8 +77,6 @@ public class AdagucServicesApplication extends SpringBootServletInitializer{
 		 * server.http.port is the adaguc-services added connector, it is meant for http only.
 		 * For backwards compatibility with previous releases, http.port is used for https and server.http.port is used for http *
 		 */
-//		Debug.println("MainServicesConfigurator.getServerPort()" + MainServicesConfigurator.getServerPort());
-//		Debug.println("MainServicesConfigurator.getServerPortHTTPS()" + MainServicesConfigurator.getServerPortHTTPS());
 		if(SecurityConfigurator.getEnableSSL()!=null && SecurityConfigurator.getEnableSSL().equals("true")) {
 			/* If SSL (HTTPS support) is enabled, configure http.port for https and optionaly server.http.port for http */
 			props.put("server.ssl.enabled", true);
@@ -109,32 +97,8 @@ public class AdagucServicesApplication extends SpringBootServletInitializer{
 		if(SecurityConfigurator.getTrustStore()!=null)props.put("server.ssl.trust-store", SecurityConfigurator.getTrustStore());
 		if(SecurityConfigurator.getTrustStorePassword()!=null)props.put("server.ssl.trust-store-password", SecurityConfigurator.getTrustStorePassword());
 		props.put("server.ssl.client-auth", "want");
-		
-		
-		
-		
 		props.put("spring.http.multipart.max-file-size","100MB");
 		props.put("spring.http.multipart.max-request-size","100MB");
-
-//		props.put("log4j.logger.httpclient.wire.header","WARN");
-//		props.put("log4j.logger.httpclient.wire.content","WARN");
-//		props.put("log4j.rootLogger","ERROR");
-//
-//		props.put("log4j.appender.stdout","org.apache.log4j.ConsoleAppender");
-//		props.put("log4j.appender.stdout.layout","org.apache.log4j.PatternLayout");
-//		props.put("log4j.appender.stdout.layout.ConversionPattern","%5p [%c] %m%n");
-//
-//		props.put("log4j.logger.org.apache.http","ERROR");
-//		props.put("log4j.logger.org.apache.http.wire","ERROR");
-//		props.put("log4j.logger.org.apache","ERROR");
-		
-//		Debug.errprintln("SecurityConfigurator.getTrustStore()" + SecurityConfigurator.getTrustStore());
-//		
-//		Enumeration e = props.propertyNames();
-//	    while (e.hasMoreElements()) {
-//	      String key = (String) e.nextElement();
-//	      System.out.println(key + " -- " + props.getProperty(key));
-//	    }
 		return props;
 	}
 
@@ -146,7 +110,6 @@ public class AdagucServicesApplication extends SpringBootServletInitializer{
 	}
 
 	private static class EmbeddedTomcatCustomizer implements WebServerFactoryCustomizer<TomcatServletWebServerFactory> {
-
 	    @Override
 	    public void customize(TomcatServletWebServerFactory factory) {
 	        factory.addConnectorCustomizers((TomcatConnectorCustomizer) connector -> {
@@ -154,8 +117,5 @@ public class AdagucServicesApplication extends SpringBootServletInitializer{
 	            connector.setAttribute("relaxedQueryChars", "<>[\\]^`{|}");
 	        });
 	    }
-	}
-	
-	
-	
+	}	
 }

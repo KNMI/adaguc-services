@@ -1,13 +1,9 @@
 package nl.knmi.adaguc.services.adagucserver;
 
-
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
@@ -16,24 +12,22 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.json.JSONObject;
-
 import nl.knmi.adaguc.config.MainServicesConfigurator;
 import nl.knmi.adaguc.security.AuthenticatorFactory;
 import nl.knmi.adaguc.security.AuthenticatorInterface;
 import nl.knmi.adaguc.security.user.UserManager;
 import nl.knmi.adaguc.tools.CGIRunner;
 import nl.knmi.adaguc.tools.Debug;
+import nl.knmi.adaguc.tools.ElementNotFoundException;
+import nl.knmi.adaguc.tools.ProcessRunner;
 import nl.knmi.adaguc.tools.Tools;
-
-
 
 /**
  * 
  * @author maartenplieger
  *
  */
-public class ADAGUCServer extends HttpServlet{
+public class ADAGUCServer extends HttpServlet {
 
 	/**
 	 * 
@@ -41,48 +35,62 @@ public class ADAGUCServer extends HttpServlet{
 	private static final long serialVersionUID = 1L;
 
 	/**
-	 * Runs the ADAGUC WMS server as executable on the system. 
-	 * Emulates the behavior of scripts in a traditional cgi-bin directory of apache http server.
-	 * @param request, the HttpServletRequest to obtain querystring parameters from.
-	 * @param response Can be null, when given the content-type for the response will be set. 
-	 * Results are not sent to this stream, this is done by outputStream parameter
-	 * @param queryString The querystring for the CGI script
-	 * @param outputStream A standard byte output stream in which the data of stdout is captured. 
-	 * When null, it will be set to response.getOutputStream().
+	 * Runs the ADAGUC WMS server as executable on the system. Emulates the behavior
+	 * of scripts in a traditional cgi-bin directory of apache http server.
+	 * 
+	 * @param request,     the HttpServletRequest to obtain querystring parameters
+	 *                     from.
+	 * @param response     Can be null, when given the content-type for the response
+	 *                     will be set. Results are not sent to this stream, this is
+	 *                     done by outputStream parameter
+	 * @param queryString  The querystring for the CGI script
+	 * @param outputStream A standard byte output stream in which the data of stdout
+	 *                     is captured. When null, it will be set to
+	 *                     response.getOutputStream().
 	 * @throws Exception
 	 */
-	public static void runADAGUCWMS(HttpServletRequest request,HttpServletResponse response,String queryString,OutputStream outputStream) throws Exception{
-		runADAGUC(request,response, queryString, outputStream, ADAGUCServiceType.WMS);
+	public static void runADAGUCWMS(HttpServletRequest request, HttpServletResponse response, String queryString,
+			OutputStream outputStream) throws Exception {
+		runADAGUC(request, response, queryString, outputStream, ADAGUCServiceType.WMS);
 	}
+
 	/**
-	 * Runs the ADAGUC WCS server as executable on the system. 
-	 * Emulates the behavior of scripts in a traditional cgi-bin directory of apache http server.
-	 * @param request, the HttpServletRequest to obtain querystring parameters from.
-	 * @param response Can be null, when given the content-type for the response will be set. 
-	 * Results are not sent to this stream, this is done by outputStream parameter
-	 * @param queryString The querystring for the CGI script
-	 * @param outputStream A standard byte output stream in which the data of stdout is captured. 
-	 * When null, it will be set to response.getOutputStream().
+	 * Runs the ADAGUC WCS server as executable on the system. Emulates the behavior
+	 * of scripts in a traditional cgi-bin directory of apache http server.
+	 * 
+	 * @param request,     the HttpServletRequest to obtain querystring parameters
+	 *                     from.
+	 * @param response     Can be null, when given the content-type for the response
+	 *                     will be set. Results are not sent to this stream, this is
+	 *                     done by outputStream parameter
+	 * @param queryString  The querystring for the CGI script
+	 * @param outputStream A standard byte output stream in which the data of stdout
+	 *                     is captured. When null, it will be set to
+	 *                     response.getOutputStream().
 	 * @throws Exception
 	 */
-	public static void runADAGUCWCS(HttpServletRequest request,HttpServletResponse response,String queryString,OutputStream outputStream) throws Exception{
-		runADAGUC(request,response, queryString, outputStream, ADAGUCServiceType.WCS);
+	public static void runADAGUCWCS(HttpServletRequest request, HttpServletResponse response, String queryString,
+			OutputStream outputStream) throws Exception {
+		runADAGUC(request, response, queryString, outputStream, ADAGUCServiceType.WCS);
 	}
-	enum ADAGUCServiceType{
+
+	enum ADAGUCServiceType {
 		WMS, WCS, OPENDAP
 	}
-	
+
 	private static int numInstancesRunning = 0;
 	private static int numInstancesInQue = 0;
-	public static void runADAGUC(HttpServletRequest request,HttpServletResponse response,String queryString,OutputStream outputStream, ADAGUCServiceType serviceType) throws Exception{
+
+	public static void runADAGUC(HttpServletRequest request, HttpServletResponse response, String queryString,
+			OutputStream outputStream, ADAGUCServiceType serviceType) throws Exception {
 		Debug.println("runADAGUC");
 		int maxInstances = ADAGUCConfigurator.getMaxInstances();
 		int maxInstancesInQueue = ADAGUCConfigurator.getMaxInstancesInQueue();
 		Exception exception = null;
 		String instanceId = UUID.randomUUID().toString();
-		
+
 		if (maxInstancesInQueue > 0 && numInstancesInQue > maxInstancesInQueue) {
-			
+
 			String msg = "[ADAGUC-Server] Queue limit [" + maxInstancesInQueue + "]  exceeded";
 			Debug.errprintln(msg);
 			response.setStatus(500);
@@ -90,96 +98,160 @@ public class ADAGUCServer extends HttpServlet{
 			o.write(msg.getBytes());
 			return;
 		}
-		
+
 		try {
 			if (maxInstances > 0 && maxInstancesInQueue > 0) {
 				if (numInstancesRunning >= maxInstances) {
-					Debug.println("[ADAGUC-Server] Too many instances running, Queued: [" + numInstancesInQue + "], Running: [" + numInstancesRunning + "]");
+					Debug.println("[ADAGUC-Server] Too many instances running, Queued: [" + numInstancesInQue + "], Running: ["
+							+ numInstancesRunning + "]");
 				}
-				if (maxInstancesInQueue > 0)numInstancesInQue++;
+				if (maxInstancesInQueue > 0)
+					numInstancesInQue++;
 				try {
 					while (numInstancesRunning >= maxInstances) {
 						Thread.sleep(100);
 					}
-				}catch (Exception e){
+				} catch (Exception e) {
 					exception = e;
 				}
-				if (maxInstancesInQueue > 0)numInstancesInQue--;
+				if (maxInstancesInQueue > 0)
+					numInstancesInQue--;
 			}
-		}catch (Exception e) {
+		} catch (Exception e) {
 			exception = e;
 		}
 		if (exception == null) {
 			numInstancesRunning++;
 			try {
 				_runADAGUC(request, response, queryString, outputStream, serviceType, instanceId);
-			}catch (Exception e) {
+			} catch (Exception e) {
 				exception = e;
 			}
 			numInstancesRunning--;
 		}
-		
-		if (exception != null) throw exception;
+
+		if (exception != null)
+			throw exception;
 	}
-	
-	private static void _runADAGUC(HttpServletRequest request,HttpServletResponse response,String queryString,OutputStream outputStream, ADAGUCServiceType serviceType, String instanceId) throws Exception{
-		
-//		Debug.println("Headers:");
-//		Enumeration<String> headerNames = request.getHeaderNames();
-//		while (headerNames.hasMoreElements()) {
-//			String headerName = headerNames.nextElement();
-//			String headerValue = request.getHeader(headerName);
-//			Debug.println(headerName + ":" + headerValue);
-//		}
-//			
-		
-		String userHomeDir="/tmp/";
+
+	private static void _runADAGUC(HttpServletRequest request, HttpServletResponse response, String queryString,
+			OutputStream outputStream, ADAGUCServiceType serviceType, String instanceId) throws Exception {
+
+		// Debug.println("Headers:");
+		// Enumeration<String> headerNames = request.getHeaderNames();
+		// while (headerNames.hasMoreElements()) {
+		// String headerName = headerNames.nextElement();
+		// String headerValue = request.getHeader(headerName);
+		// Debug.println(headerName + ":" + headerValue);
+		// }
+		//
+
+		String userHomeDir = "/tmp/";
 
 		AuthenticatorInterface authenticator = AuthenticatorFactory.getAuthenticator(request);
-		if(authenticator != null){
+		if (authenticator != null) {
 			try {
 				userHomeDir = UserManager.getUser(authenticator).getHomeDir();
-			} catch(Exception e){
+			} catch (Exception e) {
 				Debug.println("No user information provided: " + e.getMessage());
 			}
 
-		} 
-		//Debug.println("Using home " + userHomeDir);
-		String homeURL=MainServicesConfigurator.getServerExternalURL();
+		}
+		// Debug.println("Using home " + userHomeDir);
+		String homeURL = MainServicesConfigurator.getServerExternalURL();
 		String adagucExecutableLocation = ADAGUCConfigurator.getADAGUCExecutable();
-		//Debug.println("adagucExecutableLocation: "+adagucExecutableLocation);
+		// Debug.println("adagucExecutableLocation: "+adagucExecutableLocation);
 
-		if(adagucExecutableLocation == null){
+		if (adagucExecutableLocation == null) {
 			Debug.errprintln("Adagucserver executable not configured");
 			throw new Exception("Adagucserver executable not configured");
 		}
 
-		File f=new File(adagucExecutableLocation);
-		if(f.exists() == false || f.isFile() == false){
-			Debug.errprintln("Adagucserver executable not found");
-			throw new Exception("Adagucserver executable not found");
+		File f = new File(adagucExecutableLocation);
+		if (f.exists() == false || f.isFile() == false) {
+			String message = "Adagucserver executable not found at [" + adagucExecutableLocation + "]";
+			Debug.errprintln(message);
+			throw new Exception(message);
 		}
 
-
-
-		if(response == null && outputStream == null){
+		if (response == null && outputStream == null) {
 			throw new Exception("Either response or outputstream needs to be set");
 		}
 
-		if(request == null && queryString == null){
+		if (request == null && queryString == null) {
 			throw new Exception("Either request or queryString needs to be set");
 		}
 
-		if(outputStream == null){
+		if (outputStream == null) {
 			outputStream = response.getOutputStream();
 		}
 
-		if(queryString == null){
+		if (queryString == null) {
 			queryString = request.getQueryString();
 		}
 		Debug.println("[ADAGUC-Server] queryString [" + queryString + "]");
-		
-		
+
+		List<String> environmentVariables = new ArrayList<String>();
+		String tmpDir = userHomeDir + "/adaguctmp/";
+		Tools.mksubdirs(tmpDir);
+		environmentVariables.add("ADAGUC_TMP=" + tmpDir);
+		String tmpLogFile = tmpDir + "adaguc-server-log" + instanceId;
+		Debug.println("Logging to " + tmpLogFile);
+		environmentVariables.add("ADAGUC_LOGFILE=" + tmpLogFile);
+		environmentVariables.add("HOME=" + userHomeDir);
+		environmentVariables.add("QUERY_STRING=" + queryString);
+		environmentVariables.add("CONTENT_TYPE=" + request.getHeader("Content-Type"));
+		if (serviceType == ADAGUCServiceType.WMS) {
+			environmentVariables.add("ADAGUC_ONLINERESOURCE=" + homeURL + "/wms?");
+		}
+		if (serviceType == ADAGUCServiceType.WCS) {
+			environmentVariables.add("ADAGUC_ONLINERESOURCE=" + homeURL + "/wcs?");
+		}
+
+		if (serviceType == ADAGUCServiceType.OPENDAP) {
+
+			environmentVariables.add("ADAGUC_ONLINERESOURCE=" + homeURL + "/adagucopendap?");
+			environmentVariables.add("REQUEST_URI=" + request.getRequestURI());
+			environmentVariables.add("SCRIPT_NAME=");
+			Debug.println(request.getRequestURI());
+		}
+
+		String[] configEnv = ADAGUCConfigurator.getADAGUCEnvironment();
+		if (configEnv == null) {
+			Debug.println("ADAGUC environment is not configured");
+		} else {
+			for (int j = 0; j < configEnv.length; j++) {
+				if (!configEnv[j].startsWith("ADAGUC_LOGFILE") && !configEnv[j].startsWith("ADAGUC_TMP")
+						&& !configEnv[j].startsWith("ADAGUC_ONLINERESOURCE")) {
+					environmentVariables.add(configEnv[j]);
+				} else {
+					Debug.errprintln("[WARNING]: Environment " + configEnv[j] + " is controlled by adaguc-services.");
+				}
+			}
+		}
+		String commands[] = { adagucExecutableLocation };
+
+		String[] environmentVariablesAsArray = new String[environmentVariables.size()];
+		environmentVariables.toArray(environmentVariablesAsArray);
+		long timeOutMs = ADAGUCConfigurator.getTimeOut();
+
+		int statusCode = CGIRunner.runCGIProgram(commands, environmentVariablesAsArray, userHomeDir, response, outputStream,
+				null, timeOutMs);
+		if (statusCode != 143) {
+			try {
+				Debug.println("\n" + Tools.readFile(tmpLogFile));
+				Tools.rmfile(tmpLogFile);
+			} catch (Exception e) {
+				Debug.println("[ADAGUC-Server]: No logfile");
+			}
+		} else {
+			Debug.println("[ADAGUC-Server]: Timeout");
+		}
+	}
+
+	public static void runADAGUC(String userHomeDir, String [] args, OutputStream outputStream)
+			throws IOException, ElementNotFoundException, InterruptedException {
+		String instanceId = UUID.randomUUID().toString();
 		List<String> environmentVariables = new ArrayList<String>();
 		String tmpDir = userHomeDir+"/adaguctmp/";
 		Tools.mksubdirs(tmpDir);
@@ -188,24 +260,6 @@ public class ADAGUCServer extends HttpServlet{
 		Debug.println("Logging to " + tmpLogFile);
 		environmentVariables.add("ADAGUC_LOGFILE=" + tmpLogFile);
 		environmentVariables.add("HOME="+userHomeDir);
-		environmentVariables.add("QUERY_STRING="+queryString);
-		environmentVariables.add("CONTENT_TYPE="+request.getHeader("Content-Type"));
-		if(serviceType == ADAGUCServiceType.WMS){
-			environmentVariables.add("ADAGUC_ONLINERESOURCE="+homeURL+"/wms?");
-		}
-		if(serviceType == ADAGUCServiceType.WCS){
-			environmentVariables.add("ADAGUC_ONLINERESOURCE="+homeURL+"/wcs?");
-		}
-		
-		if(serviceType == ADAGUCServiceType.OPENDAP){
-			
-			environmentVariables.add("ADAGUC_ONLINERESOURCE="+homeURL+"/adagucopendap?");
-			environmentVariables.add("REQUEST_URI="+request.getRequestURI());
-			environmentVariables.add("SCRIPT_NAME=");
-			Debug.println(request.getRequestURI());
-		}
-
-		
 
 		String[] configEnv = ADAGUCConfigurator.getADAGUCEnvironment();
 		if(configEnv == null){
@@ -219,23 +273,31 @@ public class ADAGUCServer extends HttpServlet{
 				}
 			}
 		}
-		String commands[] = {adagucExecutableLocation};
+		String adagucExecutableLocation = ADAGUCConfigurator.getADAGUCExecutable();
+		List<String> commands = new ArrayList<String>();
+		commands.add(adagucExecutableLocation);
+		for(int j=0;j<args.length;j++){
+			commands.add(args[j]);
+		}
 
 		String[] environmentVariablesAsArray = new String[ environmentVariables.size() ];
 		environmentVariables.toArray( environmentVariablesAsArray );
 		long timeOutMs = ADAGUCConfigurator.getTimeOut();
 		
-		int statusCode = CGIRunner.runCGIProgram(commands,environmentVariablesAsArray,userHomeDir,response,outputStream,null, timeOutMs);
-		if (statusCode != 143) {
-			try {
-				Debug.println("\n" + Tools.readFile(tmpLogFile));
-				Tools.rmfile(tmpLogFile);
-			} catch (Exception e) {
-				Debug.println("[ADAGUC-Server]: No logfile");
+		class StdoutPrinter implements ProcessRunner.StatusPrinterInterface{
+			public void setError(String message) {}
+			public String getError() {				return null;	}
+			public boolean hasData() { 			return false;	}
+			public void print(byte[] message, int bytesRead) {
+				try {
+					outputStream.write(message, 0, bytesRead);
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
 			}
-		} else {
-			Debug.println("[ADAGUC-Server]: Timeout");
 		}
+		ProcessRunner processRunner = new ProcessRunner (new StdoutPrinter(),new StdoutPrinter(),environmentVariablesAsArray,userHomeDir, timeOutMs);
+		processRunner.runProcess(commands.toArray(new String[0]), null);
 	}
 
 	/**

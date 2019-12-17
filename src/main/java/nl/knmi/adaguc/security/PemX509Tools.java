@@ -437,7 +437,6 @@ public class PemX509Tools {
 		//			PemX509Tools.writeCertificateToPemFile(caCertificate, "/tmp/_ca.pem");
 		//			PemX509Tools.writePrivateKeyToPemFile(privateKey, "/tmp/_ca.key");
 		//		} catch (IOException e) {
-		//			// TODO Auto-generated catch block
 		//			e.printStackTrace();
 		//		}
 
@@ -448,7 +447,6 @@ public class PemX509Tools {
 		//			PemX509Tools.writeCertificateToPemFile(signedCrt, "/tmp/_user.crt");
 		//			PemX509Tools.writePrivateKeyToPemFile(keyPairCSR.getPrivate(), "/tmp/_user.key");
 		//		} catch (IOException e) {
-		//			// TODO Auto-generated catch block
 		//			e.printStackTrace();
 		//		}
 
@@ -561,37 +559,32 @@ public class PemX509Tools {
 			Debug.println(result);
 
 		}  catch (KeyManagementException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (UnrecoverableKeyException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (InvalidKeyException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (NoSuchAlgorithmException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (KeyStoreException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (CertificateException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		} catch (NoSuchProviderException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		} catch (SignatureException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		} catch (GSSException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		} catch (ParseException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		}
 		Debug.println("/main");
