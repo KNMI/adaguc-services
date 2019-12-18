@@ -153,26 +153,6 @@ public class ConfigurationReader {
 		PyWPSConfigurator.doConfig(configReader);
 		AutoWMSConfigurator.doConfig(configReader);
 		ServiceHealthConfigurator.doConfig(configReader);
-//        
-//		Set<Class<? extends ConfiguratorInterface>> allClasses = 
-//				reflections.getSubTypesOf(ConfiguratorInterface.class);
-//		
-//		Iterator<Class<? extends ConfiguratorInterface>> it = allClasses.iterator();
-//		while(it.hasNext()){
-//			Class<? extends ConfiguratorInterface> a = it.next();
-//			try {
-//				Debug.println("==> Calling get " + a.getName());
-//				a.newInstance().doConfig(configReader);
-////				a.newInstance().setConfigDone();;
-//			} catch (InstantiationException | IllegalAccessException e) {
-//				e.printStackTrace();
-//			}
-//		}
-//		configReader = null; 
 	}
-
-	
-	
-
 }
 

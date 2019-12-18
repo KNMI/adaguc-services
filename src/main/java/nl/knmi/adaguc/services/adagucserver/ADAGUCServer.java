@@ -195,7 +195,7 @@ public class ADAGUCServer extends HttpServlet {
 		String tmpDir = userHomeDir + "/adaguctmp/";
 		Tools.mksubdirs(tmpDir);
 		environmentVariables.add("ADAGUC_TMP=" + tmpDir);
-		String tmpLogFile = tmpDir + "adaguc-server-log" + instanceId;
+		String tmpLogFile = tmpDir + "adaguc-server-cgi-log" + instanceId;
 		Debug.println("Logging to " + tmpLogFile);
 		environmentVariables.add("ADAGUC_LOGFILE=" + tmpLogFile);
 		environmentVariables.add("HOME=" + userHomeDir);
@@ -256,7 +256,7 @@ public class ADAGUCServer extends HttpServlet {
 		String tmpDir = userHomeDir+"/adaguctmp/";
 		Tools.mksubdirs(tmpDir);
 		environmentVariables.add("ADAGUC_TMP="+tmpDir);
-		String tmpLogFile = tmpDir + "adaguc-server-log" + instanceId;
+		String tmpLogFile = tmpDir + "adaguc-server-cmd-log" + instanceId;
 		Debug.println("Logging to " + tmpLogFile);
 		environmentVariables.add("ADAGUC_LOGFILE=" + tmpLogFile);
 		environmentVariables.add("HOME="+userHomeDir);
@@ -298,6 +298,10 @@ public class ADAGUCServer extends HttpServlet {
 		}
 		ProcessRunner processRunner = new ProcessRunner (new StdoutPrinter(),new StdoutPrinter(),environmentVariablesAsArray,userHomeDir, timeOutMs);
 		processRunner.runProcess(commands.toArray(new String[0]), null);
+		try {
+			Tools.rmfile(tmpLogFile);
+		} catch (Exception e) {
+		}
 	}
 
 	/**

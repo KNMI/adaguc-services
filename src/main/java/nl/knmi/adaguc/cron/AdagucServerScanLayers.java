@@ -31,7 +31,6 @@ public class AdagucServerScanLayers {
    */
   public void readAdagucServerDatasetConfig(File file) throws JsonProcessingException, IOException {
     String config = Tools.readFile(file.getAbsolutePath());
-    Debug.println("Reading " + file.getName());
     MyXMLParser.XMLElement rootElement = new MyXMLParser.XMLElement();
     try {
       rootElement.parseString(config);
@@ -92,9 +91,6 @@ public class AdagucServerScanLayers {
       }
 
       if ("true".equals(autoScanAttrEnabled)) {
-        Debug.println("" + filePath.toString());
-        Debug.println("" + autoScan.toString());
-
         if (autoScanAttrDuration == null || autoScanAttrDirPattern == null) {
           /* Will update all files, no tailpath */
           scanAllFilesForLayer(datasetConfigFile, null);
@@ -130,7 +126,6 @@ public class AdagucServerScanLayers {
       do {
         
         String tailPath = date1.format(DateTimeFormatter.ofPattern(dirpattern));
-        Debug.println(tailPath);
         scanAllFilesForLayer(datasetConfigFile, tailPath);
         date1 = date1.minus(s);
         maxIter--;

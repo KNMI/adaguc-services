@@ -92,10 +92,6 @@ public class ProcessRunner{
 			}
 		}
 
-		if(workingDir!=null){
-			Debug.println("Using working directory "+workingDirectory);
-		}
-
 		child = Runtime.getRuntime().exec(commands,environmentVars,workingDir);
 
 		if(dataToPost!=null){
