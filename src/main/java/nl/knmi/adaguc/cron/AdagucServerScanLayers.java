@@ -65,13 +65,14 @@ public class AdagucServerScanLayers {
    */
   private void takeLayer(JSONObject layer, File datasetConfigFile) {
     try {
-      JSONObject filePath = layer.getJSONObject("FilePath");
+      // JSONObject filePath = layer.getJSONObject("FilePath");
       JSONObject autoScan = layer.getJSONObject("AutoScan");
       JSONObject autoScanAttributes = autoScan.getJSONObject("attr");
       String autoScanAttrEnabled = autoScanAttributes.getString("enabled");
       String autoScanAttrDirPattern = null;
       String autoScanAttrDuration = null;
       String autoScanAttrStep = null;
+      String layerName = null;
       try {
         autoScanAttrDirPattern = autoScanAttributes.getString("dirpattern");
         Debug.println("autoScanAttrDirPattern" + autoScanAttrDirPattern);
@@ -90,15 +91,22 @@ public class AdagucServerScanLayers {
       } catch (Exception e) {
       }
 
+
+      try {
+        layerName = layer.getJSONObject("Name").getString("value");
+        Debug.println("layerName" + layerName);
+      } catch (Exception e) {
+      }
+
       if ("true".equals(autoScanAttrEnabled)) {
         if (autoScanAttrDuration == null || autoScanAttrDirPattern == null) {
           /* Will update all files, no tailpath */
-          scanAllFilesForLayer(datasetConfigFile, null);
+          scanAllFilesForLayer(datasetConfigFile, null, layerName);
         } else {
           /*
            * Will scan only files configured using tailpath based on duration and pattern
            */
-          scanFilesForLayerUsingTailPath(datasetConfigFile, autoScanAttrDuration, autoScanAttrDirPattern, autoScanAttrStep);
+          scanFilesForLayerUsingTailPath(datasetConfigFile, autoScanAttrDuration, autoScanAttrDirPattern, autoScanAttrStep, layerName);
         }
       }
     } catch (Exception e) {
@@ -115,7 +123,7 @@ public class AdagucServerScanLayers {
    * @throws IOException
    * @throws InterruptedException
    */
-  private void scanFilesForLayerUsingTailPath(File datasetConfigFile, String duration, String dirpattern, String step) throws ElementNotFoundException, IOException, InterruptedException {
+  private void scanFilesForLayerUsingTailPath(File datasetConfigFile, String duration, String dirpattern, String step, String layerName) throws ElementNotFoundException, IOException, InterruptedException {
     try {
       Debug.println("scanFilesForLayerUsingTailPath");
       java.time.Period d = java.time.Period.parse(duration);
@@ -126,7 +134,7 @@ public class AdagucServerScanLayers {
       do {
         
         String tailPath = date1.format(DateTimeFormatter.ofPattern(dirpattern));
-        scanAllFilesForLayer(datasetConfigFile, tailPath);
+        scanAllFilesForLayer(datasetConfigFile, tailPath, layerName);
         date1 = date1.minus(s);
         maxIter--;
         if (maxIter<0){
@@ -146,7 +154,7 @@ public class AdagucServerScanLayers {
    * @throws IOException
    * @throws InterruptedException
    */
-  private void scanAllFilesForLayer(File datasetConfigFile, String tailpath) throws ElementNotFoundException, IOException, InterruptedException {
+  private void scanAllFilesForLayer(File datasetConfigFile, String tailpath, String layerName) throws ElementNotFoundException, IOException, InterruptedException {
     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
     String[] configEnv = ADAGUCConfigurator.getADAGUCEnvironment();
     String configFile = null;
@@ -163,11 +171,16 @@ public class AdagucServerScanLayers {
       args.add("--tailpath");
       args.add(tailpath);
     }
+    if (layerName!=null) {
+      args.add("--layername");
+      args.add(layerName);
+    }
     String[] commands = args.toArray(new String[0]);
+    Debug.println(String.join(" ", commands));
     ADAGUCServer.runADAGUC("/tmp/", commands, outputStream);
     outputStream.flush();
     String getCapabilities = new String(outputStream.toByteArray());
-    Debug.println(getCapabilities);
+    Debug.println("\n" + getCapabilities);
     outputStream.close();
   }
 }
