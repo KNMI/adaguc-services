@@ -75,26 +75,22 @@ public class AdagucServerScanLayers {
       String layerName = null;
       try {
         autoScanAttrDirPattern = autoScanAttributes.getString("dirpattern");
-        Debug.println("autoScanAttrDirPattern" + autoScanAttrDirPattern);
       } catch (Exception e) {
       }
 
       try {
         autoScanAttrDuration = autoScanAttributes.getString("duration");
-        Debug.println("autoScanAttrDuration" + autoScanAttrDuration);
       } catch (Exception e) {
       }
 
       try {
         autoScanAttrStep = autoScanAttributes.getString("step");
-        Debug.println("autoScanAttrStep" + autoScanAttrStep);
       } catch (Exception e) {
       }
 
 
       try {
         layerName = layer.getJSONObject("Name").getString("value");
-        Debug.println("layerName" + layerName);
       } catch (Exception e) {
       }
 
@@ -125,7 +121,6 @@ public class AdagucServerScanLayers {
    */
   private void scanFilesForLayerUsingTailPath(File datasetConfigFile, String duration, String dirpattern, String step, String layerName) throws ElementNotFoundException, IOException, InterruptedException {
     try {
-      Debug.println("scanFilesForLayerUsingTailPath");
       java.time.Period d = java.time.Period.parse(duration);
       java.time.Period s = java.time.Period.parse(step);
       LocalDate minimumTime = LocalDate.now().minus(d);
@@ -176,11 +171,10 @@ public class AdagucServerScanLayers {
       args.add(layerName);
     }
     String[] commands = args.toArray(new String[0]);
-    Debug.println(String.join(" ", commands));
     ADAGUCServer.runADAGUC("/tmp/", commands, outputStream);
     outputStream.flush();
-    String getCapabilities = new String(outputStream.toByteArray());
-    Debug.println("\n" + getCapabilities);
+    String adagucResponse = new String(outputStream.toByteArray());
+    Debug.println("\n" + adagucResponse);
     outputStream.close();
   }
 }
