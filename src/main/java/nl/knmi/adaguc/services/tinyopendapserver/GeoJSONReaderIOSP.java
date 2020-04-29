@@ -15,6 +15,7 @@ import ucar.ma2.Section;
 import ucar.ma2.StructureDataIterator;
 import ucar.nc2.Attribute;
 import ucar.nc2.Dimension;
+import ucar.nc2.Group.Builder;
 import ucar.nc2.NetcdfFile;
 import ucar.nc2.ParsedSectionSpec;
 import ucar.nc2.Structure;
@@ -26,27 +27,29 @@ import ucar.unidata.io.RandomAccessFile;
 /**
  * GeoJSONReaderIOSP
  * 
- * This class provides an IOServiceProvider for GeoJSON.
- * It reads the GeoJSON into a CDM object, in a similar way as done in the ADAGUCServer. 
- * The ADAGUCServer is able to visualize GeoJSON over OpenDAP by serving GeoJSON with this IOSP.
+ * This class provides an IOServiceProvider for GeoJSON. It reads the GeoJSON
+ * into a CDM object, in a similar way as done in the ADAGUCServer. The
+ * ADAGUCServer is able to visualize GeoJSON over OpenDAP by serving GeoJSON
+ * with this IOSP.
  * 
- * The ADAGUCServer IOSP in C++ is here: https://dev.knmi.nl/projects/adagucserver/repository/entry/CCDFDataModel/CCDFGeoJSONIO.cpp
+ * The ADAGUCServer IOSP in C++ is here:
+ * https://dev.knmi.nl/projects/adagucserver/repository/entry/CCDFDataModel/CCDFGeoJSONIO.cpp
  *
  * @author Maarten Plieger, KNMI, 2016-08
  */
 public class GeoJSONReaderIOSP implements IOServiceProvider {
 
-
   /**
-   * Is this a geojson? Check it by reading the first character, should be a { token.
+   * Is this a geojson? Check it by reading the first character, should be a {
+   * token.
    */
   public boolean isValidFile(RandomAccessFile raf) throws IOException {
     raf.seek(0);
     byte[] b = new byte[1];
     raf.read(b);
     String got = new String(b);
-    boolean isGeoJSON =  got.equals("{");
-    if(isGeoJSON){
+    boolean isGeoJSON = got.equals("{");
+    if (isGeoJSON) {
       Debug.println("This is GeoJson");
     }
     return isGeoJSON;
@@ -72,7 +75,7 @@ public class GeoJSONReaderIOSP implements IOServiceProvider {
     jsonVar.setDimensions("jsoncontent");
     jsonVar.setDataType(DataType.CHAR);
 
-    ncfile.addAttribute(null,new Attribute("ADAGUC_GEOJSON", ""));
+    ncfile.addAttribute(null, new Attribute("ADAGUC_GEOJSON", ""));
     jsonVar.addAttribute(new Attribute("ADAGUC_BASENAME", "geojson.geojson"));
     ncfile.addVariable(null, jsonVar);
     ncfile.addAttribute(null, new Attribute("Conventions", "CF-1.6"));
@@ -87,31 +90,29 @@ public class GeoJSONReaderIOSP implements IOServiceProvider {
     isoDateTimeFormat.setTimeZone(java.util.TimeZone.getTimeZone("GMT"));
 
     raf.seek(0);
-    int dimensionSize = (int) raf.length()+1;
+    int dimensionSize = (int) raf.length() + 1;
     byte[] document = new byte[(int) raf.length()];
     raf.readFully(document);
 
-    int[] shape = new int[]{dimensionSize};
+    int[] shape = new int[] { dimensionSize };
     jsoncontentArray = (ArrayChar.D1) Array.factory(DataType.CHAR, shape);
 
-
-    for (int i = 0; i < dimensionSize-1; i++) {
+    for (int i = 0; i < dimensionSize - 1; i++) {
       jsoncontentArray.setChar(i, (char) document[i]);
     }
 
-    jsoncontentArray.setChar(dimensionSize-1, (char) 0);
+    jsoncontentArray.setChar(dimensionSize - 1, (char) 0);
     return dimensionSize;
   }
 
   @Override
-  public Array readData(Variable arg0, Section arg1) throws IOException,
-  InvalidRangeException {
-    Debug.println("readData: "+ arg1.getOrigin(0)+ " " +arg1.getShape(0));
-    return jsoncontentArray.section(arg1.getOrigin(), arg1.getShape(),arg1.getStride());
+  public Array readData(Variable arg0, Section arg1) throws IOException, InvalidRangeException {
+    Debug.println("readData: " + arg1.getOrigin(0) + " " + arg1.getShape(0));
+    return jsoncontentArray.section(arg1.getOrigin(), arg1.getShape(), arg1.getStride());
   }
 
   public Array readData(Variable v2, List<?> section) throws IOException, InvalidRangeException {
-    return null;  //To change body of implemented methods use File | Settings | File Templates.
+    return null; // To change body of implemented methods use File | Settings | File Templates.
   }
 
   public Array readNestedData(Variable v2, List<?> section) throws IOException, InvalidRangeException {
@@ -119,27 +120,27 @@ public class GeoJSONReaderIOSP implements IOServiceProvider {
   }
 
   public void close() throws IOException {
-    //To change body of implemented methods use File | Settings | File Templates.
+    // To change body of implemented methods use File | Settings | File Templates.
   }
 
   public boolean syncExtend() throws IOException {
-    return false;  //To change body of implemented methods use File | Settings | File Templates.
+    return false; // To change body of implemented methods use File | Settings | File Templates.
   }
 
   public boolean sync() throws IOException {
-    return false;  //To change body of implemented methods use File | Settings | File Templates.
+    return false; // To change body of implemented methods use File | Settings | File Templates.
   }
 
   public void setSpecial(Object special) {
-    //To change body of implemented methods use File | Settings | File Templates.
+    // To change body of implemented methods use File | Settings | File Templates.
   }
 
   public String toStringDebug(Object o) {
-    return null;  //To change body of implemented methods use File | Settings | File Templates.
+    return null; // To change body of implemented methods use File | Settings | File Templates.
   }
 
   public String getDetailInfo() {
-    return null;  //To change body of implemented methods use File | Settings | File Templates.
+    return null; // To change body of implemented methods use File | Settings | File Templates.
   }
 
   @Override
@@ -158,24 +159,21 @@ public class GeoJSONReaderIOSP implements IOServiceProvider {
   }
 
   @Override
-  public StructureDataIterator getStructureIterator(Structure arg0, int arg1)
-      throws IOException {
+  public StructureDataIterator getStructureIterator(Structure arg0, int arg1) throws IOException {
     return null;
   }
 
   public void reacquire() throws IOException {
   }
 
-
   @Override
-  public Array readSection(ParsedSectionSpec arg0) throws IOException,
-  InvalidRangeException {
+  public Array readSection(ParsedSectionSpec arg0) throws IOException, InvalidRangeException {
     return null;
   }
 
   @Override
-  public long readToByteChannel(Variable arg0, Section arg1,
-      WritableByteChannel arg2) throws IOException, InvalidRangeException {
+  public long readToByteChannel(Variable arg0, Section arg1, WritableByteChannel arg2)
+      throws IOException, InvalidRangeException {
     return 0;
   }
 
@@ -195,17 +193,34 @@ public class GeoJSONReaderIOSP implements IOServiceProvider {
   }
 
   @Override
-  public long streamToByteChannel(Variable arg0, Section arg1,
-      WritableByteChannel arg2) throws IOException, InvalidRangeException {
+  public long streamToByteChannel(Variable arg0, Section arg1, WritableByteChannel arg2)
+      throws IOException, InvalidRangeException {
     return 0;
   }
 
-
   public static void main(String args[]) throws IOException, IllegalAccessException, InstantiationException {
     NetcdfFile.registerIOProvider(GeoJSONReaderIOSP.class);
-    NetcdfFile ncfile = NetcdfFile.open("/home/c4m/impactspace/ceda.ac.uk.openid.Maarten.Plieger/data//NUTS_2010_L0.geojson");
+    NetcdfFile ncfile = NetcdfFile
+        .open("/home/c4m/impactspace/ceda.ac.uk.openid.Maarten.Plieger/data//NUTS_2010_L0.geojson");
     System.out.println("ncfile = \n" + ncfile);
   }
 
+  @Override
+  public void build(RandomAccessFile arg0, Builder arg1, CancelTask arg2) throws IOException {
+    // TODO Auto-generated method stub
+
+  }
+
+  @Override
+  public void buildFinish(NetcdfFile arg0) {
+    // TODO Auto-generated method stub
+
+  }
+
+  @Override
+  public boolean isBuilder() {
+    // TODO Auto-generated method stub
+    return false;
+  }
 
 }

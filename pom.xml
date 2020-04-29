@@ -5,7 +5,7 @@
 
 	<groupId>nl.knmi.adagucservices</groupId>
 	<artifactId>adaguc-services</artifactId>
-	<version>1.2.5</version>
+	<version>1.2.6</version>
 
 	<name>adaguc-services</name>
 	<description>Backend for adaguc-server and adaguc-viewer</description>
@@ -111,19 +111,20 @@
 			<artifactId>httpclient</artifactId>
 		</dependency>
 
-		<!-- https://mvnrepository.com/artifact/edu.ucar/opendap -->
-		<dependency>
-			<groupId>edu.ucar</groupId>
-			<artifactId>opendap</artifactId>
-			<version>4.5.5</version>
-		</dependency>
+	<!-- https://mvnrepository.com/artifact/edu.ucar/opendap -->
+<dependency>
+    <groupId>edu.ucar</groupId>
+    <artifactId>opendap</artifactId>
+    <version>5.3.1</version>
+</dependency>
+
 
 
 		<!-- https://mvnrepository.com/artifact/edu.ucar/cdm -->
 		<dependency>
 			<groupId>edu.ucar</groupId>
-			<artifactId>cdm</artifactId>
-			<version>4.5.5</version>
+			<artifactId>cdm-core</artifactId>
+			<version>5.3.1</version>
 		</dependency>
 		<!-- https://mvnrepository.com/artifact/edu.ucar/netcdf -->
 		<!-- <dependency> <groupId>edu.ucar</groupId> <artifactId>netcdf</artifactId> 
@@ -193,7 +194,7 @@
 
 		<repository>
 			<id>artifacts.unidata.ucar.edu</id>
-			<url>https://repo.boundlessgeo.com/main/</url>
+			<url>https://artifacts.unidata.ucar.edu/content/repositories/unidata-releases/</url>
 		</repository>
 
 
