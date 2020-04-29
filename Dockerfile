@@ -1,39 +1,38 @@
 FROM centos/devtoolset-7-toolchain-centos7:7
 USER root
 
-MAINTAINER Adaguc Team at KNMI <adaguc@knmi.nl>
-
 RUN yum update -y && yum install -y \
-    epel-release deltarpm
-    
+  epel-release deltarpm
+
 RUN yum update -y && yum clean all && yum groupinstall -y "Development tools"
 
 RUN yum update -y && yum install -y \
-    hdf5-devel \
-    netcdf \
-    netcdf-devel \
-    proj \
-    proj-devel \
-    sqlite \
-    sqlite-devel \
-    udunits2 \
-    udunits2-devel \
-    make \
-    libxml2-devel \
-    cairo-devel \
-    gd-devel \
-    postgresql-devel \
-    postgresql-server \
-    gdal-devel \
-    tomcat \
-    maven \
-    openssl
-    
+  hdf5-devel \
+  netcdf \
+  netcdf-devel \
+  proj \
+  proj-devel \
+  sqlite \
+  sqlite-devel \
+  udunits2 \
+  udunits2-devel \
+  make \
+  libxml2-devel \
+  cairo-devel \
+  gd-devel \
+  postgresql-devel \
+  postgresql-server \
+  gdal-devel \
+  libwebp-devel \
+  tomcat \
+  maven \
+  openssl
+
 # Install newer numpy
 RUN curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
 RUN python get-pip.py
 RUN pip install numpy netcdf4 six lxml    
-    
+
 RUN mkdir /adaguc
 
 # Install adaguc-services from the context
@@ -56,16 +55,16 @@ RUN bash runtests.sh
 
 # Setup directories
 RUN mkdir -p /data/adaguc-autowms && \
-    mkdir -p /data/adaguc-datasets && \
-    mkdir -p /data/adaguc-data && \
-    mkdir -p /adaguc/userworkspace && \
-    mkdir -p /data/adaguc-services-home && \
-    mkdir -p /adaguc/basedir && \
-    mkdir -p /var/log/adaguc && \
-    mkdir -p /adaguc/adagucdb && \
-    mkdir -p /adaguc/security && \
-    mkdir -p /data/adaguc-datasets-internal
-   
+  mkdir -p /data/adaguc-datasets && \
+  mkdir -p /data/adaguc-data && \
+  mkdir -p /adaguc/userworkspace && \
+  mkdir -p /data/adaguc-services-home && \
+  mkdir -p /adaguc/basedir && \
+  mkdir -p /var/log/adaguc && \
+  mkdir -p /adaguc/adagucdb && \
+  mkdir -p /adaguc/security && \
+  mkdir -p /data/adaguc-datasets-internal
+
 # Configure
 COPY ./Docker/adaguc-server-config.xml /adaguc/adaguc-server-config.xml
 COPY ./Docker/adaguc-services-config.xml /adaguc/adaguc-services-config.xml
