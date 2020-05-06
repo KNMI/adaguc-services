@@ -19,7 +19,7 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-		<java.version>1.9</java.version>
+		<java.version>11</java.version>
 		<start-class>nl.knmi.adaguc.AdagucServicesApplication</start-class>
 
 	</properties>
@@ -171,8 +171,19 @@
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
 			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.8.0</version>
+				<configuration>
+						<source>11</source>  <!-- same as <java.version> -->
+						<target>11</target>    <!-- same as <java.version> -->
+				</configuration>
+		</plugin>
 		</plugins>
 	</build>
+
+	
 
 	<repositories>
 		<repository>
