@@ -124,8 +124,8 @@ public class ProcessRunner {
 		brstderr = new BufferedInputStream(child.getErrorStream());
 		stdoutThread = new StatusPrinterThread(stdoutPrinter, brstdout);
 		stderrThread = new StatusPrinterThread(stderrPrinter, brstderr);
-		stdoutPrinter.setPID(Long.toString(child.pid()));
-		stderrPrinter.setPID(Long.toString(child.pid()));
+		stdoutPrinter.setPID(String.valueOf(child.pid()));
+		stderrPrinter.setPID(String.valueOf(child.pid()));
 		stdoutThread.start();
 		stderrThread.start();
 
