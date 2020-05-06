@@ -5,7 +5,7 @@
 
 	<groupId>nl.knmi.adagucservices</groupId>
 	<artifactId>adaguc-services</artifactId>
-	<version>1.2.8</version>
+	<version>1.2.9</version>
 
 	<name>adaguc-services</name>
 	<description>Backend for adaguc-server and adaguc-viewer</description>
@@ -64,7 +64,7 @@
 		<dependency>
 			<groupId>de.grundid.opendatalab</groupId>
 			<artifactId>geojson-jackson</artifactId>
-			<version>1.8</version>
+			<version>1.14</version>
 		</dependency>
 
 		<dependency>
@@ -96,13 +96,13 @@
 		<dependency>
 			<groupId>org.bouncycastle</groupId>
 			<artifactId>bcprov-jdk15on</artifactId>
-			<version>1.56</version>
+			<version>1.65</version>
 		</dependency>
 
 		<dependency>
 			<groupId>org.bouncycastle</groupId>
 			<artifactId>bcpkix-jdk15on</artifactId>
-			<version>1.56</version>
+			<version>1.65</version>
 		</dependency>
 
 		<!-- https://mvnrepository.com/artifact/org.apache.httpcomponents/httpclient -->
@@ -115,7 +115,7 @@
 <dependency>
     <groupId>edu.ucar</groupId>
     <artifactId>opendap</artifactId>
-    <version>5.3.1</version>
+    <version>5.3.2</version>
 </dependency>
 
 
@@ -124,7 +124,7 @@
 		<dependency>
 			<groupId>edu.ucar</groupId>
 			<artifactId>cdm-core</artifactId>
-			<version>5.3.1</version>
+			<version>5.3.2</version>
 		</dependency>
 		<!-- https://mvnrepository.com/artifact/edu.ucar/netcdf -->
 		<!-- <dependency> <groupId>edu.ucar</groupId> <artifactId>netcdf</artifactId> 
@@ -160,7 +160,7 @@
 		<dependency>
 			<groupId>commons-io</groupId>
 			<artifactId>commons-io</artifactId>
-			<version>2.5</version>
+			<version>2.6</version>
 		</dependency>
 
 	</dependencies>
