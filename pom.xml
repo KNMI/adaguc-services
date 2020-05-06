@@ -5,7 +5,7 @@
 
 	<groupId>nl.knmi.adagucservices</groupId>
 	<artifactId>adaguc-services</artifactId>
-	<version>1.2.6</version>
+	<version>1.2.7</version>
 
 	<name>adaguc-services</name>
 	<description>Backend for adaguc-server and adaguc-viewer</description>
