@@ -19,7 +19,7 @@ public class User {
 
 	@Getter
 	String userId = null;
-	
+
 	@Getter
 	String openId = null;
 
@@ -28,8 +28,7 @@ public class User {
 
 	private X509UserCertAndKey userCert;
 
-
-	public static String makePosixUserId(String userId){
+	public static String makePosixUserId(String userId) {
 		if (userId == null)
 			return null;
 
@@ -39,19 +38,18 @@ public class User {
 		return userId;
 	}
 
-
 	public User(String _id) throws IOException, ElementNotFoundException {
-		Debug.println("New user ID is made :["+_id+"]");
+		Debug.println("New user ID is made :[" + _id + "]");
 		String userWorkspace = MainServicesConfigurator.getUserWorkspace();
 		openId = _id;
 		userId = makePosixUserId(_id);
-		homeDir=userWorkspace+"/"+userId;
-		dataDir = homeDir+"/data";
+		homeDir = userWorkspace + "/" + userId;
+		dataDir = homeDir + "/data";
 		Tools.mksubdirs(homeDir);
 		Tools.mksubdirs(dataDir);
-		Debug.println("User Home Dir: "+homeDir);
+		Debug.println("User Home Dir: " + homeDir);
 		try {
-			X509Certificate cert = PemX509Tools.readCertificateFromPEMFile( this.homeDir + "/cert.crt");
+			X509Certificate cert = PemX509Tools.readCertificateFromPEMFile(this.homeDir + "/cert.crt");
 			PrivateKey key = PemX509Tools.readPrivateKeyFromPEM(this.homeDir + "/cert.key");
 			this.userCert = (new PemX509Tools()).new X509UserCertAndKey(cert, key);
 			Debug.println("### Loaded certificates from disk ### for " + this.userId);
@@ -61,34 +59,30 @@ public class User {
 	}
 
 	/**
-	 * Create NetCDF .httprc or .dodsrc resource file and store it in the users
-	 * home directory
+	 * Create NetCDF .httprc or .dodsrc resource file and store it in the users home
+	 * directory
 	 * 
-	 * @param user
-	 *          The user object
+	 * @param user The user object
 	 * @throws IOException
-	 * @throws ElementNotFoundException 
+	 * @throws ElementNotFoundException
 	 */
-	private synchronized void createNCResourceFile()
-			throws IOException, ElementNotFoundException {
-		String fileContents = 
-				"HTTP.SSL.VALIDATE=0\n" + 
-				"HTTP.COOKIEJAR=" + this.homeDir + "/.dods_cookies\n" + 
-				"HTTP.SSL.CERTIFICATE="	+ this.homeDir + "/cert.crt" + "\n" +
-				"HTTP.SSL.KEY="	+ this.homeDir + "/cert.key" + "\n" + 
-				"HTTP.SSL.SSLv3="+this.homeDir + "/cert.crt"+"\n" +
-				"HTTP.SSL.CAPATH="+ SecurityConfigurator.getTrustRootsCADirectory();
-		Debug.println("createNCResourceFile for user "+this.userId+":\n"+fileContents);
+	private synchronized void createNCResourceFile() throws IOException, ElementNotFoundException {
+		String fileContents = "HTTP.SSL.VALIDATE=0\n" + "HTTP.COOKIEJAR=" + this.homeDir + "/.dods_cookies\n"
+				+ "HTTP.SSL.CERTIFICATE=" + this.homeDir + "/cert.crt" + "\n" + "HTTP.SSL.KEY=" + this.homeDir + "/cert.key"
+				+ "\n" + "HTTP.SSL.SSLv3=" + this.homeDir + "/cert.crt" + "\n" + "HTTP.SSL.CAPATH="
+				+ SecurityConfigurator.getTrustRootsCADirectory();
+		Debug.println("createNCResourceFile for user " + this.userId + ":\n" + fileContents);
 		Tools.writeFile(this.homeDir + "/.httprc", fileContents);
 		Tools.writeFile(this.homeDir + "/.dodsrc", fileContents);
 	}
+
 	public void setCertificate(X509UserCertAndKey userCert) throws IOException, ElementNotFoundException {
-		/* TODO could optinally write cert to user basket */
+		/* could optinally write cert to user basket */
 		Debug.println("### setCertificate ### for " + this.userId);
-		
+
 		PemX509Tools.writeCertificateToPemFile(userCert.getUserSlCertificate(), this.homeDir + "/cert.crt");
 		PemX509Tools.writePrivateKeyToPemFile(userCert.getPrivateKey(), this.homeDir + "/cert.key");
-	
+
 		this.userCert = userCert;
 		createNCResourceFile();
 	}
@@ -96,7 +90,5 @@ public class User {
 	public X509UserCertAndKey getCertificate() {
 		return this.userCert;
 	}
-
-
 
 }

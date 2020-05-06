@@ -52,27 +52,27 @@ import nl.knmi.adaguc.tools.MyXMLParser.Options;
 import nl.knmi.adaguc.tools.MyXMLParser.XMLElement;
 import nl.knmi.adaguc.tools.Tools;
 
-
 @RestController
 public class ServiceHelperRequestMapper {
-	//	@Bean
-	//	public MappingJackson2HttpMessageConverter mappingJackson2HttpMessageConverter() {
-	//		ObjectMapper mapper = new ObjectMapper();
-	//		mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, true);
-	//		MappingJackson2HttpMessageConverter converter = 
-	//				new MappingJackson2HttpMessageConverter(mapper);
-	//		return converter;
-	//	}
+	// @Bean
+	// public MappingJackson2HttpMessageConverter
+	// mappingJackson2HttpMessageConverter() {
+	// ObjectMapper mapper = new ObjectMapper();
+	// mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, true);
+	// MappingJackson2HttpMessageConverter converter =
+	// new MappingJackson2HttpMessageConverter(mapper);
+	// return converter;
+	// }
 	@ResponseBody
 	@CrossOrigin
 	@RequestMapping("xml2json")
-	public void XML2JSON(
-			@RequestParam(value="request")String request,
-			@RequestParam(value="callback", 
-			required=false)String callback, HttpServletRequest servletRequest, HttpServletResponse response){
+	public void XML2JSON(@RequestParam(value = "request") String request,
+			@RequestParam(value = "callback", required = false) String callback, HttpServletRequest servletRequest,
+			HttpServletResponse response) {
 		Debug.println("#### SERVLET /xml2json ####");
 		/**
 		 * Converts XML file pointed with request to JSON file
+		 * 
 		 * @param requestStr
 		 * @param out1
 		 * @param response
@@ -80,18 +80,19 @@ public class ServiceHelperRequestMapper {
 		JSONResponse jsonResponse = new JSONResponse(servletRequest);
 		String requestStr;
 		try {
-			requestStr=URLDecoder.decode(request,"UTF-8");
+			requestStr = URLDecoder.decode(request, "UTF-8");
 			MyXMLParser.XMLElement rootElement = new MyXMLParser.XMLElement();
-			//Remote XML2JSON request to external WMS service
+			// Remote XML2JSON request to external WMS service
 			boolean isLocal = false;
 			Debug.println("xml2json " + requestStr);
-			if(requestStr.startsWith(MainServicesConfigurator.getServerExternalURL()) && requestStr.toUpperCase().contains("SERVICE=WMS")){
-				Debug.println("Running local adaguc for ["+requestStr+"]");
+			if (requestStr.startsWith(MainServicesConfigurator.getServerExternalURL())
+					&& requestStr.toUpperCase().contains("SERVICE=WMS")) {
+				Debug.println("Running local adaguc for [" + requestStr + "]");
 				isLocal = true;
 				ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 				String url = requestStr.substring(MainServicesConfigurator.getServerExternalURL().length());
-				url = url.substring(url.indexOf("?")+1);
-				Debug.println("url = ["+url+"]");
+				url = url.substring(url.indexOf("?") + 1);
+				Debug.println("url = [" + url + "]");
 				ADAGUCServer.runADAGUCWMS(servletRequest, null, url, outputStream);
 				String getCapabilities = new String(outputStream.toByteArray());
 				outputStream.close();
@@ -101,30 +102,27 @@ public class ServiceHelperRequestMapper {
 			User user = null;
 			X509UserCertAndKey userCertificate = null;
 			String ts = null;
-			char [] tsPass = null;
-			if(isLocal == false){
+			char[] tsPass = null;
+			if (isLocal == false) {
 
-
-				if(requestStr.startsWith("https://")){
+				if (requestStr.startsWith("https://")) {
 					ts = SecurityConfigurator.getTrustStore();
 				}
-				if(ts!=null ){
+				if (ts != null) {
 					tsPass = SecurityConfigurator.getTrustStorePassword().toCharArray();
 
 					Debug.println("Setting up user cert with truststore");
 
-
-
 					AuthenticatorInterface authenticator = AuthenticatorFactory.getAuthenticator(servletRequest);
-					if(authenticator!=null){
+					if (authenticator != null) {
 
 						try {
 							user = UserManager.getUser(authenticator);
-						} catch(Exception e) {
+						} catch (Exception e) {
 
 						}
-						if(user!=null){
-							
+						if (user != null) {
+
 							userCertificate = user.getCertificate();
 						}
 					}
@@ -132,7 +130,7 @@ public class ServiceHelperRequestMapper {
 					Debug.println("ts: " + ts);
 					String result = new String(makeRequest(requestStr, userCertificate, ts, tsPass));
 					rootElement.parseString(result);
-				}else{
+				} else {
 					Debug.println("Running remote adaguc without truststore");
 
 					rootElement.parse(new URL(requestStr));
@@ -142,33 +140,35 @@ public class ServiceHelperRequestMapper {
 			/* Hookup WPS request calls */
 			if (requestStr.toUpperCase().contains("SERVICE=WPS")) {
 				Debug.println("This is a WPS call");
-				if (requestStr.toUpperCase().contains("REQUEST=EXECUTE") && requestStr.toUpperCase().contains("STOREEXECUTERESPONSE=TRUE")) {
+				if (requestStr.toUpperCase().contains("REQUEST=EXECUTE")
+						&& requestStr.toUpperCase().contains("STOREEXECUTERESPONSE=TRUE")) {
 					Debug.println("This is a WPS Execute call, store in jobs!");
 					JobListRequestMapper.saveExecuteResponseToJob(requestStr, rootElement.toString(), servletRequest);
 				}
 			}
 
 			/* Hookup WPS response calls */
-			try{
-				JSONObject test = PyWPSServer.statusLocationDataAsJSONElementToWPSStatusObject(null, rootElement.toJSONObject(Options.NONE));
+			try {
+				JSONObject test = PyWPSServer.statusLocationDataAsJSONElementToWPSStatusObject(null,
+						rootElement.toJSONObject(Options.NONE));
 				String wpsID = null;
-				try{
+				try {
 					wpsID = test.getString("id");
-				}catch(Exception e){
+				} catch (Exception e) {
 				}
 
-				if (wpsID!=null && test.getString("wpsstatus").equals(PyWPSServer.WPSStatus.PROCESSSUCCEEDED.toString())) {
+				if (wpsID != null && test.getString("wpsstatus").equals(PyWPSServer.WPSStatus.PROCESSSUCCEEDED.toString())) {
 					rootElement = copyStatusLocationElements(servletRequest, rootElement.toString());
 
 				}
 				Debug.println(test.toString());
-			}catch(Exception e){
+			} catch (Exception e) {
 				Debug.printStackTrace(e);
 			}
 			jsonResponse.setMessage(rootElement.toJSON(null));
 		} catch (Exception e) {
 			Debug.errprintln(e.getMessage());
-			jsonResponse.setException(e.getMessage(),e);
+			jsonResponse.setException(e.getMessage(), e);
 		}
 
 		try {
@@ -178,65 +178,85 @@ public class ServiceHelperRequestMapper {
 		}
 
 	}
-	static public XMLElement copyStatusLocationElements(HttpServletRequest servletRequest, String statusLocationResult) throws Exception {
+
+	static public XMLElement copyStatusLocationElements(HttpServletRequest servletRequest, String statusLocationResult)
+			throws Exception {
 		MyXMLParser.XMLElement rootElement = new MyXMLParser.XMLElement();
 		rootElement.parseString(statusLocationResult);
-		JSONObject test = PyWPSServer.statusLocationDataAsJSONElementToWPSStatusObject(null, rootElement.toJSONObject(Options.NONE));
+		JSONObject test = PyWPSServer.statusLocationDataAsJSONElementToWPSStatusObject(null,
+				rootElement.toJSONObject(Options.NONE));
 		Debug.println("============== OK WPS SUCCESFULLY FINISHED, START COPY TO BASKET ================ ");
 		/* Parse outputs and copy them to local basket */
 		String wpsID = null;
-		try{
+		try {
 			wpsID = test.getString("id");
-		}catch(Exception e){
+		} catch (Exception e) {
 		}
 		User user = null;
 		AuthenticatorInterface authenticator = AuthenticatorFactory.getAuthenticator(servletRequest);
-		if(authenticator!=null){
+		if (authenticator != null) {
 			try {
 				user = UserManager.getUser(authenticator);
-			} catch(Exception e) {
+			} catch (Exception e) {
 			}
 		}
-		if (user == null){
+		if (user == null) {
 			throw new Exception("Error, user is null");
 		}
-		if (user.getDataDir() == null){
+		if (user.getDataDir() == null) {
 			throw new Exception("Error, user.getDataDir() is null");
 		}
 
-		Vector<XMLElement> processOutputs = rootElement.get("wps:ExecuteResponse").get("wps:ProcessOutputs").getList("wps:Output");
-		for(int j=0;j<processOutputs.size();j++){
-			//			Debug.println(j + ")" + processOutputs.get(j).toString());
+		Vector<XMLElement> processOutputs = rootElement.get("wps:ExecuteResponse").get("wps:ProcessOutputs")
+				.getList("wps:Output");
+		for (int j = 0; j < processOutputs.size(); j++) {
+			// Debug.println(j + ")" + processOutputs.get(j).toString());
 			String identifier = processOutputs.get(j).get("ows:Identifier").getValue();
 			String title = processOutputs.get(j).get("ows:Title").getValue();
 
 			Debug.println("Identifying " + identifier + "/" + title);
-			String processFolder = test.getString("processid")+"_"+ test.getString("creationtime").replaceAll(":", "").replaceAll("-", "")+"_"+ wpsID;
+			String processFolder = test.getString("processid") + "_"
+					+ test.getString("creationtime").replaceAll(":", "").replaceAll("-", "") + "_" + wpsID;
 			try {
 				XMLElement refObj = null;
 				try {
 					refObj = processOutputs.get(j).get("wps:Reference");
-				}catch(Exception e){
+				} catch (Exception e) {
 					Debug.println("processOutput " + identifier + " has no wps:Reference");
 				}
-				if (refObj!=null) {
+				if (refObj != null) {
 					String reference = refObj.getAttrValue("href");
 					Debug.println("Remote reference is " + reference);
-					if (reference!= null && reference.length() > 0 && reference.startsWith("http")) {
-						String mimeType= refObj.getAttrValue("mimeType");
+					if (reference != null && reference.length() > 0 && reference.startsWith("http")) {
+						String mimeType = refObj.getAttrValue("mimeType");
 						Debug.println("Processfolder is " + processFolder);
 						String destLoc = user.getDataDir() + "/" + "/" + processFolder;
-						String basketLocalFilename = FilenameUtils.getBaseName(reference) + "." + FilenameUtils.getExtension(reference);
+						String basketLocalFilename = FilenameUtils.getBaseName(reference) + "."
+								+ FilenameUtils.getExtension(reference);
 						Debug.println("basketLocalFilename: " + basketLocalFilename);
 						if (basketLocalFilename.equals(".")) {
 							basketLocalFilename = identifier;
-							if (mimeType.equals("application/x-netcdf")) { basketLocalFilename += ".nc"; }
-							if (mimeType.equals("image/png")) { basketLocalFilename += ".png"; }
-							if (mimeType.equals("text/plain")) { basketLocalFilename += ".txt"; }
-							if (mimeType.equals("application/zip")) { basketLocalFilename += ".zip"; }
-							if (mimeType.equals("application/json")) { basketLocalFilename += ".json"; }
-							if (mimeType.equals("application/yml")) { basketLocalFilename += ".yml"; }
-							if (mimeType.equals("text/csv")) { basketLocalFilename += ".csv"; }
+							if (mimeType.equals("application/x-netcdf")) {
+								basketLocalFilename += ".nc";
+							}
+							if (mimeType.equals("image/png")) {
+								basketLocalFilename += ".png";
+							}
+							if (mimeType.equals("text/plain")) {
+								basketLocalFilename += ".txt";
+							}
+							if (mimeType.equals("application/zip")) {
+								basketLocalFilename += ".zip";
+							}
+							if (mimeType.equals("application/json")) {
+								basketLocalFilename += ".json";
+							}
+							if (mimeType.equals("application/yml")) {
+								basketLocalFilename += ".yml";
+							}
+							if (mimeType.equals("text/csv")) {
+								basketLocalFilename += ".csv";
+							}
 
 						}
 						Debug.println("basketLocalFilename: " + basketLocalFilename);
@@ -245,7 +265,7 @@ public class ServiceHelperRequestMapper {
 							Debug.println("Start copy " + reference);
 							// TODO: ADD SECURITY CHECKS
 							Tools.mksubdirs(destLoc);
-							char [] tsPass = SecurityConfigurator.getTrustStorePassword().toCharArray();
+							char[] tsPass = SecurityConfigurator.getTrustStorePassword().toCharArray();
 							String ts = SecurityConfigurator.getTrustStore();
 							X509UserCertAndKey userCertificate = user.getCertificate();
 							Tools.writeFile(fullPath, makeRequest(reference, userCertificate, ts, tsPass));
@@ -258,67 +278,67 @@ public class ServiceHelperRequestMapper {
 						Debug.errprintln("Warning reference is not set for " + identifier);
 					}
 				}
-			}catch(Exception e){
+			} catch (Exception e) {
 				Debug.errprintln(e.getMessage());
 			}
-
-
 
 		}
 		return rootElement;
 	}
-	private static byte[] makeRequest(String requestStr, X509UserCertAndKey userCertificate, String ts, char[] tsPass) throws KeyManagementException, UnrecoverableKeyException, InvalidKeyException, NoSuchAlgorithmException, KeyStoreException, CertificateException, NoSuchProviderException, SignatureException, IOException, GSSException {
+
+	private static byte[] makeRequest(String requestStr, X509UserCertAndKey userCertificate, String ts, char[] tsPass)
+			throws KeyManagementException, UnrecoverableKeyException, InvalidKeyException, NoSuchAlgorithmException,
+			KeyStoreException, CertificateException, NoSuchProviderException, SignatureException, IOException, GSSException {
 		try {
 			/* First try without user certificate */
-			CloseableHttpClient httpClient = (new PemX509Tools()).
-					getHTTPClientForPEMBasedClientAuth(ts, tsPass, null);
+			CloseableHttpClient httpClient = (new PemX509Tools()).getHTTPClientForPEMBasedClientAuth(ts, tsPass, null);
 			CloseableHttpResponse httpResponse = httpClient.execute(new HttpGet(requestStr));
-			
+
 			byte[] a = EntityUtils.toByteArray(httpResponse.getEntity());
-			
+
 			Debug.println("Status: " + httpResponse.getStatusLine().getStatusCode() + " Size: " + a.length);
-			
-			if (httpResponse.getStatusLine().getStatusCode() == HttpStatus.SC_FORBIDDEN || httpResponse.getStatusLine().getStatusCode() == HttpStatus.SC_UNAUTHORIZED) {
+
+			if (httpResponse.getStatusLine().getStatusCode() == HttpStatus.SC_FORBIDDEN
+					|| httpResponse.getStatusLine().getStatusCode() == HttpStatus.SC_UNAUTHORIZED) {
 				Debug.println("Status code not ok, attempting cert");
 				throw new IOException("Request needs certificate");
 			}
-			
-			/* Birdhouse WPS gives an exception when a certificate is needed, check it out */
+
+			/*
+			 * Birdhouse WPS gives an exception when a certificate is needed, check it out
+			 */
 			if (a.length < 2048) {
 				String test = new String(a);
-				if (test.indexOf("A valid X.509 client certificate is needed")!=-1) {
+				if (test.indexOf("A valid X.509 client certificate is needed") != -1) {
 					Debug.println("Request needs certificate");
 					throw new IOException("Request needs certificate");
 				}
 			}
 			return a;
-		} catch (Exception e){
-			if (userCertificate!=null) {
+		} catch (Exception e) {
+			if (userCertificate != null) {
 				/* Second, try with user certificate */
 				Debug.println("Trying with cert and header");
-				CloseableHttpClient httpClient = (new PemX509Tools()).
-						getHTTPClientForPEMBasedClientAuth(ts, tsPass, userCertificate);
+				CloseableHttpClient httpClient = (new PemX509Tools()).getHTTPClientForPEMBasedClientAuth(ts, tsPass,
+						userCertificate);
 				HttpGet request = new HttpGet(requestStr);
-				
-				try{
-					X509Info info = (new PemX509Tools()).getUserIdFromCertificate(userCertificate.getUserSlCertificate()) ;
+
+				try {
+					X509Info info = (new PemX509Tools()).getUserIdFromCertificate(userCertificate.getUserSlCertificate());
 					Debug.println("Adding header CN=" + info.getCN());
 					request.addHeader("x-ssl_client_s_dn", "CN=" + info.getCN());
-				}catch(Exception e2) {
+				} catch (Exception e2) {
 					Debug.errprintln("Unable to add header: " + e2.getMessage());
 				}
 				CloseableHttpResponse httpResponse = httpClient.execute(request);
 				Debug.println("StatusCode with certificate: " + httpResponse.getStatusLine().getStatusCode());
 				return EntityUtils.toByteArray(httpResponse.getEntity());
 
-			} else{
-				Debug.println("Request without user certificate failed " +e.getMessage());
-				throw(e);
+			} else {
+				Debug.println("Request without user certificate failed " + e.getMessage());
+				throw (e);
 			}
 		}
 	}
 
-
-
 }
-
