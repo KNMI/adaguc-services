@@ -6,6 +6,7 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -78,8 +79,8 @@ public class ADAGUCServer extends HttpServlet {
 		WMS, WCS, OPENDAP
 	}
 
-	private static int numInstancesRunning = 0;
-	private static int numInstancesInQue = 0;
+	private static AtomicInteger numInstancesRunning = new AtomicInteger(0);
+	private static AtomicInteger numInstancesInQue = new AtomicInteger(0);
 
 	public static void runADAGUC(HttpServletRequest request, HttpServletResponse response, String queryString,
 			OutputStream outputStream, ADAGUCServiceType serviceType) throws Exception {
@@ -89,7 +90,7 @@ public class ADAGUCServer extends HttpServlet {
 		Exception exception = null;
 		String instanceId = UUID.randomUUID().toString();
 
-		if (maxInstancesInQueue > 0 && numInstancesInQue > maxInstancesInQueue) {
+		if (maxInstancesInQueue > 0 && numInstancesInQue.get() > maxInstancesInQueue) {
 
 			String msg = "[ADAGUC-Server] Queue limit [" + maxInstancesInQueue + "]  exceeded";
 			Debug.errprintln(msg);
@@ -101,33 +102,33 @@ public class ADAGUCServer extends HttpServlet {
 
 		try {
 			if (maxInstances > 0 && maxInstancesInQueue > 0) {
-				if (numInstancesRunning >= maxInstances) {
-					Debug.println("[ADAGUC-Server] Too many instances running, Queued: [" + numInstancesInQue + "], Running: ["
-							+ numInstancesRunning + "]");
+				if (numInstancesRunning.get() >= maxInstances) {
+					Debug.println("[ADAGUC-Server] Too many instances running, Queued: [" + numInstancesInQue.get()
+							+ "], Running: [" + numInstancesRunning + "]");
 				}
 				if (maxInstancesInQueue > 0)
-					numInstancesInQue++;
+					numInstancesInQue.getAndIncrement();
 				try {
-					while (numInstancesRunning >= maxInstances) {
+					while (numInstancesRunning.get() >= maxInstances) {
 						Thread.sleep(100);
 					}
 				} catch (Exception e) {
 					exception = e;
 				}
 				if (maxInstancesInQueue > 0)
-					numInstancesInQue--;
+					numInstancesInQue.getAndDecrement();
 			}
 		} catch (Exception e) {
 			exception = e;
 		}
 		if (exception == null) {
-			numInstancesRunning++;
+			numInstancesRunning.getAndIncrement();
 			try {
 				_runADAGUC(request, response, queryString, outputStream, serviceType, instanceId);
 			} catch (Exception e) {
 				exception = e;
 			}
-			numInstancesRunning--;
+			numInstancesRunning.getAndDecrement();
 		}
 
 		if (exception != null)
@@ -249,25 +250,26 @@ public class ADAGUCServer extends HttpServlet {
 		}
 	}
 
-	public static void runADAGUC(String userHomeDir, String [] args, OutputStream outputStream)
+	public static void runADAGUC(String userHomeDir, String[] args, OutputStream outputStream)
 			throws IOException, ElementNotFoundException, InterruptedException {
 		String instanceId = UUID.randomUUID().toString();
 		List<String> environmentVariables = new ArrayList<String>();
-		String tmpDir = userHomeDir+"/adaguctmp/";
+		String tmpDir = userHomeDir + "/adaguctmp/";
 		Tools.mksubdirs(tmpDir);
-		environmentVariables.add("ADAGUC_TMP="+tmpDir);
+		environmentVariables.add("ADAGUC_TMP=" + tmpDir);
 		String tmpLogFile = tmpDir + "adaguc-server-cmd-log" + instanceId;
 		Debug.println("Logging to " + tmpLogFile);
 		environmentVariables.add("ADAGUC_LOGFILE=" + tmpLogFile);
-		environmentVariables.add("HOME="+userHomeDir);
+		environmentVariables.add("HOME=" + userHomeDir);
 
 		String[] configEnv = ADAGUCConfigurator.getADAGUCEnvironment();
-		if(configEnv == null){
+		if (configEnv == null) {
 			Debug.println("ADAGUC environment is not configured");
-		}else{
-			for(int j=0;j<configEnv.length;j++){
-				if (!configEnv[j].startsWith("ADAGUC_LOGFILE") && !configEnv[j].startsWith("ADAGUC_TMP") && !configEnv[j].startsWith("ADAGUC_ONLINERESOURCE")) {
-					environmentVariables.add(configEnv[j]);    
+		} else {
+			for (int j = 0; j < configEnv.length; j++) {
+				if (!configEnv[j].startsWith("ADAGUC_LOGFILE") && !configEnv[j].startsWith("ADAGUC_TMP")
+						&& !configEnv[j].startsWith("ADAGUC_ONLINERESOURCE")) {
+					environmentVariables.add(configEnv[j]);
 				} else {
 					Debug.errprintln("[WARNING]: Environment " + configEnv[j] + " is controlled by adaguc-services.");
 				}
@@ -276,18 +278,26 @@ public class ADAGUCServer extends HttpServlet {
 		String adagucExecutableLocation = ADAGUCConfigurator.getADAGUCExecutable();
 		List<String> commands = new ArrayList<String>();
 		commands.add(adagucExecutableLocation);
-		for(int j=0;j<args.length;j++){
+		for (int j = 0; j < args.length; j++) {
 			commands.add(args[j]);
 		}
 
-		String[] environmentVariablesAsArray = new String[ environmentVariables.size() ];
-		environmentVariables.toArray( environmentVariablesAsArray );
+		String[] environmentVariablesAsArray = new String[environmentVariables.size()];
+		environmentVariables.toArray(environmentVariablesAsArray);
 		long timeOutMs = ADAGUCConfigurator.getTimeOut();
-		
-		class StdoutPrinter implements ProcessRunner.StatusPrinterInterface{
-			public void setError(String message) {}
-			public String getError() {				return null;	}
-			public boolean hasData() { 			return false;	}
+
+		class StdoutPrinter implements ProcessRunner.StatusPrinterInterface {
+			public void setError(String message) {
+			}
+
+			public String getError() {
+				return null;
+			}
+
+			public boolean hasData() {
+				return false;
+			}
+
 			public void print(byte[] message, int bytesRead) {
 				try {
 					outputStream.write(message, 0, bytesRead);
@@ -296,7 +306,8 @@ public class ADAGUCServer extends HttpServlet {
 				}
 			}
 		}
-		ProcessRunner processRunner = new ProcessRunner (new StdoutPrinter(),new StdoutPrinter(),environmentVariablesAsArray,userHomeDir, timeOutMs);
+		ProcessRunner processRunner = new ProcessRunner(new StdoutPrinter(), new StdoutPrinter(),
+				environmentVariablesAsArray, userHomeDir, timeOutMs);
 		processRunner.runProcess(commands.toArray(new String[0]), null);
 		try {
 			Tools.rmfile(tmpLogFile);
@@ -305,16 +316,17 @@ public class ADAGUCServer extends HttpServlet {
 	}
 
 	/**
-	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
+	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse
+	 *      response)
 	 */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		doGet(request,response);
+		doGet(request, response);
 	}
 
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) {
 		Debug.println("Handle ADAGUC WMS requests");
 		OutputStream out1 = null;
-		//response.setContentType("application/json");
+		// response.setContentType("application/json");
 		try {
 			out1 = response.getOutputStream();
 		} catch (IOException e) {
@@ -323,7 +335,7 @@ public class ADAGUCServer extends HttpServlet {
 		}
 
 		try {
-			ADAGUCServer.runADAGUCWMS(request,response,request.getQueryString(),out1);
+			ADAGUCServer.runADAGUCWMS(request, response, request.getQueryString(), out1);
 
 		} catch (Exception e) {
 			response.setStatus(401);
@@ -333,17 +345,20 @@ public class ADAGUCServer extends HttpServlet {
 				Debug.errprintln("Unable to write to stream");
 				Debug.printStackTrace(e);
 			}
-		}    
-	}
-	public static void runADAGUCOpenDAP(HttpServletRequest request,HttpServletResponse response,String queryString,OutputStream outputStream) throws Exception  {
-		runADAGUC(request,response, queryString, outputStream, ADAGUCServiceType.OPENDAP);
-	}
-	public static int getNumInstancesInQueue() {
-		return numInstancesInQue;
-	}
-	public static int getNumInstancesRunning() {
-		return numInstancesRunning;
+		}
 	}
 
+	public static void runADAGUCOpenDAP(HttpServletRequest request, HttpServletResponse response, String queryString,
+			OutputStream outputStream) throws Exception {
+		runADAGUC(request, response, queryString, outputStream, ADAGUCServiceType.OPENDAP);
+	}
+
+	public static int getNumInstancesInQueue() {
+		return numInstancesInQue.get();
+	}
+
+	public static int getNumInstancesRunning() {
+		return numInstancesRunning.get();
+	}
 
 }
