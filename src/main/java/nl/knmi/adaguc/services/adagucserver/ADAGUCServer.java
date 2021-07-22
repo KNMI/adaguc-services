@@ -84,7 +84,7 @@ public class ADAGUCServer extends HttpServlet {
 
 	public static void runADAGUC(HttpServletRequest request, HttpServletResponse response, String queryString,
 			OutputStream outputStream, ADAGUCServiceType serviceType) throws Exception {
-		Debug.println("runADAGUC");
+		// Debug.println("runADAGUC");
 		int maxInstances = ADAGUCConfigurator.getMaxInstances();
 		int maxInstancesInQueue = ADAGUCConfigurator.getMaxInstancesInQueue();
 		Exception exception = null;
@@ -154,7 +154,7 @@ public class ADAGUCServer extends HttpServlet {
 			try {
 				userHomeDir = UserManager.getUser(authenticator).getHomeDir();
 			} catch (Exception e) {
-				Debug.println("No user information provided: " + e.getMessage());
+				// Debug.println("No user information provided: " + e.getMessage());
 			}
 
 		}
@@ -197,7 +197,7 @@ public class ADAGUCServer extends HttpServlet {
 		Tools.mksubdirs(tmpDir);
 		environmentVariables.add("ADAGUC_TMP=" + tmpDir);
 		String tmpLogFile = tmpDir + "adaguc-server-cgi-log" + instanceId;
-		Debug.println("Logging to " + tmpLogFile);
+		// Debug.println("Logging to " + tmpLogFile);
 		environmentVariables.add("ADAGUC_LOGFILE=" + tmpLogFile);
 		environmentVariables.add("HOME=" + userHomeDir);
 		environmentVariables.add("QUERY_STRING=" + queryString);

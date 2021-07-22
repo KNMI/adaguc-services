@@ -33,7 +33,7 @@ public class CGIRunner {
 	public static int runCGIProgram(String[] commands, String[] environmentVariables, String directory,
 			final HttpServletResponse response, OutputStream outputStream, String postData, long timeOutMs)
 			throws InterruptedException, IOException {
-		Debug.println("Working Directory: " + directory);
+		// Debug.println("Working Directory: " + directory);
 
 		class StderrPrinter implements ProcessRunner.StatusPrinterInterface {
 			StringBuffer errorMessages = new StringBuffer();
@@ -175,9 +175,10 @@ public class CGIRunner {
 				timeOutMs);
 
 		long startTimeInMillis = Calendar.getInstance().getTimeInMillis();
-		Debug.println("Starting CGI.");
+		
 
 		processRunner.runProcess(commands, postData);
+		 //Debug.println("Starting CGI");
 		long stopTimeInMillis = Calendar.getInstance().getTimeInMillis();
 		if (processRunner.exitValue() != 0) {
 			Debug.errprintln("Warning: exit code: " + processRunner.exitValue());
@@ -217,7 +218,7 @@ public class CGIRunner {
 			}
 		}
 
-		Debug.println("Finished CGI with code " + processRunner.exitValue() + ": " + " ("
+		Debug.println("Finished CGI process with code " +  processRunner.exitValue() + ": " + " ("
 				+ (stopTimeInMillis - startTimeInMillis) + " ms)");
 		try {
 			outputStream.flush();

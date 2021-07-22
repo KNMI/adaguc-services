@@ -74,7 +74,7 @@ public class AuthenticatorImpl implements AuthenticatorInterface{
 		}
 
 		x509 = new PemX509Tools().getUserIdFromCertificate(request);
-		Debug.println("No user info found from certificates");
+		// Debug.println("No user info found from certificates");
 		if(x509 == null){
 			String path = request.getServletPath();
 
@@ -84,7 +84,7 @@ public class AuthenticatorImpl implements AuthenticatorInterface{
 				try {
 					tokenStr = HTTPTools.getHTTPParam(request, "key");
 				} catch (Exception e1) {
-					Debug.println("No access token set in URL via key=<accesstoken> KVP");
+					// Debug.println("No access token set in URL via key=<accesstoken> KVP");
 				}
 			}
 
@@ -100,7 +100,7 @@ public class AuthenticatorImpl implements AuthenticatorInterface{
 
 
 			}else{
-				Debug.println("Unable to find user info from certificate or accesstoken");
+				// Debug.println("Unable to find user info from certificate or accesstoken");
 			}
 
 
